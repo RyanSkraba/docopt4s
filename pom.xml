@@ -3,9 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.tinfoiled</groupId>
-  <artifactId>docopt4s</artifactId>
+  <artifactId>docopt4s-parent</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>A scala library for using docopt</description>
@@ -79,6 +79,12 @@
     <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-reflect</artifactId>
       <version>${scala.version}</version>
     </dependency>
 
@@ -324,9 +330,6 @@
         <artifactId>scalatest-maven-plugin</artifactId>
       </plugin>
     </plugins>
-
-    <sourceDirectory>src/main/scala</sourceDirectory>
-    <testSourceDirectory>src/test/scala</testSourceDirectory>
   </build>
 
   <profiles>
@@ -381,5 +384,10 @@
       </build>
     </profile>
   </profiles>
+
+  <modules>
+    <module>docopt4s</module>
+    <module>testkit</module>
+  </modules>
 
 </project>

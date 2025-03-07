@@ -1,16 +1,14 @@
-package com.tinfoiled.docopt4s
+package com.tinfoiled.docopt4s.testkit
 
-import com.tinfoiled.docopt4s.DocoptCliGoSpec.withConsoleMatch
+import com.tinfoiled.docopt4s.AnsiConsole.withConsoleMatch
+import com.tinfoiled.docopt4s.DocoptCliGo
 import org.docopt.DocoptExitException
 import org.scalactic.source
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funspec.AnyFunSpecLike
 import org.scalatest.matchers.should.Matchers
 
-import java.io.ByteArrayOutputStream
-import java.nio.charset.StandardCharsets
 import scala.reflect.ClassTag
-import scala.reflect.io.Streamable
 
 /** Unit test specification base for an [[DocoptCliGo]] */
 abstract class DocoptCliGoSpec(protected val Cli: DocoptCliGo, protected val Task: Option[DocoptCliGo.Task] = None)
@@ -166,42 +164,4 @@ abstract class DocoptCliGoSpec(protected val Cli: DocoptCliGo, protected val Tas
       t.getMessage shouldBe s"${args.last} requires argument"
     }
   }
-}
-
-object DocoptCliGoSpec {
-
-  /** A helper method used to capture the console and apply it to a partial function.
-    * @param thunk
-    *   code to execute that may use Console.out and Console.err print streams
-    * @param pf
-    *   A partial function to apply matchers
-    * @tparam T
-    *   The return value type of the thunk code to execute
-    * @tparam U
-    *   The return value type of the partial function to return.
-    * @return
-    *   The return value of the partial function.
-    */
-  def withConsoleMatch[T, U](
-      thunk: => T
-  )(pf: scala.PartialFunction[(T, String, String), U]): U = {
-    Streamable.closing(new ByteArrayOutputStream()) { out =>
-      Streamable.closing(new ByteArrayOutputStream()) { err =>
-        Console.withOut(out) {
-          Console.withErr(err) {
-            val t = thunk
-            Console.out.flush()
-            Console.err.flush()
-            // The return value
-            pf(
-              t,
-              new String(out.toByteArray, StandardCharsets.UTF_8),
-              new String(err.toByteArray, StandardCharsets.UTF_8)
-            )
-          }
-        }
-      }
-    }
-  }
-
 }

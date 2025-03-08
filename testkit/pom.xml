@@ -13,12 +13,16 @@
   <packaging>jar</packaging>
   <description>Testkit for docopt4s</description>
 
+  <properties>
+    <project.relBaseDir>..</project.relBaseDir>
+  </properties>
+
   <dependencies>
-      <dependency>
-        <groupId>com.tinfoiled</groupId>
-        <artifactId>docopt4s</artifactId>
-        <version>${project.version}</version>
-      </dependency>
+    <dependency>
+      <groupId>com.tinfoiled</groupId>
+      <artifactId>docopt4s</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.scalatest</groupId>

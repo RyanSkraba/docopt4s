@@ -1,8 +1,7 @@
 package com.tinfoiled.docopt4s.testkit
 
 import com.tinfoiled.docopt4s.AnsiConsole.withConsoleMatch
-import com.tinfoiled.docopt4s.DocoptCliGo
-import org.docopt.DocoptExitException
+import com.tinfoiled.docopt4s.{DocoptCliGo, DocoptException}
 import org.scalactic.source
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funspec.AnyFunSpecLike
@@ -82,15 +81,6 @@ abstract class DocoptCliGoSpec(protected val Cli: DocoptCliGo, protected val Tas
   def interceptGo[EX <: AnyRef](args: Any*)(implicit classTag: ClassTag[EX], pos: source.Position): EX =
     intercept[EX] { withGo(args: _*) }(classTag, pos)
 
-  /** A helper method used to capture an [[DocoptExitException]] thrown by [[withGo]]
-    *
-    * @param args
-    *   String arguments to pass to the [[DocoptCliGo.go()]] method
-    * @return
-    *   The exception thrown when the arguments are run
-    */
-  def interceptGoDocoptExitEx(args: Any*): DocoptExitException = interceptGo[DocoptExitException](args: _*)
-
   /** A helper method used to capture an [[Cli.InternalDocoptException]] thrown by [[withGo]]
     *
     * @param args
@@ -98,7 +88,7 @@ abstract class DocoptCliGoSpec(protected val Cli: DocoptCliGo, protected val Tas
     * @return
     *   The exception thrown when the arguments are run
     */
-  def interceptGoDocoptEx(args: Any*): Cli.InternalDocoptException = interceptGo[Cli.InternalDocoptException](args: _*)
+  def interceptGoDocoptEx(args: Any*): DocoptException = interceptGo[DocoptException](args: _*)
 
   /** A helper method used to capture an [[IllegalArgumentException]] thrown by [[withGo]]
     *
@@ -115,21 +105,21 @@ abstract class DocoptCliGoSpec(protected val Cli: DocoptCliGo, protected val Tas
     val prefixArgs = Task.map(_.Cmd).toSeq
 
     it(s"throws an exception with ${prefixArgs.mkString(" ")} --help") {
-      val t = interceptGoDocoptExitEx(prefixArgs :+ "--help": _*)
+      val t = interceptGoDocoptEx(prefixArgs :+ "--help": _*)
       t.getMessage shouldBe Doc
-      t.getExitCode shouldBe 0
+      t.exitCode shouldBe 0
     }
 
     it(s"throws an exception with a bare ${prefixArgs.mkString(" ")}") {
-      val t = interceptGoDocoptExitEx(prefixArgs :+ "--help": _*)
+      val t = interceptGoDocoptEx(prefixArgs :+ "--help": _*)
       t.getMessage shouldBe Doc
-      t.getExitCode shouldBe 0
+      t.exitCode shouldBe 0
     }
 
     it(s"throws an exception with ${prefixArgs.mkString(" ")} --version") {
-      val t = interceptGoDocoptExitEx(prefixArgs :+ "--version": _*)
+      val t = interceptGoDocoptEx(prefixArgs :+ "--version": _*)
       t.getMessage shouldBe Cli.Version
-      t.getExitCode shouldBe 0
+      t.exitCode shouldBe 0
     }
   }
 
@@ -159,8 +149,8 @@ abstract class DocoptCliGoSpec(protected val Cli: DocoptCliGo, protected val Tas
   val itShouldThrowOnMissingOptValue: Seq[String] => Unit = args => {
     val allArgs = Task.map(_.Cmd).toSeq ++ args
     it("throws an exception on missing option parameters: " + allArgs.mkString(" ")) {
-      val t = interceptGoDocoptExitEx(allArgs: _*)
-      t.getExitCode shouldBe 1
+      val t = interceptGoDocoptEx(allArgs: _*)
+      t.exitCode shouldBe 1
       t.getMessage shouldBe s"${args.last} requires argument"
     }
   }

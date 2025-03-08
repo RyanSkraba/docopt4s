@@ -24,6 +24,11 @@
       <organizationUrl>https://skraba.com</organizationUrl>
     </developer>
   </developers>
+
+  <modules>
+    <module>docopt4s</module>
+    <module>testkit</module>
+  </modules>
   <scm>
     <connection>scm:git:git://github.com/RyanSkraba/docopt4s.git</connection>
     <developerConnection>scm:git:ssh://github.com:RyanSkraba/docopt4s.git</developerConnection>
@@ -32,7 +37,7 @@
 
   <properties>
     <!-- From this file to the root directory of the repo. -->
-    <byexample.relBaseDir>.</byexample.relBaseDir>
+    <project.relBaseDir>.</project.relBaseDir>
 
     <!-- specifies that the system uses Java 11 by default -->
     <maven.compiler.source>11</maven.compiler.source>
@@ -281,7 +286,7 @@
                 <include>src/test/scala/**/*.scala</include>
               </includes>
               <scalafmt>
-                <file>${project.basedir}/${byexample.relBaseDir}/.scalafmt.conf</file>
+                <file>${project.basedir}/${project.relBaseDir}/.scalafmt.conf</file>
                 <version>${scalafmt.version}</version>
               </scalafmt>
             </scala>
@@ -309,10 +314,6 @@
     </pluginManagement>
 
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
@@ -384,10 +385,5 @@
       </build>
     </profile>
   </profiles>
-
-  <modules>
-    <module>docopt4s</module>
-    <module>testkit</module>
-  </modules>
 
 </project>

@@ -1,7 +1,7 @@
 package com.tinfoiled.docopt4s
 
 import com.tinfoiled.docopt4s.DocoptCliGo.Task
-import org.docopt.{Docopt, DocoptExitException}
+import org.docopt.Docopt
 
 import scala.jdk.CollectionConverters._
 
@@ -46,20 +46,12 @@ trait DocoptCliGo {
         .mkString("\n")
     }.trim
 
-  /** [[DocoptExitException]] constructors are protected. */
-  class InternalDocoptException(
-      msg: String,
-      ex: Throwable = None.orNull,
-      val docopt: String = Doc
-  ) extends RuntimeException(msg, ex)
-
   /** Runs the tool. This does not handle any docopt exception automatically while parsing the command line.
     *
     * @param args
     *   command-line arguments as described in [[Doc]]
     */
-  @throws[DocoptExitException]
-  @throws[InternalDocoptException]
+  @throws[DocoptException]
   def go(args: String*): Unit = {
     // Java docopts doesn't support ignoring options after the command, so strip them first.
     val mainArgs: Seq[String] = if (args.nonEmpty) {
@@ -68,32 +60,38 @@ trait DocoptCliGo {
     } else Seq("--help")
 
     // Get the command, but throw exceptions for --help and --version
-    val cmd = new Docopt(Doc)
-      .withVersion(Version)
-      .withOptionsFirst(true)
-      .withExit(false)
-      .parse(mainArgs.asJava)
-      .get("<command>")
-      .asInstanceOf[String]
+    val cmd =
+      try {
+        new Docopt(Doc)
+          .withVersion(Version)
+          .withOptionsFirst(true)
+          .withExit(false)
+          .parse(mainArgs.asJava)
+          .get("<command>")
+          .asInstanceOf[String]
+      } catch {
+        case ex: org.docopt.DocoptExitException =>
+          throw new DocoptException(ex.getMessage, ex, Doc, ex.getExitCode)
+      }
 
     // This is only here to rewrap any internal docopt exception with the current docopt
     if (cmd == "???")
-      throw new InternalDocoptException("Missing command", docopt = Doc)
+      throw new DocoptException("Missing command", exitCode = 1, docopt = Doc)
 
     // Reparse with the specific command.
     val task = Tasks
       .find(_.Cmd == cmd)
-      .getOrElse(throw new InternalDocoptException(s"Unknown command: $cmd"))
+      .getOrElse(throw new DocoptException(s"Unknown command: $cmd", exitCode = 1, docopt = Doc))
 
     try {
       val opts = new Docopt(task.Doc).withVersion(Version).withExit(false).parse(args.asJava)
       task.go(new task.TaskOptions(opts))
     } catch {
       // This is only here to rewrap any internal docopt exception with the current docopt
-      case ex: InternalDocoptException =>
-        throw new InternalDocoptException(ex.getMessage, ex, task.Doc)
-      case ex: DocoptExitException if ex.getMessage == null =>
-        throw new InternalDocoptException(null, ex, task.Doc)
+      case ex: DocoptException =>
+        throw new DocoptException(ex.getMessage, ex, task.Doc, ex.exitCode)
+      case ex: org.docopt.DocoptExitException =>
+        throw new DocoptException(ex.getMessage, ex, task.Doc, ex.getExitCode)
     }
   }
 
@@ -103,14 +101,14 @@ trait DocoptCliGo {
     try {
       go(args.toIndexedSeq: _*)
     } catch {
-      case ex: DocoptExitException =>
+      case ex: org.docopt.DocoptExitException =>
         Option(if (ex.getExitCode == 0) System.out else System.err)
           .foreach(ps => {
             if (ex.getMessage != null) ps.println(ex.getMessage)
             else ps.println(Doc)
           })
         System.exit(ex.getExitCode)
-      case ex: InternalDocoptException =>
+      case ex: DocoptException =>
         println(ex.docopt)
         if (ex.getMessage != null) {
           println()

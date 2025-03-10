@@ -1,11 +1,11 @@
 package com.tinfoiled.docopt4s.testkit.example
 
-import com.tinfoiled.docopt4s.DocoptCliGo
+import com.tinfoiled.docopt4s.Task
 
 /** An example task that can be integrated into the main [[ExampleGo]] driver. This implements the standard Naval Fate
   * docopt example.
   */
-object Example2Task extends DocoptCliGo.Task {
+object Example2Task extends Task {
 
   val Cmd = "naval_fate"
 
@@ -15,12 +15,12 @@ object Example2Task extends DocoptCliGo.Task {
     s"""$Description
        |
        |Usage:
-       |  ${ExampleGo.Cli} $Cmd ship new <name>...
-       |  ${ExampleGo.Cli} $Cmd ship <name> move <x> <y> [--speed=<kn>]
-       |  ${ExampleGo.Cli} $Cmd ship shoot <x> <y>
-       |  ${ExampleGo.Cli} $Cmd mine (set|remove) <x> <y> [--moored|--drifting]
-       |  ${ExampleGo.Cli} $Cmd -h | --help
-       |  ${ExampleGo.Cli} $Cmd --version
+       |  ${ExampleGo.Name} $Cmd ship new <name>...
+       |  ${ExampleGo.Name} $Cmd ship <name> move <x> <y> [--speed=<kn>]
+       |  ${ExampleGo.Name} $Cmd ship shoot <x> <y>
+       |  ${ExampleGo.Name} $Cmd mine (set|remove) <x> <y> [--moored|--drifting]
+       |  ${ExampleGo.Name} $Cmd -h | --help
+       |  ${ExampleGo.Name} $Cmd --version
        |
        |Options:
        |  -h --help     Show this screen.

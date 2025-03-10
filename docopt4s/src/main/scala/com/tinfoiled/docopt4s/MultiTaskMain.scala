@@ -1,15 +1,12 @@
 package com.tinfoiled.docopt4s
 
-import com.tinfoiled.docopt4s.DocoptCliGo.Task
 import org.docopt.Docopt
 
-import scala.jdk.CollectionConverters._
+/** A base class for a Docopt oriented command line application that can take multiple subcommands (tasks). */
+trait MultiTaskMain {
 
-/** A base class for a Docopt oriented command line script that can take multiple subcommands. */
-trait DocoptCliGo {
-
-  /** The script name. */
-  val Cli: String
+  /** The application name. */
+  val Name: String
 
   /** The version to print when the --version flag is set. */
   val Version: String
@@ -17,7 +14,7 @@ trait DocoptCliGo {
   /** A list of subcommands that can be executed. */
   val Tasks: Seq[Task]
 
-  /** The full, main docopt that can be used for the script. */
+  /** The full, main docopt that can be used for the application. */
   lazy val Doc: String = SimpleDoc
 
   /** The simple docopt without any description or additional text. */
@@ -26,7 +23,7 @@ trait DocoptCliGo {
   /** A suggested usage section for the basic docopt. */
   lazy val UsageDoc: String =
     s"""Usage:
-       |  $Cli [--debug] <command> [args...]""".stripMargin
+       |  $Name [--debug] <command> [args...]""".stripMargin
 
   /** A suggested options section for the docopt. */
   lazy val OptionsDoc: String =
@@ -53,6 +50,8 @@ trait DocoptCliGo {
     */
   @throws[DocoptException]
   def go(args: String*): Unit = {
+    import scala.jdk.CollectionConverters._
+
     // Java docopts doesn't support ignoring options after the command, so strip them first.
     val mainArgs: Seq[String] = if (args.nonEmpty) {
       val (options, cmd) = args.span(_.startsWith("-"))
@@ -96,8 +95,7 @@ trait DocoptCliGo {
   }
 
   def main(args: Array[String]): Unit = {
-    // All of the command is executed in the go method, and this wraps DocOpt and exceptions for
-    // console feedback.
+    // All the command is executed in the go method, and this wraps DocOpt and exceptions for console feedback.
     try {
       go(args.toIndexedSeq: _*)
     } catch {
@@ -122,51 +120,4 @@ trait DocoptCliGo {
         System.exit(1)
     }
   }
-}
-
-object DocoptCliGo {
-
-  /** A subcommand or task supported by this driver */
-  abstract class Task() {
-
-    /** A helper class to extract options from the docopts.
-      * @param opts
-      *   The raw map exposed by docopts.
-      */
-    class TaskOptions(private val opts: java.util.Map[String, AnyRef]) {
-      def getStringsOption(key: String): Option[Iterable[String]] =
-        Option(opts.get(key)).map(_.asInstanceOf[java.lang.Iterable[String]].asScala)
-      def getStrings(key: String, default: Iterable[String]): Iterable[String] =
-        getStringsOption(key).getOrElse(default)
-      def getStrings(key: String): Iterable[String] = getStringsOption(key).get
-
-      def getStringOption(key: String): Option[String] = Option(opts.get(key)).map(_.toString)
-      def getString(key: String, default: String): String = getStringOption(key).getOrElse(default)
-      def getString(key: String): String = getStringOption(key).get
-
-      def getIntOption(key: String): Option[Int] = Option(opts.get(key)).map(_.toString.toInt)
-      def getInt(key: String, default: Int): Int = getIntOption(key).getOrElse(default)
-      def getInt(key: String): Int = getIntOption(key).get
-
-      def getBooleanOption(key: String): Option[Boolean] = Option(opts.get(key)).map(_.toString.toBoolean)
-      def getBoolean(key: String, default: Boolean): Boolean = getBooleanOption(key).getOrElse(default)
-      def getBoolean(key: String): Boolean = getBooleanOption(key).get
-    }
-
-    /** The [[Docopt]] for the subcommand */
-    val Doc: String
-
-    /** The subcommand token, used to pick the task from the driver */
-    val Cmd: String
-
-    /** A short description for the subcommand */
-    val Description: String
-
-    /** Executes this subcommand
-      * @param opts
-      *   the docopts already parsed
-      */
-    def go(opts: TaskOptions): Unit
-  }
-
 }

@@ -1,11 +1,11 @@
 package com.tinfoiled.docopt4s.testkit.example
 
-import com.tinfoiled.docopt4s.testkit.DocoptCliGoSpec
+import com.tinfoiled.docopt4s.testkit.MultiTaskMainSpec
 
 /** Unit tests for [[Example1Task]] */
-class Example1TaskSpec extends DocoptCliGoSpec(ExampleGo, Some(Example1Task)) {
+class Example1TaskSpec extends MultiTaskMainSpec(ExampleGo, Some(Example1Task)) {
 
-  describe(s"${Cli.Cli} $TaskCmd command line") {
+  describe(s"${Main.Name} $TaskCmd command line") {
     itShouldThrowOnHelpAndVersionFlags()
     itShouldThrowOnUnknownFlag()
     itShouldThrowOnMissingOpt(Seq.empty)

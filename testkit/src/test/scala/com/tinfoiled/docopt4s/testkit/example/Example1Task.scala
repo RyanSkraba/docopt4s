@@ -1,9 +1,9 @@
 package com.tinfoiled.docopt4s.testkit.example
 
-import com.tinfoiled.docopt4s.DocoptCliGo
+import com.tinfoiled.docopt4s.Task
 
 /** An example task that can be integrated into the main [[ExampleGo]] driver. */
-object Example1Task extends DocoptCliGo.Task {
+object Example1Task extends Task {
 
   val Cmd = "example1"
 
@@ -13,7 +13,7 @@ object Example1Task extends DocoptCliGo.Task {
     s"""$Description
        |
        |Usage:
-       |  ${ExampleGo.Cli} $Cmd ARG1 [ARG2] [ARG3...] [--flag]
+       |  ${ExampleGo.Name} $Cmd ARG1 [ARG2] [ARG3...] [--flag]
        |
        |Options:
        |  -h --help  Show this screen.

@@ -10,10 +10,11 @@ class Example1TaskSpec extends MultiTaskMainSpec(ExampleGo, Some(Example1Task)) 
     itShouldThrowOnUnknownFlag()
     itShouldThrowOnMissingOpt(Seq.empty)
     itShouldThrowOnMissingOptValue(Seq("--default"))
+    itShouldThrowOnIncompatibleOpts(Seq("--options", "--default", "dflt"))
   }
 
-  describe("When running with arguments") {
-    it("should work on a single basic example") {
+  describe("When running without any flags") {
+    it("should work with a single argument") {
       withGoMatching(TaskCmd, "arg1") { case (stdout, stderr) =>
         stderr shouldBe empty
         stdout shouldBe
@@ -23,6 +24,45 @@ class Example1TaskSpec extends MultiTaskMainSpec(ExampleGo, Some(Example1Task)) 
             |ARG1:arg1
             |ARG2:0
             |ARG3:()
+            |""".stripMargin
+      }
+    }
+    it("should work with two arguments") {
+      withGoMatching(TaskCmd, "arg1", "2") { case (stdout, stderr) =>
+        stderr shouldBe empty
+        stdout shouldBe
+          """Command:example1
+            |--options:false
+            |--default:None
+            |ARG1:arg1
+            |ARG2:2
+            |ARG3:()
+            |""".stripMargin
+      }
+    }
+    it("should work with a three arguments") {
+      withGoMatching(TaskCmd, "arg1", "3", "arg3") { case (stdout, stderr) =>
+        stderr shouldBe empty
+        stdout shouldBe
+          """Command:example1
+            |--options:false
+            |--default:None
+            |ARG1:arg1
+            |ARG2:3
+            |ARG3:(arg3)
+            |""".stripMargin
+      }
+    }
+    it("should work with four arguments") {
+      withGoMatching(TaskCmd, "arg1", "4", "arg3", "arg4") { case (stdout, stderr) =>
+        stderr shouldBe empty
+        stdout shouldBe
+          """Command:example1
+            |--options:false
+            |--default:None
+            |ARG1:arg1
+            |ARG2:4
+            |ARG3:(arg3,arg4)
             |""".stripMargin
       }
     }

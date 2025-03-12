@@ -152,4 +152,15 @@ abstract class MultiTaskMainSpec(protected val Main: MultiTaskMain, protected va
       t.getMessage shouldBe s"${args.last} requires argument"
     }
   }
+
+  /** Run tests on a command line with incompatible options. */
+  val itShouldThrowOnIncompatibleOpts: Seq[String] => Unit = args => {
+    val allArgs = Task.map(_.Cmd).toSeq ++ args
+    it("throws an exception on incompatible arguments: " + allArgs.mkString(" ")) {
+      val t = interceptGoDocoptEx(allArgs: _*)
+      t.exitCode shouldBe 1
+      // TODO: This could be a better message
+      t.getMessage shouldBe null
+    }
+  }
 }

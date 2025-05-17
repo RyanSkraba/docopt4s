@@ -93,6 +93,7 @@
       <version>${scala.version}</version>
     </dependency>
 
+    <!-- Delegate parsing to docopt-java -->
     <dependency>
       <groupId>com.offbytwo</groupId>
       <artifactId>docopt</artifactId>

@@ -1,6 +1,6 @@
 package com.tinfoiled.docopt4s.testkit.example
 
-import com.tinfoiled.docopt4s.Task
+import com.tinfoiled.docopt4s.{DocoptException, Task}
 
 /** An example task that can be integrated into the main [[ExampleGo]] driver. This implements the standard Naval Fate
   * docopt example.
@@ -32,8 +32,18 @@ object Example2Task extends Task {
        |""".stripMargin.trim
 
   def go(opts: TaskOptions): Unit = {
-    val file: String = opts.getString("FILE")
-    val tableArg: String = opts.getString("TABLE")
-    val ignore: Boolean = opts.getBoolean("--ignore")
+
+    if (opts.getBoolean("ship") && opts.getBoolean("new")) {
+      val names = opts.getStrings("<name>")
+      if (names.isEmpty) throw new DocoptException("Ship name is required.")
+      else for (name <- names) println(s"Creating ship: $name")
+    } else if (opts.getBoolean("ship") && opts.getBoolean("move")) {
+      println(s"""Moving ${opts.getInt("<name>")} ship
+        |  to coordinates (${opts.getInt("x")}, ${opts.getInt("x")}) at speed ${opts.getInt("speed")}""".stripMargin)
+    } else if (opts.getBoolean("ship") && opts.getBoolean("shoot")) {
+      println(s"Shooting at coordinates (${opts.getInt("x")}, ${opts.getInt("y")})")
+    } else {
+      throw new DocoptException("Unknown parsing error")
+    }
   }
 }

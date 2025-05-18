@@ -5,7 +5,7 @@ import com.tinfoiled.docopt4s.testkit.MultiTaskMainSpec
 /** Unit tests for [[Example1Task]] */
 class Example1TaskSpec extends MultiTaskMainSpec(ExampleGo, Some(Example1Task)) {
 
-  describe(s"${Main.Name} $TaskCmd command line errors") {
+  describe(s"Standard ${Main.Name} $TaskCmd command line help, versions and exceptions") {
     itShouldThrowOnHelpAndVersionFlags()
     itShouldThrowOnUnknownFlag()
     itShouldThrowOnMissingOpt(Seq.empty)

@@ -5,6 +5,7 @@ import com.tinfoiled.docopt4s.testkit.MultiTaskMainSpec
 /** Unit tests for [[Example2Task]] */
 class Example2TaskSpec extends MultiTaskMainSpec(ExampleGo, Some(Example2Task)) {
 
+  /*
   """$Description
      |
      |Usage:
@@ -23,6 +24,7 @@ class Example2TaskSpec extends MultiTaskMainSpec(ExampleGo, Some(Example2Task)) 
      |  --drifting    Drifting mine.
      |
      |""".stripMargin.trim
+   */
 
   describe(s"Standard ${Main.Name} $TaskCmd command line help, versions and exceptions") {
     itShouldThrowOnHelpAndVersionFlags()
@@ -33,6 +35,7 @@ class Example2TaskSpec extends MultiTaskMainSpec(ExampleGo, Some(Example2Task)) 
     itShouldThrowOnMissingOpt(Seq("ship", "titanic"))
     itShouldThrowOnMissingOpt(Seq("ship", "titanic", "move"))
     itShouldThrowOnMissingOptValue(Seq("ship", "titanic", "move", "--speed"))
+    itShouldThrowOnMissingOpt(Seq("ship", "titanic", "move", "--speed", "0"))
     itShouldThrowOnMissingOpt(Seq("ship", "titanic", "move", "0"))
     itShouldThrowOnMissingOptValue(Seq("ship", "titanic", "move", "0", "0", "--speed"))
     itShouldThrowOnMissingOptValue(Seq("ship", "titanic", "move", "0", "--speed"))
@@ -42,6 +45,7 @@ class Example2TaskSpec extends MultiTaskMainSpec(ExampleGo, Some(Example2Task)) 
   }
 
   describe("When running the ship sub-subtask ") {
+
     it("should accept 'ship new' with name arguments") {
       withGoMatching(TaskCmd, "ship", "new", "titanic") { case (stdout, stderr) =>
         stderr shouldBe empty
@@ -58,5 +62,26 @@ class Example2TaskSpec extends MultiTaskMainSpec(ExampleGo, Some(Example2Task)) 
       }
     }
 
+    it("should accept 'ship <name> move' with the default speed") {
+      withGoMatching(TaskCmd, "ship", "titanic", "move", "123", "987") { case (stdout, stderr) =>
+        stderr shouldBe empty
+        stdout shouldBe
+          """Moving titanic ship
+            |  to coordinates (123, 987)
+            |  at speed 10
+            |""".stripMargin
+      }
+    }
+
+    it("should accept 'ship <name> move' with a specific speed") {
+      withGoMatching(TaskCmd, "ship", "titanic", "move", "123", "987", "--speed", "-123") { case (stdout, stderr) =>
+        stderr shouldBe empty
+        stdout shouldBe
+          """Moving titanic ship
+            |  to coordinates (123, 987)
+            |  at speed -123
+            |""".stripMargin
+      }
+    }
   }
 }

@@ -1,6 +1,6 @@
 package com.tinfoiled.docopt4s.testkit.example
 
-import com.tinfoiled.docopt4s.{DocoptException, Task}
+import com.tinfoiled.docopt4s.{Docopt, DocoptException, Task}
 
 /** An example task that can be integrated into the main [[ExampleGo]] driver. This implements the standard Naval Fate
   * docopt example.
@@ -31,8 +31,7 @@ object Example2Task extends Task {
        |
        |""".stripMargin.trim
 
-  def go(opts: TaskOptions): Unit = {
-
+  def go(opts: Docopt): Unit = {
     if (opts.getBoolean("ship") && opts.getBoolean("new")) {
       val names = opts.getStrings("<name>")
       if (names.isEmpty) throw new DocoptException("Ship name is required.")

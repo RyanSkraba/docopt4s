@@ -1,6 +1,6 @@
 package com.tinfoiled.docopt4s.testkit.example
 
-import com.tinfoiled.docopt4s.Task
+import com.tinfoiled.docopt4s.{Docopt, Task}
 
 /** An example task that can be integrated into the main [[ExampleGo]] driver. */
 object Example1Task extends Task {
@@ -28,7 +28,7 @@ object Example1Task extends Task {
        |Some description of the command line interface task
        |""".stripMargin.trim
 
-  def go(opts: TaskOptions): Unit = {
+  def go(opts: Docopt): Unit = {
     println(s"Command:$Cmd")
     if (opts.getBoolean("--options")) {
       print(s"""--options:${opts.getBooleanOption("--options")}

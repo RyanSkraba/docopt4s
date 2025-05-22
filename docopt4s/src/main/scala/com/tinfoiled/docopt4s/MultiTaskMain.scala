@@ -1,7 +1,5 @@
 package com.tinfoiled.docopt4s
 
-import org.docopt.Docopt
-
 /** A base class for a Docopt oriented command line application that can take multiple subcommands (tasks). */
 trait MultiTaskMain {
 
@@ -50,7 +48,6 @@ trait MultiTaskMain {
     */
   @throws[DocoptException]
   def go(args: String*): Unit = {
-    import scala.jdk.CollectionConverters._
 
     // Java docopts doesn't support ignoring options after the command, so strip them first.
     val mainArgs: Seq[String] = if (args.nonEmpty) {
@@ -59,23 +56,10 @@ trait MultiTaskMain {
     } else Seq("--help")
 
     // Get the command, but throw exceptions for --help and --version
-    val cmd =
-      try {
-        new Docopt(Doc)
-          .withVersion(Version)
-          .withOptionsFirst(true)
-          .withExit(false)
-          .parse(mainArgs.asJava)
-          .get("<command>")
-          .asInstanceOf[String]
-      } catch {
-        case ex: org.docopt.DocoptExitException =>
-          throw new DocoptException(ex.getMessage, ex, Doc, ex.getExitCode)
-      }
-
-    // This is only here to rewrap any internal docopt exception with the current docopt
-    if (cmd == "???")
-      throw new DocoptException("Missing command", exitCode = 1, docopt = Doc)
+    val cmd = Docopt(Doc, Version, mainArgs, optionsFirst = true).getStringOption("<command>") match {
+      case Some("???") => throw new DocoptException("Missing command", exitCode = 1, docopt = Doc)
+      case Some(cmd)   => cmd
+    }
 
     // Reparse with the specific command.
     val task = Tasks
@@ -83,8 +67,7 @@ trait MultiTaskMain {
       .getOrElse(throw new DocoptException(s"Unknown command: $cmd", exitCode = 1, docopt = Doc))
 
     try {
-      val opts = new Docopt(task.Doc).withVersion(Version).withExit(false).parse(args.asJava)
-      task.go(new task.TaskOptions(opts))
+      task.go(Docopt(task.Doc, Version, args))
     } catch {
       // This is only here to rewrap any internal docopt exception with the current docopt
       case ex: DocoptException =>

@@ -9,7 +9,7 @@
     <relativePath>..</relativePath>
   </parent>
 
-  <artifactId>docopt4s</artifactId>
+  <artifactId>docopt4s_${scala.binary.version}</artifactId>
   <packaging>jar</packaging>
 
   <properties>

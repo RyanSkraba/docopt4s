@@ -29,6 +29,7 @@
     <module>docopt4s</module>
     <module>testkit</module>
   </modules>
+
   <scm>
     <connection>scm:git:git://github.com/RyanSkraba/docopt4s.git</connection>
     <developerConnection>scm:git:ssh://github.com:RyanSkraba/docopt4s.git</developerConnection>

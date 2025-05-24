@@ -15,5 +15,5 @@ class DocoptException(
     msg: String,
     ex: Throwable = None.orNull,
     val docopt: String = None.orNull,
-    val exitCode: Int = 0
+    val exitCode: Int = 1
 ) extends RuntimeException(msg, ex)

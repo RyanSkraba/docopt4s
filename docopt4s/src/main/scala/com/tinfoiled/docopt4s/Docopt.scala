@@ -46,36 +46,44 @@ trait Docopt {
 }
 
 object Docopt {
+
   def apply(doc: String, version: String, args: Iterable[String], optionsFirst: Boolean = false): Docopt = {
     try {
-
-      /** Delegate to the Java implementation. */
-      val docoptJava = new org.docopt.Docopt(doc)
-        .withVersion(version)
-        .withOptionsFirst(optionsFirst)
-        .withExit(false)
-        .parse(args.toList.asJava)
-      new Docopt {
-        override def getStringsOption(key: String): Option[Iterable[String]] = Option(docoptJava.get(key)) match {
-          case Some(value: String)                     => Some(Seq(value))
-          case Some(value: java.lang.Iterable[String]) => Some(value.asScala)
-          case Some(value)                             => Some(Seq(value.toString))
-          case None                                    => None
-        }
-
-        override def getStringOption(key: String): Option[String] = Option(docoptJava.get(key)) match {
-          case Some(value: String)                     => Some(value)
-          case Some(value: java.lang.Iterable[String]) => Some(value.asScala.mkString(","))
-          case Some(value)                             => Some(value.toString)
-          case None                                    => None
-        }
-
-        override def getBooleanOption(key: String): Option[Boolean] =
-          Option(docoptJava.get(key)).map(_.toString.toBoolean)
-      }
+      // Delegate to the Java implementation
+      apply(
+        new org.docopt.Docopt(doc)
+          .withVersion(version)
+          .withOptionsFirst(optionsFirst)
+          .withExit(false)
+          .parse(args.toList.asJava)
+          .asScala
+          .toMap
+          .filter(_._2 != null) // Remove all null values
+      )
     } catch {
       case ex: org.docopt.DocoptExitException =>
         throw new DocoptException(ex.getMessage, ex, doc, ex.getExitCode)
+    }
+  }
+
+  def apply(opts: Map[String, AnyRef]): Docopt = {
+    new Docopt {
+      override def getStringsOption(key: String): Option[Iterable[String]] = opts.get(key) match {
+        case Some(value: String)                     => Some(Seq(value))
+        case Some(value: java.lang.Iterable[String]) => Some(value.asScala)
+        case Some(value)                             => Some(Seq(value.toString))
+        case None                                    => None
+      }
+
+      override def getStringOption(key: String): Option[String] = opts.get(key) match {
+        case Some(value: String)                     => Some(value)
+        case Some(value: java.lang.Iterable[String]) => Some(value.asScala.mkString(","))
+        case Some(value)                             => Some(value.toString)
+        case None                                    => None
+      }
+
+      override def getBooleanOption(key: String): Option[Boolean] =
+        opts.get(key).map(_.toString.toBoolean)
     }
   }
 }

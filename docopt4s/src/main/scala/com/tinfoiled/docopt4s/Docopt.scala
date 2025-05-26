@@ -1,6 +1,8 @@
 package com.tinfoiled.docopt4s
 
 import scala.jdk.CollectionConverters._
+import scala.reflect.io.{Directory, File, Path}
+import scala.util.Properties
 
 /** Once created, a [[Docopt]] provides a means to interpret command line arguments.
   *
@@ -43,6 +45,70 @@ trait Docopt {
   def getBoolean(key: String): Boolean = getBooleanOption(key).getOrElse {
     throw new DocoptException(s"Expected $key not found")
   }
+
+  /** Helper to validate command line arguments against an expected filesystem state.
+    *
+    * @param root
+    *   An absolute directory to use in constructing the path
+    * @param tag
+    *   A human-readable description to describe the
+    * @param ifIsDir
+    *   Whether to test to ensure the argument must be a Directory or must be a File (or None if it doesn't matter).
+    * @param ifExists
+    *   Whether to test to ensure the argument must exist or must not exist (or None if it doesn't matter).
+    * @return
+    *   The validated path that the argument represents on the filesystem.
+    */
+  case class PathValidator(
+      root: Option[AnyRef] = None,
+      systemEnvVar: Option[String] = None,
+      tag: Option[String] = None,
+      ifIsDir: Option[Boolean] = None,
+      ifExists: Option[Boolean] = Some(true)
+  ) {
+
+    def validate(key: String): Path = {
+      val path: Path = Path(
+        root
+          .map(_.toString)
+          .orElse(systemEnvVar.flatMap(sys.env.get(_)))
+          .orElse(Option(Properties.userDir))
+          .getOrElse("/")
+      )
+        .resolve(Path(getString(key)))
+        .toAbsolute
+      if (ifExists.contains(true) && !path.exists)
+        throw new DocoptException(s"$tag doesn't exist: $path")
+      if (ifExists.contains(false) && path.exists)
+        throw new DocoptException(s"$tag already exists: $path")
+      if (ifIsDir.contains(true) && ifExists.contains(true) && !path.isDirectory)
+        throw new DocoptException(s"$tag is not a directory: $path")
+      if (ifIsDir.contains(false) && ifExists.contains(true) && !path.isFile)
+        throw new DocoptException(s"$tag is not a file: $path")
+      path
+    }
+
+    def isPath(): PathValidator = copy(ifIsDir = None)
+    def isDir(): PathValidator = copy(ifIsDir = Some(true))
+    def isFile(): PathValidator = copy(ifIsDir = Some(false))
+
+    def exists(): PathValidator = copy(ifExists = Some(true))
+    def doesntExist(): PathValidator = copy(ifExists = Some(false))
+    def optionallyExists(): PathValidator = copy(ifExists = None)
+  }
+
+  def getPathOption(key: String, vld: PathValidator = PathValidator()): Option[Path] =
+    getStringOption(key).map(_ => vld.validate(key))
+  def getPath(key: String, vld: PathValidator = PathValidator()): Path = vld.validate(key)
+
+  def getFileOption(key: String, vld: PathValidator = PathValidator()): Option[File] =
+    getPathOption(key, vld.isFile()).map(_.toFile)
+  def getFile(key: String, vld: PathValidator = PathValidator().isFile()): File = getPath(key, vld.isFile()).toFile
+
+  def getDirectoryOption(key: String, vld: PathValidator = PathValidator()): Option[Directory] =
+    getPathOption(key, vld.isDir()).map(_.toDirectory)
+  def getDirectory(key: String, vld: PathValidator = PathValidator().isDir()): Directory =
+    getPath(key, vld.isDir()).toDirectory
 }
 
 object Docopt {

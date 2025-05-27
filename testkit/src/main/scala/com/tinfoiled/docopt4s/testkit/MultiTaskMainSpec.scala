@@ -134,7 +134,7 @@ abstract class MultiTaskMainSpec(protected val Main: MultiTaskMain, protected va
   }
 
   /** Run tests on a command line that is missing necessary information for the Cli to proceed. */
-  val itShouldThrowOnMissingOpt: Seq[String] => Unit = args => {
+  val itShouldThrowOnIncompleteArgs: Seq[String] => Unit = args => {
     val allArgs = Task.map(_.Cmd).toSeq ++ args
     it("throws an exception on missing options: " + allArgs.mkString(" ")) {
       val t = interceptGoDocoptEx(allArgs: _*)
@@ -144,7 +144,7 @@ abstract class MultiTaskMainSpec(protected val Main: MultiTaskMain, protected va
   }
 
   /** Run tests on a command line where the last argument is an option missing its value. */
-  val itShouldThrowOnMissingOptValue: Seq[String] => Unit = args => {
+  val itShouldThrowOnMissingFlagValue: Seq[String] => Unit = args => {
     val allArgs = Task.map(_.Cmd).toSeq ++ args
     it("throws an exception on missing option parameters: " + allArgs.mkString(" ")) {
       val t = interceptGoDocoptEx(allArgs: _*)

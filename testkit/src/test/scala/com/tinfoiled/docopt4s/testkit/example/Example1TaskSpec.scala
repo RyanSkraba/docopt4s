@@ -8,8 +8,8 @@ class Example1TaskSpec extends MultiTaskMainSpec(ExampleGo, Some(Example1Task)) 
   describe(s"Standard ${Main.Name} $TaskCmd command line help, versions and exceptions") {
     itShouldThrowOnHelpAndVersionFlags()
     itShouldThrowOnUnknownFlag()
-    itShouldThrowOnMissingOpt(Seq.empty)
-    itShouldThrowOnMissingOptValue(Seq("arg", "--default"))
+    itShouldThrowOnIncompleteArgs(Seq.empty)
+    itShouldThrowOnMissingFlagValue(Seq("arg", "--default"))
     itShouldThrowOnIncompatibleOpts(Seq("arg", "--options", "--default", "dflt"))
   }
 

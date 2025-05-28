@@ -333,6 +333,8 @@
         <artifactId>scalatest-maven-plugin</artifactId>
       </plugin>
     </plugins>
+    <sourceDirectory>src/main/scala</sourceDirectory>
+    <testSourceDirectory>src/test/scala</testSourceDirectory>
   </build>
 
   <profiles>

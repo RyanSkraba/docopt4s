@@ -28,32 +28,32 @@ object Example1Task extends Task {
        |Some description of the command line interface task
        |""".stripMargin.trim
 
-  def go(opts: Docopt): Unit = {
+  def go(opt: Docopt): Unit = {
     println(s"Command:$Cmd")
-    if (opts.getBoolean("--options")) {
-      print(s"""--options:${opts.getBooleanOption("--options")}
-           |--default:${opts.getStringOption("--default")}
-           |ARG1:${opts.getStringOption("ARG1")}
-           |ARG2:${opts.getIntOption("ARG2")}
-           |ARG3:${opts.getStringOption("ARG3")}
-           |ARG4:${opts.getStringsOption("ARG4").map(_.mkString("(", ",", ")"))}
+    if (opt.getBoolean("--options")) {
+      print(s"""--options:${opt.getBooleanOption("--options")}
+           |--default:${opt.getStringOption("--default")}
+           |ARG1:${opt.getStringOption("ARG1")}
+           |ARG2:${opt.getIntOption("ARG2")}
+           |ARG3:${opt.getStringOption("ARG3")}
+           |ARG4:${opt.getStringsOption("ARG4").map(_.mkString("(", ",", ")"))}
            |""".stripMargin)
-    } else if (opts.getStringOption("--default").nonEmpty) {
-      val dflt = opts.getString("--default")
-      print(s"""--options:${opts.getBoolean("--options", default = false)}
+    } else if (opt.getStringOption("--default").nonEmpty) {
+      val dflt = opt.getString("--default")
+      print(s"""--options:${opt.getBoolean("--options", default = false)}
            |--default:$dflt
-           |ARG1:${opts.getString("ARG1", dflt)}
-           |ARG2:${opts.getInt("ARG2", -1)}
-           |ARG3:${opts.getString("ARG3", dflt)}
-           |ARG4:${opts.getStrings("ARG4", Seq(dflt)).mkString("(", ",", ")")}
+           |ARG1:${opt.getString("ARG1", dflt)}
+           |ARG2:${opt.getInt("ARG2", -1)}
+           |ARG3:${opt.getString("ARG3", dflt)}
+           |ARG4:${opt.getStrings("ARG4", Seq(dflt)).mkString("(", ",", ")")}
            |""".stripMargin)
     } else {
-      print(s"""--options:${opts.getBoolean("--options")}
-           |--default:${opts.getStringOption("--default")}
-           |ARG1:${opts.getString("ARG1")}
-           |ARG2:${opts.getInt("ARG2", default = 0)}
-           |ARG3:${opts.getString("ARG3", default = "--")}
-           |ARG4:${opts.getStrings("ARG4").mkString("(", ",", ")")}
+      print(s"""--options:${opt.getBoolean("--options")}
+           |--default:${opt.getStringOption("--default")}
+           |ARG1:${opt.getString("ARG1")}
+           |ARG2:${opt.getInt("ARG2", default = 0)}
+           |ARG3:${opt.getString("ARG3", default = "--")}
+           |ARG4:${opt.getStrings("ARG4").mkString("(", ",", ")")}
            |""".stripMargin)
     }
   }

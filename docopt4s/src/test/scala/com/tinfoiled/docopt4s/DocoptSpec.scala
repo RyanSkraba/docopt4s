@@ -30,31 +30,31 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
   describe("Testing the key -> value fetch methods") {
 
-    val opts = Docopt(Map("string" -> "value", "dir" -> Tmp.toString, "file" -> ExistingFile.toString))
+    val opt = Docopt(Map("string" -> "value", "dir" -> Tmp.toString, "file" -> ExistingFile.toString))
 
     it("should get string values correctly") {
       // option
-      opts.getStringOption("string") shouldBe Some("value")
-      opts.getStringOption("no-exists") shouldBe None
+      opt.getStringOption("string") shouldBe Some("value")
+      opt.getStringOption("no-exists") shouldBe None
       // direct
-      opts.getString("string") shouldBe "value"
-      val t = intercept[DocoptException] { opts.getString("no-exists") }
+      opt.getString("string") shouldBe "value"
+      val t = intercept[DocoptException] { opt.getString("no-exists") }
       t.getMessage shouldBe "Expected no-exists not found"
       t.exitCode shouldBe 1
       // default
-      opts.getString("string", "default") shouldBe "value"
-      opts.getString("no-exists", "default") shouldBe "default"
+      opt.getString("string", "default") shouldBe "value"
+      opt.getString("no-exists", "default") shouldBe "default"
     }
 
     it("should get path values correctly") {
       // option
-      opts.getPathOption("dir") shouldBe Some(Tmp)
-      opts.getPathOption("file") shouldBe Some(ExistingFile)
-      opts.getPathOption("no-exists") shouldBe None
+      opt.getPathOption("dir") shouldBe Some(Tmp)
+      opt.getPathOption("file") shouldBe Some(ExistingFile)
+      opt.getPathOption("no-exists") shouldBe None
       // direct
-      opts.getPath("dir") shouldBe Tmp
-      opts.getPath("file") shouldBe ExistingFile
-      val t = intercept[DocoptException] { opts.getPath("no-exists") }
+      opt.getPath("dir") shouldBe Tmp
+      opt.getPath("file") shouldBe ExistingFile
+      val t = intercept[DocoptException] { opt.getPath("no-exists") }
       t.getMessage shouldBe "Expected no-exists not found"
       t.exitCode shouldBe 1
       // default (TODO)
@@ -62,11 +62,11 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
     it("should get directory values correctly") {
       // option
-      opts.getDirectoryOption("dir") shouldBe Some(Tmp)
-      opts.getDirectoryOption("no-exists") shouldBe None
+      opt.getDirectoryOption("dir") shouldBe Some(Tmp)
+      opt.getDirectoryOption("no-exists") shouldBe None
       // direct
-      opts.getDirectory("dir") shouldBe Tmp
-      val t = intercept[DocoptException] { opts.getDirectory("no-exists") }
+      opt.getDirectory("dir") shouldBe Tmp
+      val t = intercept[DocoptException] { opt.getDirectory("no-exists") }
       t.getMessage shouldBe "Expected no-exists not found"
       t.exitCode shouldBe 1
       // default (TODO)
@@ -74,11 +74,11 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
     it("should get file values correctly") {
       // option
-      opts.getFileOption("file") shouldBe Some(ExistingFile)
-      opts.getFileOption("no-exists") shouldBe None
+      opt.getFileOption("file") shouldBe Some(ExistingFile)
+      opt.getFileOption("no-exists") shouldBe None
       // direct
-      opts.getFile("file") shouldBe ExistingFile
-      val t = intercept[DocoptException] { opts.getFile("no-exists") }
+      opt.getFile("file") shouldBe ExistingFile
+      val t = intercept[DocoptException] { opt.getFile("no-exists") }
       t.getMessage shouldBe "Expected no-exists not found"
       t.exitCode shouldBe 1
       // default (TODO)

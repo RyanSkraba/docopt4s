@@ -13,8 +13,8 @@ abstract class Task() {
   val Description: String
 
   /** Executes this task
-    * @param opts
-    *   the docopts to fetch information from.
+    * @param opt
+    *   the docopt to fetch information from.
     */
-  def go(opts: Docopt): Unit
+  def go(opt: Docopt): Unit
 }

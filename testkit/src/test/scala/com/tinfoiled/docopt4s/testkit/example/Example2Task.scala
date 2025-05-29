@@ -9,7 +9,7 @@ object Example2Task extends Task {
 
   val Cmd = "naval_fate"
 
-  val Description = "The naval fate example for docopts."
+  val Description = "The naval fate example for docopt."
 
   val Doc: String =
     s"""$Description
@@ -31,17 +31,17 @@ object Example2Task extends Task {
        |
        |""".stripMargin.trim
 
-  def go(opts: Docopt): Unit = {
-    if (opts.getBoolean("ship") && opts.getBoolean("new")) {
-      val names = opts.getStrings("<name>")
+  def go(opt: Docopt): Unit = {
+    if (opt.getBoolean("ship") && opt.getBoolean("new")) {
+      val names = opt.getStrings("<name>")
       if (names.isEmpty) throw new DocoptException("Ship name is required.")
       else for (name <- names) println(s"Creating ship: $name")
-    } else if (opts.getBoolean("ship") && opts.getBoolean("move")) {
-      println(s"""Moving ${opts.getString("<name>")} ship
-        |  to coordinates (${opts.getInt("<x>")}, ${opts.getInt("<y>")})
-        |  at speed ${opts.getInt("--speed")}""".stripMargin)
-    } else if (opts.getBoolean("ship") && opts.getBoolean("shoot")) {
-      println(s"Shooting at coordinates (${opts.getInt("<x>")}, ${opts.getInt("<y>")})")
+    } else if (opt.getBoolean("ship") && opt.getBoolean("move")) {
+      println(s"""Moving ${opt.getString("<name>")} ship
+        |  to coordinates (${opt.getInt("<x>")}, ${opt.getInt("<y>")})
+        |  at speed ${opt.getInt("--speed")}""".stripMargin)
+    } else if (opt.getBoolean("ship") && opt.getBoolean("shoot")) {
+      println(s"Shooting at coordinates (${opt.getInt("<x>")}, ${opt.getInt("<y>")})")
     } else {
       throw new DocoptException("Unknown parsing error")
     }

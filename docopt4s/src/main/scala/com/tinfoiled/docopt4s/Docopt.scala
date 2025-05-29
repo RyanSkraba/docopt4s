@@ -115,7 +115,7 @@ object Docopt {
 
   def apply(doc: String, version: String, args: Iterable[String], optionsFirst: Boolean = false): Docopt = {
     try {
-      // Delegate to the Java implementation
+      // Delegate to the Java implementation to obtain a map of arguments
       apply(
         new org.docopt.Docopt(doc)
           .withVersion(version)
@@ -132,16 +132,16 @@ object Docopt {
     }
   }
 
-  def apply(opts: Map[String, AnyRef]): Docopt = {
+  def apply(argMap: Map[String, AnyRef]): Docopt = {
     new Docopt {
-      override def getStringsOption(key: String): Option[Iterable[String]] = opts.get(key) match {
+      override def getStringsOption(key: String): Option[Iterable[String]] = argMap.get(key) match {
         case Some(value: String)                     => Some(Seq(value))
         case Some(value: java.lang.Iterable[String]) => Some(value.asScala)
         case Some(value)                             => Some(Seq(value.toString))
         case None                                    => None
       }
 
-      override def getStringOption(key: String): Option[String] = opts.get(key) match {
+      override def getStringOption(key: String): Option[String] = argMap.get(key) match {
         case Some(value: String)                     => Some(value)
         case Some(value: java.lang.Iterable[String]) => Some(value.asScala.mkString(","))
         case Some(value)                             => Some(value.toString)
@@ -149,7 +149,7 @@ object Docopt {
       }
 
       override def getBooleanOption(key: String): Option[Boolean] =
-        opts.get(key).map(_.toString.toBoolean)
+        argMap.get(key).map(_.toString.toBoolean)
     }
   }
 }

@@ -49,7 +49,7 @@ trait MultiTaskMain {
   @throws[DocoptException]
   def go(args: String*): Unit = {
 
-    // Java docopts doesn't support ignoring options after the command, so strip them first.
+    // Java docopt doesn't support ignoring options after the command, so strip them first.
     val mainArgs: Seq[String] = if (args.nonEmpty) {
       val (options, cmd) = args.span(_.startsWith("-"))
       if (cmd.isEmpty) options :+ "???" else options :+ cmd.head

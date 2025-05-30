@@ -9,6 +9,7 @@
     <relativePath>..</relativePath>
   </parent>
 
+  <name>${project.groupId}:docopt4s-testkit_${scala.binary.version}</name>
   <artifactId>docopt4s-testkit_${scala.binary.version}</artifactId>
   <packaging>jar</packaging>
   <description>Testkit for docopt4s</description>

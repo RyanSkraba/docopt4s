@@ -5,9 +5,7 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funspec.AnyFunSpecLike
 import org.scalatest.matchers.should.Matchers
 
-import java.io.ByteArrayInputStream
-import scala.io.AnsiColor._
-import scala.reflect.io.{Directory, File, Path, Streamable}
+import scala.reflect.io.{Directory, File}
 
 /** Test the [[Docopt]] class.
   *
@@ -30,7 +28,14 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
   describe("Testing the key -> value fetch methods") {
 
-    val opt = Docopt(Map("string" -> "value", "dir" -> Tmp.toString, "file" -> ExistingFile.toString))
+    val opt = Docopt(
+      Map(
+        "string" -> "value",
+        "dir" -> Tmp.toString,
+        "file" -> ExistingFile.toString,
+        "nox" -> (Tmp / "nox").toString()
+      )
+    )
 
     it("should get string values correctly") {
       // option
@@ -66,9 +71,16 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       opt.getDirectoryOption("no-exists") shouldBe None
       // direct
       opt.getDirectory("dir") shouldBe Tmp
-      val t = intercept[DocoptException] { opt.getDirectory("no-exists") }
+      // When the directory doesn't exist in the list of arguments
+      val t = intercept[DocoptException] {
+        opt.getDirectory("no-exists")
+      }
       t.getMessage shouldBe "Expected no-exists not found"
       t.exitCode shouldBe 1
+      // When the directory doesn't exist in the filesystem
+      val t2 = intercept[DocoptException] { opt.getDirectory("nox") }
+      t2.getMessage shouldBe s"None doesn't exist: $Tmp/nox"
+      t2.exitCode shouldBe 1
       // default (TODO)
     }
 

@@ -8,10 +8,10 @@
     <version>0.0.3-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
-
-  <name>${project.groupId}:docopt4s_${scala.binary.version}</name>
   <artifactId>docopt4s_${scala.binary.version}</artifactId>
   <packaging>jar</packaging>
+
+  <name>${project.groupId}:docopt4s_${scala.binary.version}</name>
 
   <properties>
     <project.relBaseDir>..</project.relBaseDir>

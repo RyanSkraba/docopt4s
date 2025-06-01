@@ -79,7 +79,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       t.exitCode shouldBe 1
       // When the directory doesn't exist in the filesystem
       val t2 = intercept[DocoptException] { opt.getDirectory("nox") }
-      t2.getMessage shouldBe s"None doesn't exist: $Tmp/nox"
+      t2.getMessage shouldBe s"Directory doesn't exist: $Tmp/nox"
       t2.exitCode shouldBe 1
       // default (TODO)
     }

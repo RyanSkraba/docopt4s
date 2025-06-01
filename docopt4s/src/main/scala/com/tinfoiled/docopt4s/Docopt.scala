@@ -77,17 +77,25 @@ trait Docopt {
       )
         .resolve(Path(getString(key)))
         .toAbsolute
+      val pathTag = tag.getOrElse(
+        ifIsDir match {
+          case Some(true)  => "Directory"
+          case Some(false) => "File"
+          case None        => "Path"
+        }
+      )
       if (ifExists.contains(true) && !path.exists)
-        throw new DocoptException(s"$tag doesn't exist: $path")
+        throw new DocoptException(s"$pathTag doesn't exist: $path")
       if (ifExists.contains(false) && path.exists)
-        throw new DocoptException(s"$tag already exists: $path")
+        throw new DocoptException(s"$pathTag already exists: $path")
       if (ifIsDir.contains(true) && ifExists.contains(true) && !path.isDirectory)
-        throw new DocoptException(s"$tag is not a directory: $path")
+        throw new DocoptException(s"$pathTag is not a directory: $path")
       if (ifIsDir.contains(false) && ifExists.contains(true) && !path.isFile)
-        throw new DocoptException(s"$tag is not a file: $path")
+        throw new DocoptException(s"$pathTag is not a file: $path")
       path
     }
 
+    def withTag(tag: String) = copy(tag = Some(tag))
     def isPath(): PathValidator = copy(ifIsDir = None)
     def isDir(): PathValidator = copy(ifIsDir = Some(true))
     def isFile(): PathValidator = copy(ifIsDir = Some(false))

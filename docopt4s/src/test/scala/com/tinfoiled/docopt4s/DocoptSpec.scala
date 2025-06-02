@@ -1,6 +1,5 @@
 package com.tinfoiled.docopt4s
 
-import com.tinfoiled.docopt4s.AnsiConsole.withConsoleMatch
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funspec.AnyFunSpecLike
 import org.scalatest.matchers.should.Matchers
@@ -26,30 +25,40 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     try { Tmp.deleteRecursively() }
     catch { case ex: Exception => ex.printStackTrace() }
 
-  describe("Testing the key -> value fetch methods") {
-
-    val opt = Docopt(
-      Map(
-        "string" -> "value",
-        "dir" -> Tmp.toString,
-        "file" -> ExistingFile.toString,
-        "nox" -> (Tmp / "nox").toString()
-      )
+  val opt = Docopt(
+    Map(
+      "string" -> "value",
+      "dir" -> Tmp.toString,
+      "file" -> ExistingFile.toString,
+      "nox" -> (Tmp / "nox").toString()
     )
+  )
 
-    it("should get string values correctly") {
-      // option
-      opt.getStringOption("string") shouldBe Some("value")
-      opt.getStringOption("no-exists") shouldBe None
-      // direct
-      opt.getString("string") shouldBe "value"
-      val t = intercept[DocoptException] { opt.getString("no-exists") }
-      t.getMessage shouldBe "Expected no-exists not found"
-      t.exitCode shouldBe 1
-      // default
-      opt.getString("string", "default") shouldBe "value"
-      opt.getString("no-exists", "default") shouldBe "default"
+  describe("Testing the getString methods") {
+
+    describe("when getting an optional value") {
+      it("should get the present value") { opt.getStringOption("string") shouldBe Some("value") }
+      it("should get a missing value") { opt.getStringOption("string") shouldBe Some("value") }
     }
+
+    describe("when getting a required value") {
+      it("should get the present value") { opt.getStringOption("no-exists") shouldBe None }
+      it("should fail with a missing value") {
+        val t = intercept[DocoptException] {
+          opt.getString("no-exists")
+        }
+        t.getMessage shouldBe "Expected no-exists not found"
+        t.exitCode shouldBe 1
+      }
+    }
+
+    describe("when getting a required value with default") {
+      it("should get the present value") { opt.getString("string", "default") shouldBe "value" }
+      it("should get a missing value") { opt.getString("no-exists", "default") shouldBe "default" }
+    }
+  }
+
+  describe("Other") {
 
     it("should get path values correctly") {
       // option
@@ -72,9 +81,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       // direct
       opt.getDirectory("dir") shouldBe Tmp
       // When the directory doesn't exist in the list of arguments
-      val t = intercept[DocoptException] {
-        opt.getDirectory("no-exists")
-      }
+      val t = intercept[DocoptException] { opt.getDirectory("no-exists") }
       t.getMessage shouldBe "Expected no-exists not found"
       t.exitCode shouldBe 1
       // When the directory doesn't exist in the filesystem

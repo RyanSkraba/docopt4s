@@ -140,7 +140,7 @@ object Docopt {
     }
   }
 
-  def apply(argMap: Map[String, AnyRef]): Docopt = {
+  def apply(argMap: Map[String, Any]): Docopt = {
     new Docopt {
       override def getStringsOption(key: String): Option[Iterable[String]] = argMap.get(key) match {
         case Some(value: String)                     => Some(Seq(value))

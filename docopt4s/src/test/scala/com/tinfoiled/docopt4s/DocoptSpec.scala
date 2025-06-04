@@ -25,13 +25,16 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     try { Tmp.deleteRecursively() }
     catch { case ex: Exception => ex.printStackTrace() }
 
-  val opt: Docopt = Docopt( Map(
-    "string" -> "value",
-    "int" -> 12345,
-    "dir" -> Tmp.toString,
-    "file" -> ExistingFile.toString,
-    "nox" -> (Tmp / "nox").toString()
-  ))
+  val opt: Docopt = Docopt(
+    Map(
+      "string" -> "value",
+      "int" -> 12345,
+      "bool" -> true,
+      "dir" -> Tmp.toString,
+      "file" -> ExistingFile.toString,
+      "nox" -> (Tmp / "nox").toString()
+    )
+  )
 
   describe("Testing the getString methods") {
     describe("when getting an optional value") {
@@ -51,6 +54,27 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     describe("when getting a required value with default") {
       it("should get the present value") { opt.getString("string", "default") shouldBe "value" }
       it("should get a missing value") { opt.getString("missing", "default") shouldBe "default" }
+    }
+  }
+
+  describe("Testing the getBoolean methods") {
+    describe("when getting an optional value") {
+      it("should get the present value") { opt.getBooleanOption("bool") shouldBe Some(true) }
+      it("should get a missing value") { opt.getBooleanOption("missing") shouldBe None }
+    }
+
+    describe("when getting a required value") {
+      it("should get the present value") { opt.getBoolean("bool") shouldBe true }
+      it("should fail with a missing value") {
+        val t = intercept[DocoptException] { opt.getBoolean("missing") }
+        t.getMessage shouldBe "Expected missing not found"
+        t.exitCode shouldBe 1
+      }
+    }
+
+    describe("when getting a required value with default") {
+      it("should get the present value") { opt.getBoolean("bool", default = false) shouldBe true }
+      it("should get a missing value") { opt.getBoolean("missing", default = false) shouldBe false }
     }
   }
 

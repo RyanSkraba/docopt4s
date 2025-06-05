@@ -10,19 +10,19 @@ import scala.util.Properties
   */
 trait Docopt {
 
-  def getStringsOption(key: String): Option[Iterable[String]]
-
-  def getStrings(key: String, default: Iterable[String]): Iterable[String] = getStringsOption(key).getOrElse(default)
-
-  def getStrings(key: String): Iterable[String] = getStringsOption(key).getOrElse {
-    throw new DocoptException(s"Expected $key not found")
-  }
-
   def getStringOption(key: String): Option[String]
 
   def getString(key: String, default: String): String = getStringOption(key).getOrElse(default)
 
   def getString(key: String): String = getStringOption(key).getOrElse {
+    throw new DocoptException(s"Expected $key not found")
+  }
+
+  def getStringsOption(key: String): Option[Iterable[String]]
+
+  def getStrings(key: String, default: Iterable[String]): Iterable[String] = getStringsOption(key).getOrElse(default)
+
+  def getStrings(key: String): Iterable[String] = getStringsOption(key).getOrElse {
     throw new DocoptException(s"Expected $key not found")
   }
 
@@ -144,6 +144,7 @@ object Docopt {
     new Docopt {
       override def getStringsOption(key: String): Option[Iterable[String]] = argMap.get(key) match {
         case Some(value: String)                     => Some(Seq(value))
+        case Some(value: Iterable[String])           => Some(value)
         case Some(value: java.lang.Iterable[String]) => Some(value.asScala)
         case Some(value)                             => Some(Seq(value.toString))
         case None                                    => None
@@ -151,6 +152,7 @@ object Docopt {
 
       override def getStringOption(key: String): Option[String] = argMap.get(key) match {
         case Some(value: String)                     => Some(value)
+        case Some(value: Iterable[String])           => Some(value.mkString(","))
         case Some(value: java.lang.Iterable[String]) => Some(value.asScala.mkString(","))
         case Some(value)                             => Some(value.toString)
         case None                                    => None

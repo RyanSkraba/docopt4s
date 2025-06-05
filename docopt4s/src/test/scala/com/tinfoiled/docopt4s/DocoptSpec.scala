@@ -28,6 +28,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
   val opt: Docopt = Docopt(
     Map(
       "string" -> "value",
+      "strings" -> Seq("value"),
       "int" -> 12345,
       "bool" -> true,
       "dir" -> Tmp.toString,
@@ -54,6 +55,27 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     describe("when getting a required value with default") {
       it("should get the present value") { opt.getString("string", "default") shouldBe "value" }
       it("should get a missing value") { opt.getString("missing", "default") shouldBe "default" }
+    }
+  }
+
+  describe("Testing the getStrings methods") {
+    describe("when getting an optional value") {
+      it("should get the present value") { opt.getStringsOption("strings") shouldBe Some(Seq("value")) }
+      it("should get a missing value") { opt.getStringsOption("missing") shouldBe None }
+    }
+
+    describe("when getting a required value") {
+      it("should get the present value") { opt.getStrings("strings") shouldBe Seq("value") }
+      it("should fail with a missing value") {
+        val t = intercept[DocoptException] { opt.getStrings("missing") }
+        t.getMessage shouldBe "Expected missing not found"
+        t.exitCode shouldBe 1
+      }
+    }
+
+    describe("when getting a required value with default") {
+      it("should get the present value") { opt.getStrings("strings", Seq("def")) shouldBe Seq("value") }
+      it("should get a missing value") { opt.getStrings("missing", Seq("def")) shouldBe Seq("def") }
     }
   }
 

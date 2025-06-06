@@ -1,9 +1,11 @@
 package com.tinfoiled.docopt4s
 
+import org.scalactic.source
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funspec.AnyFunSpecLike
 import org.scalatest.matchers.should.Matchers
 
+import scala.reflect.ClassTag
 import scala.reflect.io.{Directory, File}
 
 /** Test the [[Docopt]] class.
@@ -37,87 +39,87 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     )
   )
 
+  /** Helper method to capture a DocoptException with no docopt and an exitCode of 1.
+    *
+    * @param thunk
+    *   Code to execute that should throw an exception.
+    * @return
+    *   the message in the DocoptException
+    */
+  def failOn[EX <: AnyRef](
+      thunk: => Any
+  )(implicit classTag: ClassTag[DocoptException], pos: source.Position): String = {
+    val t = intercept[DocoptException] { thunk }(classTag, pos)
+    Option(t.docopt) shouldBe None
+    t.exitCode shouldBe 1
+    t.getMessage
+  }
+
   describe("Testing the getString methods") {
     describe("when getting an optional value") {
-      it("should get the present value") { opt.getStringOption("string") shouldBe Some("value") }
-      it("should get a missing value") { opt.getStringOption("missing") shouldBe None }
+      it("should get when present") { opt.getStringOption("string") shouldBe Some("value") }
+      it("should get when missing") { opt.getStringOption("missing") shouldBe None }
     }
 
     describe("when getting a required value") {
-      it("should get the present value") { opt.getString("string") shouldBe "value" }
-      it("should fail with a missing value") {
-        val t = intercept[DocoptException] { opt.getString("missing") }
-        t.getMessage shouldBe "Expected missing not found"
-        t.exitCode shouldBe 1
-      }
+      it("should get when present") { opt.getString("string") shouldBe "value" }
+      it("should fail when missing") { failOn { opt.getString("missing") } shouldBe "Expected missing not found" }
     }
 
     describe("when getting a required value with default") {
-      it("should get the present value") { opt.getString("string", "default") shouldBe "value" }
-      it("should get a missing value") { opt.getString("missing", "default") shouldBe "default" }
+      it("should get when present") { opt.getString("string", "default") shouldBe "value" }
+      it("should get when missing") { opt.getString("missing", "default") shouldBe "default" }
     }
   }
 
   describe("Testing the getStrings methods") {
     describe("when getting an optional value") {
-      it("should get the present value") { opt.getStringsOption("strings") shouldBe Some(Seq("value")) }
-      it("should get a missing value") { opt.getStringsOption("missing") shouldBe None }
+      it("should get when present") { opt.getStringsOption("strings") shouldBe Some(Seq("value")) }
+      it("should get when missing") { opt.getStringsOption("missing") shouldBe None }
     }
 
     describe("when getting a required value") {
-      it("should get the present value") { opt.getStrings("strings") shouldBe Seq("value") }
-      it("should fail with a missing value") {
-        val t = intercept[DocoptException] { opt.getStrings("missing") }
-        t.getMessage shouldBe "Expected missing not found"
-        t.exitCode shouldBe 1
-      }
+      it("should get when present") { opt.getStrings("strings") shouldBe Seq("value") }
+      it("should fail when missing") { failOn { opt.getStrings("missing") } shouldBe "Expected missing not found" }
     }
 
     describe("when getting a required value with default") {
-      it("should get the present value") { opt.getStrings("strings", Seq("def")) shouldBe Seq("value") }
-      it("should get a missing value") { opt.getStrings("missing", Seq("def")) shouldBe Seq("def") }
+      it("should get when present") { opt.getStrings("strings", Seq("def")) shouldBe Seq("value") }
+      it("should get when missing") { opt.getStrings("missing", Seq("def")) shouldBe Seq("def") }
     }
   }
 
   describe("Testing the getBoolean methods") {
     describe("when getting an optional value") {
-      it("should get the present value") { opt.getBooleanOption("bool") shouldBe Some(true) }
-      it("should get a missing value") { opt.getBooleanOption("missing") shouldBe None }
+      it("should get when present") { opt.getBooleanOption("bool") shouldBe Some(true) }
+      it("should get when missing") { opt.getBooleanOption("missing") shouldBe None }
     }
 
     describe("when getting a required value") {
-      it("should get the present value") { opt.getBoolean("bool") shouldBe true }
-      it("should fail with a missing value") {
-        val t = intercept[DocoptException] { opt.getBoolean("missing") }
-        t.getMessage shouldBe "Expected missing not found"
-        t.exitCode shouldBe 1
-      }
+      it("should get when present") { opt.getBoolean("bool") shouldBe true }
+      it("should fail when missing") { failOn { opt.getBoolean("missing") } shouldBe "Expected missing not found" }
     }
 
     describe("when getting a required value with default") {
-      it("should get the present value") { opt.getBoolean("bool", default = false) shouldBe true }
-      it("should get a missing value") { opt.getBoolean("missing", default = false) shouldBe false }
+      it("should get when present") { opt.getBoolean("bool", default = false) shouldBe true }
+      it("should get when missing") { opt.getBoolean("missing", default = false) shouldBe false }
     }
   }
 
   describe("Testing the getInt methods") {
     describe("when getting an optional value") {
-      it("should get the present value") { opt.getIntOption("int") shouldBe Some(12345) }
-      it("should get a missing value") { opt.getIntOption("missing") shouldBe None }
+      it("should get when present") { opt.getIntOption("int") shouldBe Some(12345) }
+      it("should get when missing") { opt.getIntOption("missing") shouldBe None }
     }
 
     describe("when getting a required value") {
-      it("should get the present value") { opt.getInt("int") shouldBe 12345 }
-      it("should fail with a missing value") {
-        val t = intercept[DocoptException] { opt.getInt("missing") }
-        t.getMessage shouldBe "Expected missing not found"
-        t.exitCode shouldBe 1
-      }
+      it("should get when present") { opt.getInt("int") shouldBe 12345 }
+      it("should fail when missing") { failOn { opt.getInt("missing") } shouldBe "Expected missing not found" }
     }
 
     describe("when getting a required value with default") {
-      it("should get the present value") { opt.getInt("int", -99999) shouldBe 12345 }
-      it("should get a missing value") { opt.getInt("missing", -99999) shouldBe -99999 }
+      it("should get when present") { opt.getInt("int", -99999) shouldBe 12345 }
+      it("should get when missing") { opt.getInt("missing", -99999) shouldBe -99999 }
     }
   }
 

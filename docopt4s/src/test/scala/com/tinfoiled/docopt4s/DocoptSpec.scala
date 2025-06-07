@@ -1,7 +1,7 @@
 package com.tinfoiled.docopt4s
 
 import org.scalactic.source
-import org.scalatest.BeforeAndAfterAll
+import org.scalatest.{Assertion, BeforeAndAfterAll}
 import org.scalatest.funspec.AnyFunSpecLike
 import org.scalatest.matchers.should.Matchers
 
@@ -46,14 +46,22 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     * @return
     *   the message in the DocoptException
     */
-  def failOn[EX <: AnyRef](
-      thunk: => Any
-  )(implicit classTag: ClassTag[DocoptException], pos: source.Position): String = {
+  def failOn(thunk: => Any)(implicit classTag: ClassTag[DocoptException], pos: source.Position): String = {
     val t = intercept[DocoptException] { thunk }(classTag, pos)
     Option(t.docopt) shouldBe None
     t.exitCode shouldBe 1
     t.getMessage
   }
+
+  /** Helper method to capture a DocoptException with no docopt and an exitCode of 1.
+    *
+    * @param thunk
+    *   Code to execute that should throw an exception.
+    * @return
+    *   the message in the DocoptException
+    */
+  def failOnMissing(key: String = "missing")(thunk: => Any): Assertion =
+    failOn { thunk } shouldBe s"Expected $key not found"
 
   describe("Testing the getString methods") {
     describe("when getting an optional value") {
@@ -63,7 +71,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
     describe("when getting a required value") {
       it("should get when present") { opt.getString("string") shouldBe "value" }
-      it("should fail when missing") { failOn { opt.getString("missing") } shouldBe "Expected missing not found" }
+      it("should fail when missing") { failOnMissing() { opt.getString("missing") } }
     }
 
     describe("when getting a required value with default") {
@@ -80,7 +88,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
     describe("when getting a required value") {
       it("should get when present") { opt.getStrings("strings") shouldBe Seq("value") }
-      it("should fail when missing") { failOn { opt.getStrings("missing") } shouldBe "Expected missing not found" }
+      it("should fail when missing") { failOnMissing() { opt.getStrings("missing") } }
     }
 
     describe("when getting a required value with default") {
@@ -97,7 +105,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
     describe("when getting a required value") {
       it("should get when present") { opt.getBoolean("bool") shouldBe true }
-      it("should fail when missing") { failOn { opt.getBoolean("missing") } shouldBe "Expected missing not found" }
+      it("should fail when missing") { failOnMissing() { opt.getBoolean("missing") } }
     }
 
     describe("when getting a required value with default") {
@@ -114,7 +122,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
     describe("when getting a required value") {
       it("should get when present") { opt.getInt("int") shouldBe 12345 }
-      it("should fail when missing") { failOn { opt.getInt("missing") } shouldBe "Expected missing not found" }
+      it("should fail when missing") { failOnMissing() { opt.getInt("missing") } }
     }
 
     describe("when getting a required value with default") {

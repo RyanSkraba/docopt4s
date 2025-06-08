@@ -30,7 +30,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
   val opt: Docopt = Docopt(
     Map(
       "string" -> "value",
-      "strings" -> Seq("value"),
+      "strings" -> Seq("x", "y"),
       "int" -> 12345,
       "bool" -> true,
       "dir" -> Tmp.toString,
@@ -78,21 +78,27 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       it("should get when present") { opt.getString("string", "default") shouldBe "value" }
       it("should get when missing") { opt.getString("missing", "default") shouldBe "default" }
     }
+
+    describe("when converting other types") {
+      it("should convert a string list") { opt.getString("strings", "default") shouldBe "x,y" }
+      it("should convert an int") { opt.getString("int", "default") shouldBe "12345" }
+      it("should convert a boolean") { opt.getString("bool", "default") shouldBe "true" }
+    }
   }
 
   describe("Testing the getStrings methods") {
     describe("when getting an optional value") {
-      it("should get when present") { opt.getStringsOption("strings") shouldBe Some(Seq("value")) }
+      it("should get when present") { opt.getStringsOption("strings") shouldBe Some(Seq("x", "y")) }
       it("should get when missing") { opt.getStringsOption("missing") shouldBe None }
     }
 
     describe("when getting a required value") {
-      it("should get when present") { opt.getStrings("strings") shouldBe Seq("value") }
+      it("should get when present") { opt.getStrings("strings") shouldBe Seq("x", "y") }
       it("should fail when missing") { failOnMissing() { opt.getStrings("missing") } }
     }
 
     describe("when getting a required value with default") {
-      it("should get when present") { opt.getStrings("strings", Seq("def")) shouldBe Seq("value") }
+      it("should get when present") { opt.getStrings("strings", Seq("def")) shouldBe Seq("x", "y") }
       it("should get when missing") { opt.getStrings("missing", Seq("def")) shouldBe Seq("def") }
     }
   }

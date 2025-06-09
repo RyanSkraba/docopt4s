@@ -101,6 +101,12 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       it("should get when present") { opt.getStrings("strings", Seq("def")) shouldBe Seq("x", "y") }
       it("should get when missing") { opt.getStrings("missing", Seq("def")) shouldBe Seq("def") }
     }
+
+    describe("when converting other types") {
+      it("should convert a string") { opt.getStrings("string", Seq.empty) shouldBe Seq("value") }
+      it("should convert an int") { opt.getStrings("int", Seq.empty) shouldBe Seq("12345") }
+      it("should convert a boolean") { opt.getStrings("bool", Seq.empty) shouldBe Seq("true") }
+    }
   }
 
   describe("Testing the getBoolean methods") {

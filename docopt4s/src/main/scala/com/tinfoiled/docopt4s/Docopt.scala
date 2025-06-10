@@ -159,7 +159,7 @@ object Docopt {
       }
 
       override def getBooleanOption(key: String): Option[Boolean] =
-        argMap.get(key).map(_.toString.toBoolean)
+        argMap.get(key).map(_.toString.toBooleanOption.getOrElse(false))
     }
   }
 }

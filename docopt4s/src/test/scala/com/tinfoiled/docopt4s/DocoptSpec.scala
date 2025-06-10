@@ -33,6 +33,9 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       "strings" -> Seq("x", "y"),
       "int" -> 12345,
       "bool" -> true,
+      "string_true" -> "true",
+      "string_True" -> "True",
+      "strings_true" -> Seq("true"),
       "dir" -> Tmp.toString,
       "file" -> ExistingFile.toString,
       "nox" -> (Tmp / "nox").toString()
@@ -123,6 +126,15 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     describe("when getting a required value with default") {
       it("should get when present") { opt.getBoolean("bool", default = false) shouldBe true }
       it("should get when missing") { opt.getBoolean("missing", default = false) shouldBe false }
+    }
+
+    describe("when converting other types") {
+      it("should convert a string list") { opt.getBoolean("strings", default = false) shouldBe false }
+      it("should convert a true string list") { opt.getBoolean("strings_true", default = true) shouldBe false }
+      it("should convert a string") { opt.getBoolean("string", default = false) shouldBe false }
+      it("should convert a true string") { opt.getBoolean("string_true", default = false) shouldBe true }
+      it("should convert a True string") { opt.getBoolean("string_True", default = false) shouldBe true }
+      it("should convert an int") { opt.getBoolean("int", default = false) shouldBe false }
     }
   }
 

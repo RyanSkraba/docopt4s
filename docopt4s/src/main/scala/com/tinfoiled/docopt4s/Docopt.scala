@@ -158,8 +158,12 @@ object Docopt {
         case None                                    => None
       }
 
-      override def getBooleanOption(key: String): Option[Boolean] =
-        argMap.get(key).map(_.toString.toBooleanOption.getOrElse(false))
+      override def getBooleanOption(key: String): Option[Boolean] = argMap.get(key) match {
+        case Some(value: Iterable[String])           => Some(value.nonEmpty)
+        case Some(value: java.lang.Iterable[String]) => Some(value.iterator().hasNext)
+        case Some(value)                             => Some(value.toString.toBooleanOption.getOrElse(false))
+        case None                                    => None
+      }
     }
   }
 }

@@ -27,19 +27,18 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     try { Tmp.deleteRecursively() }
     catch { case ex: Exception => ex.printStackTrace() }
 
-  val opt: Docopt = Docopt(
-    Map(
-      "string" -> "value",
-      "strings" -> Seq("x", "y"),
-      "int" -> 12345,
-      "bool" -> true,
-      "string_true" -> "true",
-      "string_True" -> "True",
-      "strings_true" -> Seq("true"),
-      "dir" -> Tmp.toString,
-      "file" -> ExistingFile.toString,
-      "nox" -> (Tmp / "nox").toString()
-    )
+  /** Shortcut to generate a Docopt */
+  def optWith(elems: (String, Any)*): Docopt = Docopt(Map.from(elems))
+
+  /** A standard opts */
+  val opt: Docopt = optWith(
+    "string" -> "value",
+    "strings" -> Seq("x", "y"),
+    "int" -> 12345,
+    "bool" -> true,
+    "dir" -> Tmp.toString,
+    "file" -> ExistingFile.toString,
+    "nox" -> (Tmp / "nox").toString()
   )
 
   /** Helper method to capture a DocoptException with no docopt and an exitCode of 1.
@@ -129,11 +128,23 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     }
 
     describe("when converting other types") {
-      it("should convert a string list") { opt.getBoolean("strings", default = false) shouldBe false }
-      it("should convert a true string list") { opt.getBoolean("strings_true", default = true) shouldBe false }
+      it("should convert a string list") { opt.getBoolean("strings", default = false) shouldBe true }
+      it(s"should convert a false (empty) string list") {
+        optWith("x" -> Seq.empty).getBoolean("x", default = true) shouldBe false
+      }
       it("should convert a string") { opt.getBoolean("string", default = false) shouldBe false }
-      it("should convert a true string") { opt.getBoolean("string_true", default = false) shouldBe true }
-      it("should convert a True string") { opt.getBoolean("string_True", default = false) shouldBe true }
+      for (x <- Seq("true", "TRUE", "True")) {
+        it(s"should convert a true string: $x") { optWith("x" -> x).getBoolean("x", default = false) shouldBe true }
+        it(s"should convert a true (non-empty) string list: $x") {
+          optWith("x" -> Seq(x)).getBoolean("x", default = false) shouldBe true
+        }
+      }
+      for (x <- Seq("", "false", "1", "Anything1", "Yes")) {
+        it(s"should convert a false string: $x") { optWith("x" -> x).getBoolean("x", default = true) shouldBe false }
+        it(s"should convert a true (non-empty) string list: $x") {
+          optWith("x" -> Seq(x)).getBoolean("x", default = false) shouldBe true
+        }
+      }
       it("should convert an int") { opt.getBoolean("int", default = false) shouldBe false }
     }
   }

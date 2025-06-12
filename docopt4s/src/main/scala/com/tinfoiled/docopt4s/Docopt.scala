@@ -28,7 +28,7 @@ trait Docopt {
 
   def getIntOption(key: String): Option[Int] = getStringOption(key).map(value =>
     value.toIntOption.getOrElse {
-      throw new DocoptException("Expected an integer for $key, but got $value")
+      throw new DocoptException(s"Expected an integer for $key, but got $value")
     }
   )
 

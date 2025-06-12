@@ -164,6 +164,13 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       it("should get when present") { opt.getInt("int", -99999) shouldBe 12345 }
       it("should get when missing") { opt.getInt("missing", -99999) shouldBe -99999 }
     }
+
+    describe("when converting other types") {
+      it("should fail to convert a string") { failOn(opt.getInt("string", -99999)) shouldBe "Expected an integer for string, but got value"}
+      it("should convert a string") { optWith("x" -> 98765).getInt("x", -99999) shouldBe 98765}
+      it("should fail to convert a string list") { failOn(opt.getInt("strings", -99999)) shouldBe "Expected an integer for strings, but got x,y"}
+      it("should fail to convert a boolean") { failOn(opt.getInt("bool", -99999)) shouldBe "Expected an integer for bool, but got true"}
+    }
   }
 
   describe("Other") {

@@ -179,21 +179,37 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     }
   }
 
-  describe("Other") {
-
-    it("should get path values correctly") {
-      // option
-      opt.getPathOption("dir") shouldBe Some(Tmp)
-      opt.getPathOption("file") shouldBe Some(ExistingFile)
-      opt.getPathOption("no-exists") shouldBe None
-      // direct
-      opt.getPath("dir") shouldBe Tmp
-      opt.getPath("file") shouldBe ExistingFile
-      val t = intercept[DocoptException] { opt.getPath("no-exists") }
-      t.getMessage shouldBe "Expected no-exists not found"
-      t.exitCode shouldBe 1
-      // default (TODO)
+  describe("Testing the getPath methods") {
+    describe("when getting an optional value") {
+      it("should get when present") { opt.getPathOption("dir") shouldBe Some(Tmp) }
+      it("should get when missing") { opt.getPathOption("missing") shouldBe None }
     }
+
+    describe("when getting a required value") {
+      it("should get when present") { opt.getPath("dir") shouldBe Tmp }
+      it("should fail when missing") { failOnMissing() { opt.getPath("missing") } }
+    }
+
+    describe("when getting a required value with default") {
+      it("should get when present") { opt.getPathOr("dir", Tmp / "x") shouldBe Tmp }
+      it("should get when missing") { opt.getPathOr("missing", Tmp / "x") shouldBe (Tmp / "x") }
+    }
+
+//    describe("when converting other types") {
+//      it("should fail to convert a string") {
+//        failOn(opt.getInt("string", -99999)) shouldBe "Expected an integer for string, but got value"
+//      }
+//      it("should convert a string") { optWith("x" -> 98765).getInt("x", -99999) shouldBe 98765 }
+//      it("should fail to convert a string list") {
+//        failOn(opt.getInt("strings", -99999)) shouldBe "Expected an integer for strings, but got x,y"
+//      }
+//      it("should fail to convert a boolean") {
+//        failOn(opt.getInt("bool", -99999)) shouldBe "Expected an integer for bool, but got true"
+//      }
+//    }
+  }
+
+  describe("Other") {
 
     it("should get directory values correctly") {
       // option

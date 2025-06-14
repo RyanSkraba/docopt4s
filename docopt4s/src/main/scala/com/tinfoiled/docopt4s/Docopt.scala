@@ -108,6 +108,8 @@ trait Docopt {
   def getPathOption(key: String, vld: PathValidator = PathValidator()): Option[Path] =
     getStringOption(key).map(_ => vld.validate(key))
   def getPath(key: String, vld: PathValidator = PathValidator()): Path = vld.validate(key)
+  def getPathOr(key: String, default: Path, vld: PathValidator = PathValidator()): Path =
+    getPathOption(key, vld).getOrElse(default)
 
   def getFileOption(key: String, vld: PathValidator = PathValidator()): Option[File] =
     getPathOption(key, vld.isFile()).map(_.toFile)

@@ -6,7 +6,7 @@ import org.scalatest.funspec.AnyFunSpecLike
 import org.scalatest.matchers.should.Matchers
 
 import scala.reflect.ClassTag
-import scala.reflect.io.{Directory, File}
+import scala.reflect.io.{Directory, File, Path}
 
 /** Test the [[Docopt]] class.
   *
@@ -17,6 +17,9 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
   /** A local temporary directory for test file storage. */
   val Tmp: Directory = Directory.makeTemp(getClass.getSimpleName)
+
+  /** The directory that we're being run in (used for relative paths) */
+  val Pwd: Path = Directory(".").toCanonical
 
   /** A file with a basic scenario. */
   val ExistingFile: File = (Tmp / "file.txt").createFile()
@@ -195,18 +198,24 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       it("should get when missing") { opt.getPathOr("missing", Tmp / "x") shouldBe (Tmp / "x") }
     }
 
-//    describe("when converting other types") {
-//      it("should fail to convert a string") {
-//        failOn(opt.getInt("string", -99999)) shouldBe "Expected an integer for string, but got value"
-//      }
-//      it("should convert a string") { optWith("x" -> 98765).getInt("x", -99999) shouldBe 98765 }
-//      it("should fail to convert a string list") {
-//        failOn(opt.getInt("strings", -99999)) shouldBe "Expected an integer for strings, but got x,y"
-//      }
-//      it("should fail to convert a boolean") {
-//        failOn(opt.getInt("bool", -99999)) shouldBe "Expected an integer for bool, but got true"
-//      }
-//    }
+    describe("when converting other types") {
+      it("should fail to convert a string") {
+        assume(!(Pwd / "value").exists)
+        failOn(opt.getPathOr("string", Tmp)) shouldBe s"Path doesn't exist: $Pwd/value"
+      }
+      it("should fail to convert a string list") {
+        assume(!(Pwd / "x,y").exists)
+        failOn(opt.getPathOr("strings", Tmp)) shouldBe s"Path doesn't exist: $Pwd/x,y"
+      }
+      it("should fail to convert a boolean") {
+        assume(!(Pwd / "true").exists)
+        failOn(opt.getPathOr("bool", Tmp)) shouldBe s"Path doesn't exist: $Pwd/true"
+      }
+      it("should fail to convert a int") {
+        assume(!(Pwd / "12345").exists)
+        failOn(opt.getPathOr("int", Tmp)) shouldBe s"Path doesn't exist: $Pwd/12345"
+      }
+    }
   }
 
   describe("Other") {

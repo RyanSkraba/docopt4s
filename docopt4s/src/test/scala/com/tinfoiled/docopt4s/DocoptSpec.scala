@@ -218,6 +218,43 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     }
   }
 
+  describe("Testing the getDirectory methods") {
+    describe("when getting an optional value") {
+      it("should get when present") { opt.getDirectoryOption("dir") shouldBe Some(Tmp) }
+      it("should get when missing") { opt.getDirectoryOption("missing") shouldBe None }
+    }
+
+    describe("when getting a required value") {
+      it("should get when present") { opt.getDirectory("dir") shouldBe Tmp }
+      it("should fail when missing") { failOnMissing() { opt.getDirectory("missing") } }
+    }
+
+    describe("when getting a required value with default") {
+      val default = (Tmp / "x").toDirectory
+      it("should get when present") { opt.getDirectoryOr("dir", default) shouldBe Tmp }
+      it("should get when missing") { opt.getDirectoryOr("missing", default) shouldBe (Tmp / "x") }
+    }
+
+    describe("when converting other types") {
+      it("should fail to convert a string") {
+        assume(!(Pwd / "value").exists)
+        failOn(opt.getDirectoryOr("string", Tmp)) shouldBe s"Directory doesn't exist: $Pwd/value"
+      }
+      it("should fail to convert a string list") {
+        assume(!(Pwd / "x,y").exists)
+        failOn(opt.getDirectoryOr("strings", Tmp)) shouldBe s"Directory doesn't exist: $Pwd/x,y"
+      }
+      it("should fail to convert a boolean") {
+        assume(!(Pwd / "true").exists)
+        failOn(opt.getDirectoryOr("bool", Tmp)) shouldBe s"Directory doesn't exist: $Pwd/true"
+      }
+      it("should fail to convert a int") {
+        assume(!(Pwd / "12345").exists)
+        failOn(opt.getDirectoryOr("int", Tmp)) shouldBe s"Directory doesn't exist: $Pwd/12345"
+      }
+    }
+  }
+
   describe("Other") {
 
     it("should get directory values correctly") {

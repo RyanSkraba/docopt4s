@@ -119,6 +119,8 @@ trait Docopt {
     getPathOption(key, vld.isDir()).map(_.toDirectory)
   def getDirectory(key: String, vld: PathValidator = PathValidator().isDir()): Directory =
     getPath(key, vld.isDir()).toDirectory
+  def getDirectoryOr(key: String, default: Directory, vld: PathValidator = PathValidator()): Directory =
+    getDirectoryOption(key, vld).getOrElse(default)
 }
 
 object Docopt {

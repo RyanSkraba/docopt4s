@@ -218,7 +218,49 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     }
   }
 
+  describe("Testing the getFile methods") {
+
+    val default = (Tmp / "x").toFile
+
+    describe("when getting an optional value") {
+      it("should get when present") { opt.getFileOption("file") shouldBe Some(ExistingFile) }
+      it("should get when missing") { opt.getFileOption("missing") shouldBe None }
+    }
+
+    describe("when getting a required value") {
+      it("should get when present") { opt.getFile("file") shouldBe ExistingFile }
+      it("should fail when missing") { failOnMissing() { opt.getFile("missing") } }
+    }
+
+    describe("when getting a required value with default") {
+      it("should get when present") { opt.getFileOr("file", default) shouldBe ExistingFile }
+      it("should get when missing") { opt.getFileOr("missing", default) shouldBe (Tmp / "x") }
+    }
+
+    describe("when converting other types") {
+      it("should fail to convert a string") {
+        assume(!(Pwd / "value").exists)
+        failOn(opt.getFileOr("string", default)) shouldBe s"File doesn't exist: $Pwd/value"
+      }
+      it("should fail to convert a string list") {
+        assume(!(Pwd / "x,y").exists)
+        failOn(opt.getFileOr("strings", default)) shouldBe s"File doesn't exist: $Pwd/x,y"
+      }
+      it("should fail to convert a boolean") {
+        assume(!(Pwd / "true").exists)
+        failOn(opt.getFileOr("bool", default)) shouldBe s"File doesn't exist: $Pwd/true"
+      }
+      it("should fail to convert a int") {
+        assume(!(Pwd / "12345").exists)
+        failOn(opt.getFileOr("int", default)) shouldBe s"File doesn't exist: $Pwd/12345"
+      }
+    }
+  }
+
   describe("Testing the getDirectory methods") {
+
+    val default = (Tmp / "x").toDirectory
+
     describe("when getting an optional value") {
       it("should get when present") { opt.getDirectoryOption("dir") shouldBe Some(Tmp) }
       it("should get when missing") { opt.getDirectoryOption("missing") shouldBe None }
@@ -230,7 +272,6 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     }
 
     describe("when getting a required value with default") {
-      val default = (Tmp / "x").toDirectory
       it("should get when present") { opt.getDirectoryOr("dir", default) shouldBe Tmp }
       it("should get when missing") { opt.getDirectoryOr("missing", default) shouldBe (Tmp / "x") }
     }
@@ -238,53 +279,20 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     describe("when converting other types") {
       it("should fail to convert a string") {
         assume(!(Pwd / "value").exists)
-        failOn(opt.getDirectoryOr("string", Tmp)) shouldBe s"Directory doesn't exist: $Pwd/value"
+        failOn(opt.getDirectoryOr("string", default)) shouldBe s"Directory doesn't exist: $Pwd/value"
       }
       it("should fail to convert a string list") {
         assume(!(Pwd / "x,y").exists)
-        failOn(opt.getDirectoryOr("strings", Tmp)) shouldBe s"Directory doesn't exist: $Pwd/x,y"
+        failOn(opt.getDirectoryOr("strings", default)) shouldBe s"Directory doesn't exist: $Pwd/x,y"
       }
       it("should fail to convert a boolean") {
         assume(!(Pwd / "true").exists)
-        failOn(opt.getDirectoryOr("bool", Tmp)) shouldBe s"Directory doesn't exist: $Pwd/true"
+        failOn(opt.getDirectoryOr("bool", default)) shouldBe s"Directory doesn't exist: $Pwd/true"
       }
       it("should fail to convert a int") {
         assume(!(Pwd / "12345").exists)
-        failOn(opt.getDirectoryOr("int", Tmp)) shouldBe s"Directory doesn't exist: $Pwd/12345"
+        failOn(opt.getDirectoryOr("int", default)) shouldBe s"Directory doesn't exist: $Pwd/12345"
       }
     }
-  }
-
-  describe("Other") {
-
-    it("should get directory values correctly") {
-      // option
-      opt.getDirectoryOption("dir") shouldBe Some(Tmp)
-      opt.getDirectoryOption("no-exists") shouldBe None
-      // direct
-      opt.getDirectory("dir") shouldBe Tmp
-      // When the directory doesn't exist in the list of arguments
-      val t = intercept[DocoptException] { opt.getDirectory("no-exists") }
-      t.getMessage shouldBe "Expected no-exists not found"
-      t.exitCode shouldBe 1
-      // When the directory doesn't exist in the filesystem
-      val t2 = intercept[DocoptException] { opt.getDirectory("nox") }
-      t2.getMessage shouldBe s"Directory doesn't exist: $Tmp/nox"
-      t2.exitCode shouldBe 1
-      // default (TODO)
-    }
-
-    it("should get file values correctly") {
-      // option
-      opt.getFileOption("file") shouldBe Some(ExistingFile)
-      opt.getFileOption("no-exists") shouldBe None
-      // direct
-      opt.getFile("file") shouldBe ExistingFile
-      val t = intercept[DocoptException] { opt.getFile("no-exists") }
-      t.getMessage shouldBe "Expected no-exists not found"
-      t.exitCode shouldBe 1
-      // default (TODO)
-    }
-
   }
 }

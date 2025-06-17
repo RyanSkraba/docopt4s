@@ -107,20 +107,22 @@ trait Docopt {
 
   def getPathOption(key: String, vld: PathValidator = PathValidator()): Option[Path] =
     getStringOption(key).map(_ => vld.validate(key))
-  def getPath(key: String, vld: PathValidator = PathValidator()): Path = vld.validate(key)
   def getPathOr(key: String, default: Path, vld: PathValidator = PathValidator()): Path =
     getPathOption(key, vld).getOrElse(default)
+  def getPath(key: String, vld: PathValidator = PathValidator()): Path = vld.validate(key)
 
   def getFileOption(key: String, vld: PathValidator = PathValidator()): Option[File] =
     getPathOption(key, vld.isFile()).map(_.toFile)
+  def getFileOr(key: String, default: File, vld: PathValidator = PathValidator().isFile()): File =
+    getFileOption(key, vld).getOrElse(default)
   def getFile(key: String, vld: PathValidator = PathValidator().isFile()): File = getPath(key, vld.isFile()).toFile
 
   def getDirectoryOption(key: String, vld: PathValidator = PathValidator()): Option[Directory] =
     getPathOption(key, vld.isDir()).map(_.toDirectory)
-  def getDirectory(key: String, vld: PathValidator = PathValidator().isDir()): Directory =
-    getPath(key, vld.isDir()).toDirectory
   def getDirectoryOr(key: String, default: Directory, vld: PathValidator = PathValidator()): Directory =
     getDirectoryOption(key, vld).getOrElse(default)
+  def getDirectory(key: String, vld: PathValidator = PathValidator().isDir()): Directory =
+    getPath(key, vld.isDir()).toDirectory
 }
 
 object Docopt {

@@ -189,7 +189,8 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     }
 
     describe("when getting a required value") {
-      it("should get when present") { opt.getPath("dir") shouldBe Tmp }
+      it("should get when present as dir") { opt.getPath("dir") shouldBe Tmp }
+      it("should get when present as file") { opt.getPath("file") shouldBe ExistingFile }
       it("should fail when missing") { failOnMissing() { opt.getPath("missing") } }
     }
 
@@ -229,6 +230,9 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
     describe("when getting a required value") {
       it("should get when present") { opt.getFile("file") shouldBe ExistingFile }
+      it("should fail when present but the wrong type") {
+        failOn(opt.getFile("dir")) shouldBe s"File is not a file: $Tmp"
+      }
       it("should fail when missing") { failOnMissing() { opt.getFile("missing") } }
     }
 
@@ -268,6 +272,9 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
     describe("when getting a required value") {
       it("should get when present") { opt.getDirectory("dir") shouldBe Tmp }
+      it("should fail when present but the wrong type") {
+        failOn(opt.getDirectory("file")) shouldBe s"Directory is not a directory: $ExistingFile"
+      }
       it("should fail when missing") { failOnMissing() { opt.getDirectory("missing") } }
     }
 

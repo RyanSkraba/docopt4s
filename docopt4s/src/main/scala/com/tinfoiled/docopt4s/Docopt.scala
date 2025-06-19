@@ -67,6 +67,14 @@ trait Docopt {
       ifExists: Option[Boolean] = Some(true)
   ) {
 
+    lazy val pathTag: String = tag.getOrElse(
+      ifIsDir match {
+        case Some(true)  => "Directory"
+        case Some(false) => "File"
+        case None        => "Path"
+      }
+    )
+
     def validate(key: String): Path = {
       val path: Path = Path(
         root
@@ -77,21 +85,22 @@ trait Docopt {
       )
         .resolve(Path(getString(key)))
         .toAbsolute
-      val pathTag = tag.getOrElse(
-        ifIsDir match {
-          case Some(true)  => "Directory"
-          case Some(false) => "File"
-          case None        => "Path"
-        }
-      )
       if (ifExists.contains(true) && !path.exists)
         throw new DocoptException(s"$pathTag doesn't exist: $path")
       if (ifExists.contains(false) && path.exists)
         throw new DocoptException(s"$pathTag already exists: $path")
       if (ifIsDir.contains(true) && ifExists.contains(true) && !path.isDirectory)
-        throw new DocoptException(s"$pathTag is not a directory: $path")
+        throw new DocoptException(
+          tag
+            .map(t => s"$t expected a directory, found file: $path")
+            .getOrElse(s"Expected a directory, found file: $path")
+        )
       if (ifIsDir.contains(false) && ifExists.contains(true) && !path.isFile)
-        throw new DocoptException(s"$pathTag is not a file: $path")
+        throw new DocoptException(
+          tag
+            .map(t => s"$t expected a file, found directory: $path")
+            .getOrElse(s"Expected a file, found directory: $path")
+        )
       path
     }
 

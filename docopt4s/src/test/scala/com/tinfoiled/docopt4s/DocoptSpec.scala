@@ -44,6 +44,9 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     "nox" -> (Tmp / "nox").toString()
   )
 
+  /** A path validator with the tag source */
+  val vldTag = opt.PathValidator().withTag("Source")
+
   /** Helper method to capture a DocoptException with no docopt and an exitCode of 1.
     *
     * @param thunk
@@ -203,18 +206,22 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       it("should fail to convert a string") {
         assume(!(Pwd / "value").exists)
         failOn(opt.getPathOr("string", Tmp)) shouldBe s"Path doesn't exist: $Pwd/value"
+        failOn(opt.getPathOr("string", Tmp, vldTag)) shouldBe s"Source doesn't exist: $Pwd/value"
       }
       it("should fail to convert a string list") {
         assume(!(Pwd / "x,y").exists)
         failOn(opt.getPathOr("strings", Tmp)) shouldBe s"Path doesn't exist: $Pwd/x,y"
+        failOn(opt.getPathOr("strings", Tmp, vldTag)) shouldBe s"Source doesn't exist: $Pwd/x,y"
       }
       it("should fail to convert a boolean") {
         assume(!(Pwd / "true").exists)
         failOn(opt.getPathOr("bool", Tmp)) shouldBe s"Path doesn't exist: $Pwd/true"
+        failOn(opt.getPathOr("bool", Tmp, vldTag)) shouldBe s"Source doesn't exist: $Pwd/true"
       }
       it("should fail to convert a int") {
         assume(!(Pwd / "12345").exists)
         failOn(opt.getPathOr("int", Tmp)) shouldBe s"Path doesn't exist: $Pwd/12345"
+        failOn(opt.getPathOr("int", Tmp, vldTag)) shouldBe s"Source doesn't exist: $Pwd/12345"
       }
     }
   }
@@ -232,6 +239,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       it("should get when present") { opt.getFile("file") shouldBe ExistingFile }
       it("should fail when present but the wrong type") {
         failOn(opt.getFile("dir")) shouldBe s"Expected a file, found directory: $Tmp"
+        failOn(opt.getFile("dir", vldTag)) shouldBe s"Source expected a file, found directory: $Tmp"
       }
       it("should fail when missing") { failOnMissing() { opt.getFile("missing") } }
     }
@@ -245,18 +253,22 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       it("should fail to convert a string") {
         assume(!(Pwd / "value").exists)
         failOn(opt.getFileOr("string", default)) shouldBe s"File doesn't exist: $Pwd/value"
+        failOn(opt.getFileOr("string", default, vldTag)) shouldBe s"Source doesn't exist: $Pwd/value"
       }
       it("should fail to convert a string list") {
         assume(!(Pwd / "x,y").exists)
         failOn(opt.getFileOr("strings", default)) shouldBe s"File doesn't exist: $Pwd/x,y"
+        failOn(opt.getFileOr("strings", default, vldTag)) shouldBe s"Source doesn't exist: $Pwd/x,y"
       }
       it("should fail to convert a boolean") {
         assume(!(Pwd / "true").exists)
         failOn(opt.getFileOr("bool", default)) shouldBe s"File doesn't exist: $Pwd/true"
+        failOn(opt.getFileOr("bool", default, vldTag)) shouldBe s"Source doesn't exist: $Pwd/true"
       }
       it("should fail to convert a int") {
         assume(!(Pwd / "12345").exists)
         failOn(opt.getFileOr("int", default)) shouldBe s"File doesn't exist: $Pwd/12345"
+        failOn(opt.getFileOr("int", default, vldTag)) shouldBe s"Source doesn't exist: $Pwd/12345"
       }
     }
   }
@@ -274,6 +286,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       it("should get when present") { opt.getDirectory("dir") shouldBe Tmp }
       it("should fail when present but the wrong type") {
         failOn(opt.getDirectory("file")) shouldBe s"Expected a directory, found file: $ExistingFile"
+        failOn(opt.getDirectory("file", vldTag)) shouldBe s"Source expected a directory, found file: $ExistingFile"
       }
       it("should fail when missing") { failOnMissing() { opt.getDirectory("missing") } }
     }
@@ -287,18 +300,22 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       it("should fail to convert a string") {
         assume(!(Pwd / "value").exists)
         failOn(opt.getDirectoryOr("string", default)) shouldBe s"Directory doesn't exist: $Pwd/value"
+        failOn(opt.getDirectoryOr("string", default, vldTag)) shouldBe s"Source doesn't exist: $Pwd/value"
       }
       it("should fail to convert a string list") {
         assume(!(Pwd / "x,y").exists)
         failOn(opt.getDirectoryOr("strings", default)) shouldBe s"Directory doesn't exist: $Pwd/x,y"
+        failOn(opt.getDirectoryOr("strings", default, vldTag)) shouldBe s"Source doesn't exist: $Pwd/x,y"
       }
       it("should fail to convert a boolean") {
         assume(!(Pwd / "true").exists)
         failOn(opt.getDirectoryOr("bool", default)) shouldBe s"Directory doesn't exist: $Pwd/true"
+        failOn(opt.getDirectoryOr("bool", default, vldTag)) shouldBe s"Source doesn't exist: $Pwd/true"
       }
       it("should fail to convert a int") {
         assume(!(Pwd / "12345").exists)
         failOn(opt.getDirectoryOr("int", default)) shouldBe s"Directory doesn't exist: $Pwd/12345"
+        failOn(opt.getDirectoryOr("int", default, vldTag)) shouldBe s"Source doesn't exist: $Pwd/12345"
       }
     }
   }

@@ -25,6 +25,8 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
   val ExistingFile: File = (Tmp / "file.txt").createFile()
   ExistingFile.writeAll("file")
 
+  val NonExistingPath: Path = Tmp / "nox"
+
   /** Delete temporary resources after the script. */
   override protected def afterAll(): Unit =
     try { Tmp.deleteRecursively() }
@@ -41,11 +43,14 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     "bool" -> true,
     "dir" -> Tmp.toString,
     "file" -> ExistingFile.toString,
-    "nox" -> (Tmp / "nox").toString()
+    "nox" -> NonExistingPath.toString()
   )
 
   /** A path validator with the tag source */
-  val vldTag = opt.PathValidator().withTag("Source")
+  val vldTag: opt.PathValidator = opt.PathValidator().withTag("Source")
+
+  /** A path validator that ensures a file doesn't exist */
+  val vldNox: opt.PathValidator = opt.PathValidator().doesntExist()
 
   /** Helper method to capture a DocoptException with no docopt and an exitCode of 1.
     *
@@ -202,6 +207,14 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       it("should get when missing") { opt.getPathOr("missing", Tmp / "x") shouldBe (Tmp / "x") }
     }
 
+    describe("when requiring that it doesn't exist") {
+      it("should get when it doesn't exist") { opt.getPath("nox", vldNox) shouldBe NonExistingPath }
+      it("should fail when it does exist as a file") {
+        failOn(opt.getPath("file", vldNox)) shouldBe s"Path already exists: $ExistingFile"
+        failOn(opt.getPath("file", vldNox.withTag("Src"))) shouldBe s"Src already exists: $ExistingFile"
+      }
+    }
+
     describe("when converting other types") {
       it("should fail to convert a string") {
         assume(!(Pwd / "value").exists)
@@ -249,6 +262,14 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       it("should get when missing") { opt.getFileOr("missing", default) shouldBe (Tmp / "x") }
     }
 
+    describe("when requiring that it doesn't exist") {
+      it("should get when it doesn't exist") { opt.getFile("nox", vldNox) shouldBe NonExistingPath }
+      it("should fail when it does exist as a file") {
+        failOn(opt.getFile("file", vldNox)) shouldBe s"File already exists: $ExistingFile"
+        failOn(opt.getFile("file", vldNox.withTag("Src"))) shouldBe s"Src already exists: $ExistingFile"
+      }
+    }
+
     describe("when converting other types") {
       it("should fail to convert a string") {
         assume(!(Pwd / "value").exists)
@@ -294,6 +315,14 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     describe("when getting a required value with default") {
       it("should get when present") { opt.getDirectoryOr("dir", default) shouldBe Tmp }
       it("should get when missing") { opt.getDirectoryOr("missing", default) shouldBe (Tmp / "x") }
+    }
+
+    describe("when requiring that it doesn't exist") {
+      it("should get when it doesn't exist") { opt.getDirectory("nox", vldNox) shouldBe NonExistingPath }
+      it("should fail when it does exist as a file") {
+        failOn(opt.getDirectory("file", vldNox)) shouldBe s"Directory already exists: $ExistingFile"
+        failOn(opt.getDirectory("file", vldNox.withTag("Src"))) shouldBe s"Src already exists: $ExistingFile"
+      }
     }
 
     describe("when converting other types") {

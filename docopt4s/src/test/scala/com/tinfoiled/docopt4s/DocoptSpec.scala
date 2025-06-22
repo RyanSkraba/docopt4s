@@ -213,6 +213,10 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
         failOn(opt.getPath("file", vldNox)) shouldBe s"Path already exists: $ExistingFile"
         failOn(opt.getPath("file", vldNox.withTag("Src"))) shouldBe s"Src already exists: $ExistingFile"
       }
+      it("should fail when it does exist as a directory") {
+        failOn(opt.getPath("dir", vldNox)) shouldBe s"Path already exists: $Tmp"
+        failOn(opt.getPath("dir", vldNox.withTag("Src"))) shouldBe s"Src already exists: $Tmp"
+      }
     }
 
     describe("when converting other types") {
@@ -268,6 +272,10 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
         failOn(opt.getFile("file", vldNox)) shouldBe s"File already exists: $ExistingFile"
         failOn(opt.getFile("file", vldNox.withTag("Src"))) shouldBe s"Src already exists: $ExistingFile"
       }
+      it("should fail when it does exist as a directory") {
+        failOn(opt.getFile("dir", vldNox)) shouldBe s"File already exists: $Tmp"
+        failOn(opt.getFile("dir", vldNox.withTag("Src"))) shouldBe s"Src already exists: $Tmp"
+      }
     }
 
     describe("when converting other types") {
@@ -322,6 +330,10 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       it("should fail when it does exist as a file") {
         failOn(opt.getDirectory("file", vldNox)) shouldBe s"Directory already exists: $ExistingFile"
         failOn(opt.getDirectory("file", vldNox.withTag("Src"))) shouldBe s"Src already exists: $ExistingFile"
+      }
+      it("should fail when it does exist as a directory") {
+        failOn(opt.getDirectory("dir", vldNox)) shouldBe s"Directory already exists: $Tmp"
+        failOn(opt.getDirectory("dir", vldNox.withTag("Src"))) shouldBe s"Src already exists: $Tmp"
       }
     }
 

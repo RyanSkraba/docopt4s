@@ -52,6 +52,9 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
   /** A path validator that ensures a file doesn't exist */
   val vldNox: opt.PathValidator = opt.PathValidator().doesntExist()
 
+  /** A path validator that doesn't care if a file exists or not */
+  val vldMaybe: opt.PathValidator = opt.PathValidator().optionallyExists()
+
   /** Helper method to capture a DocoptException with no docopt and an exitCode of 1.
     *
     * @param thunk
@@ -219,6 +222,12 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       }
     }
 
+    describe("when optionally it exists") {
+      it("should get when it doesn't exist") { opt.getPath("nox", vldMaybe) shouldBe NonExistingPath }
+      it("should get when it exists as a file") { opt.getPath("file", vldMaybe) shouldBe ExistingFile }
+      it("should get when it exists as a directory") { opt.getPath("dir", vldMaybe) shouldBe Tmp }
+    }
+
     describe("when converting other types") {
       it("should fail to convert a string") {
         assume(!(Pwd / "value").exists)
@@ -275,6 +284,15 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       it("should fail when it does exist as a directory") {
         failOn(opt.getFile("dir", vldNox)) shouldBe s"File already exists: $Tmp"
         failOn(opt.getFile("dir", vldNox.withTag("Src"))) shouldBe s"Src already exists: $Tmp"
+      }
+    }
+
+    describe("when optionally it exists") {
+      it("should get when it doesn't exist") { opt.getFile("nox", vldMaybe) shouldBe NonExistingPath }
+      it("should get when it exists as a file") { opt.getFile("file", vldMaybe) shouldBe ExistingFile }
+      it("should fail when present but the wrong type") {
+        failOn(opt.getFile("dir", vldMaybe)) shouldBe s"Expected a file, found directory: $Tmp"
+        failOn(opt.getFile("dir", vldMaybe.withTag("Src"))) shouldBe s"Src expected a file, found directory: $Tmp"
       }
     }
 
@@ -335,6 +353,17 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
         failOn(opt.getDirectory("dir", vldNox)) shouldBe s"Directory already exists: $Tmp"
         failOn(opt.getDirectory("dir", vldNox.withTag("Src"))) shouldBe s"Src already exists: $Tmp"
       }
+    }
+
+    describe("when optionally it exists") {
+      it("should get when it doesn't exist") { opt.getDirectory("nox", vldMaybe) shouldBe NonExistingPath }
+      it("should fail when present but the wrong type") {
+        failOn(opt.getDirectory("file", vldMaybe)) shouldBe s"Expected a directory, found file: $ExistingFile"
+        failOn(
+          opt.getDirectory("file", vldMaybe.withTag("Src"))
+        ) shouldBe s"Src expected a directory, found file: $ExistingFile"
+      }
+      it("should get when it exists as a directory") { opt.getDirectory("dir", vldMaybe) shouldBe Tmp }
     }
 
     describe("when converting other types") {

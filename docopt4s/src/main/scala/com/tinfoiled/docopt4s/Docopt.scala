@@ -85,23 +85,20 @@ trait Docopt {
       )
         .resolve(Path(getString(key)))
         .toAbsolute
-      if (ifExists.contains(true) && !path.exists)
-        throw new DocoptException(s"$pathTag doesn't exist: $path")
-      if (ifExists.contains(false) && path.exists)
-        throw new DocoptException(s"$pathTag already exists: $path")
-      if (ifIsDir.contains(true) && ifExists.contains(true) && !path.isDirectory)
-        throw new DocoptException(
-          tag
-            .map(t => s"$t expected a directory, found file: $path")
-            .getOrElse(s"Expected a directory, found file: $path")
-        )
-      if (ifIsDir.contains(false) && ifExists.contains(true) && !path.isFile)
-        throw new DocoptException(
-          tag
-            .map(t => s"$t expected a file, found directory: $path")
-            .getOrElse(s"Expected a file, found directory: $path")
-        )
-      path
+
+      (ifExists, ifIsDir, tag, path.exists) match {
+        case (Some(true), _, _, false) => throw new DocoptException(s"$pathTag doesn't exist: $path")
+        case (Some(false), _, _, true) => throw new DocoptException(s"$pathTag already exists: $path")
+        case (_, Some(true), None, true) if !path.isDirectory =>
+          throw new DocoptException(s"Expected a directory, found file: $path")
+        case (_, Some(true), Some(t), true) if !path.isDirectory =>
+          throw new DocoptException(s"$t expected a directory, found file: $path")
+        case (_, Some(false), None, true) if !path.isFile =>
+          throw new DocoptException(s"Expected a file, found directory: $path")
+        case (_, Some(false), Some(t), true) if !path.isFile =>
+          throw new DocoptException(s"$t expected a file, found directory: $path")
+        case _ => path
+      }
     }
 
     def withTag(tag: String) = copy(tag = Some(tag))

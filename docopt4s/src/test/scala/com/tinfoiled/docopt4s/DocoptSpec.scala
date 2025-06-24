@@ -47,13 +47,13 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
   )
 
   /** A path validator with the tag source */
-  val vldTag: opt.PathValidator = opt.PathValidator().withTag("Source")
+  val vldTag: PathValidator = PathValidator().withTag("Source")
 
   /** A path validator that ensures a file doesn't exist */
-  val vldNox: opt.PathValidator = opt.PathValidator().doesntExist()
+  val vldNox: PathValidator = PathValidator().doesntExist()
 
   /** A path validator that doesn't care if a file exists or not */
-  val vldMaybe: opt.PathValidator = opt.PathValidator().optionallyExists()
+  val vldMaybe: PathValidator = PathValidator().optionallyExists()
 
   /** Helper method to capture a DocoptException with no docopt and an exitCode of 1.
     *

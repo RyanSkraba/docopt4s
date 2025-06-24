@@ -4,7 +4,7 @@ import scala.jdk.CollectionConverters._
 import scala.reflect.io.{Directory, File, Path}
 import scala.util.Properties
 
-/** Once created, a [[Docopt]] provides a means to interpret command line arguments.
+/** A [[Docopt]] provides a means to interpret command line arguments.
   *
   * The Docopt text spec is described at https://docopt.org/.
   */
@@ -46,89 +46,92 @@ trait Docopt {
     throw new DocoptException(s"Expected $key not found")
   }
 
-  /** Helper to validate command line arguments against an expected filesystem state.
-    *
-    * @param root
-    *   An absolute directory to use in constructing the path
-    * @param tag
-    *   A human-readable description to describe the
-    * @param ifIsDir
-    *   Whether to test to ensure the argument must be a Directory or must be a File (or None if it doesn't matter).
-    * @param ifExists
-    *   Whether to test to ensure the argument must exist or must not exist (or None if it doesn't matter).
-    * @return
-    *   The validated path that the argument represents on the filesystem.
-    */
-  case class PathValidator(
-      root: Option[AnyRef] = None,
-      systemEnvVar: Option[String] = None,
-      tag: Option[String] = None,
-      ifIsDir: Option[Boolean] = None,
-      ifExists: Option[Boolean] = Some(true)
-  ) {
-
-    lazy val pathTag: String = tag.getOrElse(
-      ifIsDir match {
-        case Some(true)  => "Directory"
-        case Some(false) => "File"
-        case None        => "Path"
-      }
-    )
-
-    def validate(key: String): Path = {
-      val path: Path = Path(
-        root
-          .map(_.toString)
-          .orElse(systemEnvVar.flatMap(sys.env.get(_)))
-          .orElse(Option(Properties.userDir))
-          .getOrElse("/")
-      )
-        .resolve(Path(getString(key)))
-        .toAbsolute
-
-      (ifExists, ifIsDir, tag, path.exists) match {
-        case (Some(true), _, _, false) => throw new DocoptException(s"$pathTag doesn't exist: $path")
-        case (Some(false), _, _, true) => throw new DocoptException(s"$pathTag already exists: $path")
-        case (_, Some(true), None, true) if !path.isDirectory =>
-          throw new DocoptException(s"Expected a directory, found file: $path")
-        case (_, Some(true), Some(t), true) if !path.isDirectory =>
-          throw new DocoptException(s"$t expected a directory, found file: $path")
-        case (_, Some(false), None, true) if !path.isFile =>
-          throw new DocoptException(s"Expected a file, found directory: $path")
-        case (_, Some(false), Some(t), true) if !path.isFile =>
-          throw new DocoptException(s"$t expected a file, found directory: $path")
-        case _ => path
-      }
-    }
-
-    def withTag(tag: String) = copy(tag = Some(tag))
-    def isPath(): PathValidator = copy(ifIsDir = None)
-    def isDir(): PathValidator = copy(ifIsDir = Some(true))
-    def isFile(): PathValidator = copy(ifIsDir = Some(false))
-
-    def exists(): PathValidator = copy(ifExists = Some(true))
-    def doesntExist(): PathValidator = copy(ifExists = Some(false))
-    def optionallyExists(): PathValidator = copy(ifExists = None)
-  }
-
   def getPathOption(key: String, vld: PathValidator = PathValidator()): Option[Path] =
-    getStringOption(key).map(_ => vld.validate(key))
+    getStringOption(key).map(_ => vld.validate(getString(key)))
   def getPathOr(key: String, default: Path, vld: PathValidator = PathValidator()): Path =
     getPathOption(key, vld).getOrElse(default)
-  def getPath(key: String, vld: PathValidator = PathValidator()): Path = vld.validate(key)
+  def getPath(key: String, vld: PathValidator = PathValidator()): Path = vld.validate(getString(key))
 
   def getFileOption(key: String, vld: PathValidator = PathValidator()): Option[File] =
-    getPathOption(key, vld.isFile()).map(_.toFile)
-  def getFileOr(key: String, default: File, vld: PathValidator = PathValidator().isFile()): File =
+    getPathOption(key, vld.isFile).map(_.toFile)
+  def getFileOr(key: String, default: File, vld: PathValidator = PathValidator()): File =
     getFileOption(key, vld).getOrElse(default)
-  def getFile(key: String, vld: PathValidator = PathValidator().isFile()): File = getPath(key, vld.isFile()).toFile
+  def getFile(key: String, vld: PathValidator = PathValidator()): File = getPath(key, vld.isFile).toFile
 
   def getDirectoryOption(key: String, vld: PathValidator = PathValidator()): Option[Directory] =
-    getPathOption(key, vld.isDir()).map(_.toDirectory)
+    getPathOption(key, vld.isDir).map(_.toDirectory)
   def getDirectoryOr(key: String, default: Directory, vld: PathValidator = PathValidator()): Directory =
     getDirectoryOption(key, vld).getOrElse(default)
-  def getDirectory(key: String, vld: PathValidator = PathValidator().isDir()): Directory =
-    getPath(key, vld.isDir()).toDirectory
+  def getDirectory(key: String, vld: PathValidator = PathValidator()): Directory =
+    getPath(key, vld.isDir).toDirectory
+}
+
+/** Helper to validate command line arguments against an expected filesystem state.
+  *
+  * @param root
+  *   An absolute directory to use in constructing the path
+  * @param tag
+  *   A human-readable description to describe the argument, used in exceptions.
+  * @param ifIsDir
+  *   Whether to test to ensure the argument must be a Directory or must be a File (or None if it doesn't matter).
+  * @param ifExists
+  *   Whether to test to ensure the argument must exist or must not exist (or None if it doesn't matter).
+  */
+case class PathValidator(
+    root: Option[AnyRef] = None,
+    systemEnvVar: Option[String] = None,
+    tag: Option[String] = None,
+    ifIsDir: Option[Boolean] = None,
+    ifExists: Option[Boolean] = Some(true)
+) {
+
+  private lazy val pathTag: String = tag.getOrElse(
+    ifIsDir match {
+      case Some(true)  => "Directory"
+      case Some(false) => "File"
+      case None        => "Path"
+    }
+  )
+
+  /** @param value
+    *   The path to validate as a string.
+    * @return
+    *   The absolute, validated path that the argument represents on the filesystem.
+    */
+  def validate(value: String): Path = {
+    val path: Path = Path(
+      root
+        .map(_.toString)
+        .orElse(systemEnvVar.flatMap(sys.env.get(_)))
+        .orElse(Option(Properties.userDir))
+        .getOrElse("/")
+    )
+      .resolve(Path(value))
+      .toAbsolute
+
+    (ifExists, ifIsDir, tag, path.exists) match {
+      case (Some(true), _, _, false) => throw new DocoptException(s"$pathTag doesn't exist: $path")
+      case (Some(false), _, _, true) => throw new DocoptException(s"$pathTag already exists: $path")
+      case (_, Some(true), None, true) if !path.isDirectory =>
+        throw new DocoptException(s"Expected a directory, found file: $path")
+      case (_, Some(true), Some(t), true) if !path.isDirectory =>
+        throw new DocoptException(s"$t expected a directory, found file: $path")
+      case (_, Some(false), None, true) if !path.isFile =>
+        throw new DocoptException(s"Expected a file, found directory: $path")
+      case (_, Some(false), Some(t), true) if !path.isFile =>
+        throw new DocoptException(s"$t expected a file, found directory: $path")
+      case _ => path
+    }
+  }
+
+  def withTag(tag: String): PathValidator = copy(tag = Some(tag))
+  def isPath: PathValidator = copy(ifIsDir = None)
+  def isDir: PathValidator = copy(ifIsDir = Some(true))
+  def isFile: PathValidator = copy(ifIsDir = Some(false))
+
+  def exists(): PathValidator = copy(ifExists = Some(true))
+  def doesntExist(): PathValidator = copy(ifExists = Some(false))
+  def optionallyExists(): PathValidator = copy(ifExists = None)
 }
 
 object Docopt {

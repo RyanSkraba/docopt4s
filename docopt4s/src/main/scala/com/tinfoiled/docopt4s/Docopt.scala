@@ -10,13 +10,14 @@ import scala.util.Properties
   */
 trait Docopt {
 
+  /** Get argument values as Strings */
+  val string: DocoptGet[String] = (key: String) => getStringOption(key)
+
   def getStringOption(key: String): Option[String]
 
-  def getString(key: String, default: String): String = getStringOption(key).getOrElse(default)
+  def getString(key: String, default: String): String = string.get(key, default)
 
-  def getString(key: String): String = getStringOption(key).getOrElse {
-    throw new DocoptException(s"Expected $key not found")
-  }
+  def getString(key: String): String = string.get(key)
 
   def getStringsOption(key: String): Option[Iterable[String]]
 
@@ -26,11 +27,13 @@ trait Docopt {
     throw new DocoptException(s"Expected $key not found")
   }
 
-  def getIntOption(key: String): Option[Int] = getStringOption(key).map(value =>
-    value.toIntOption.getOrElse {
-      throw new DocoptException(s"Expected an integer for $key, but got $value")
-    }
-  )
+  def getIntOption(key: String): Option[Int] = string
+    .getOption(key)
+    .map(value =>
+      value.toIntOption.getOrElse {
+        throw new DocoptException(s"Expected an integer for $key, but got $value")
+      }
+    )
 
   def getInt(key: String, default: Int): Int = getIntOption(key).getOrElse(default)
 
@@ -47,10 +50,10 @@ trait Docopt {
   }
 
   def getPathOption(key: String, vld: PathValidator = PathValidator()): Option[Path] =
-    getStringOption(key).map(_ => vld.validate(getString(key)))
+    string.getOption(key).map(_ => vld.validate(string.get(key)))
   def getPathOr(key: String, default: Path, vld: PathValidator = PathValidator()): Path =
     getPathOption(key, vld).getOrElse(default)
-  def getPath(key: String, vld: PathValidator = PathValidator()): Path = vld.validate(getString(key))
+  def getPath(key: String, vld: PathValidator = PathValidator()): Path = vld.validate(string.get(key))
 
   def getFileOption(key: String, vld: PathValidator = PathValidator()): Option[File] =
     getPathOption(key, vld.isFile).map(_.toFile)
@@ -64,6 +67,40 @@ trait Docopt {
     getDirectoryOption(key, vld).getOrElse(default)
   def getDirectory(key: String, vld: PathValidator = PathValidator()): Directory =
     getPath(key, vld.isDir).toDirectory
+}
+
+/** Gets options of a certain type from the command line arguments.
+  *
+  * @tparam T
+  *   The expected type of the command line argument.
+  */
+trait DocoptGet[T] {
+
+  /** @param key
+    *   The option key for the argument
+    * @return
+    *   If present and can be transformed to the type, return the transformed argument value or [[None]] if not present.
+    *   If it is present but can't be converted or is invalid, throws a DocoptException.
+    */
+  def getOption(key: String): Option[T]
+
+  /** @param key
+    *   The option key for the argument
+    * @param default
+    *   The default value for the argument if it is not present.
+    * @return
+    *   If present and can be transformed to the type, return the transformed argument value or use the default if not
+    *   present. If it is present but can't be converted or is invalid, throws a DocoptException.
+    */
+  def get(key: String, default: T): T = getOption(key).getOrElse(default)
+
+  /** @param key
+    *   The option key for the argument
+    * @return
+    *   If present and can be transformed to the type, return the transformed argument value. If it is not present, or
+    *   present but can't be converted or is invalid, throws a DocoptException.
+    */
+  def get(key: String): T = getOption(key).getOrElse { throw new DocoptException(s"Expected $key not found") }
 }
 
 /** Helper to validate command line arguments against an expected filesystem state.
@@ -157,6 +194,7 @@ object Docopt {
 
   def apply(argMap: Map[String, Any]): Docopt = {
     new Docopt {
+
       override def getStringsOption(key: String): Option[Iterable[String]] = argMap.get(key) match {
         case Some(value: String)                     => Some(Seq(value))
         case Some(value: Iterable[String])           => Some(value)

@@ -37,7 +37,7 @@ object Example2Task extends Task {
       if (names.isEmpty) throw new DocoptException("Ship name is required.")
       else for (name <- names) println(s"Creating ship: $name")
     } else if (opt.getBoolean("ship") && opt.getBoolean("move")) {
-      println(s"""Moving ${opt.getString("<name>")} ship
+      println(s"""Moving ${opt.string.get("<name>")} ship
         |  to coordinates (${opt.getInt("<x>")}, ${opt.getInt("<y>")})
         |  at speed ${opt.getInt("--speed")}""".stripMargin)
     } else if (opt.getBoolean("ship") && opt.getBoolean("shoot")) {

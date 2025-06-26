@@ -81,24 +81,24 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
   describe("Testing the getString methods") {
     describe("when getting an optional value") {
-      it("should get when present") { opt.getStringOption("string") shouldBe Some("value") }
-      it("should get when missing") { opt.getStringOption("missing") shouldBe None }
+      it("should get when present") { opt.string.getOption("string") shouldBe Some("value") }
+      it("should get when missing") { opt.string.getOption("missing") shouldBe None }
     }
 
     describe("when getting a required value") {
-      it("should get when present") { opt.getString("string") shouldBe "value" }
-      it("should fail when missing") { failOnMissing() { opt.getString("missing") } }
+      it("should get when present") { opt.string.get("string") shouldBe "value" }
+      it("should fail when missing") { failOnMissing() { opt.string.get("missing") } }
     }
 
     describe("when getting a required value with default") {
-      it("should get when present") { opt.getString("string", "default") shouldBe "value" }
-      it("should get when missing") { opt.getString("missing", "default") shouldBe "default" }
+      it("should get when present") { opt.string.get("string", "default") shouldBe "value" }
+      it("should get when missing") { opt.string.get("missing", "default") shouldBe "default" }
     }
 
     describe("when converting other types") {
-      it("should convert a string list") { opt.getString("strings", "default") shouldBe "x,y" }
-      it("should convert an int") { opt.getString("int", "default") shouldBe "12345" }
-      it("should convert a boolean") { opt.getString("bool", "default") shouldBe "true" }
+      it("should convert a string list") { opt.string.get("strings", "default") shouldBe "x,y" }
+      it("should convert an int") { opt.string.get("int", "default") shouldBe "12345" }
+      it("should convert a boolean") { opt.string.get("bool", "default") shouldBe "true" }
     }
   }
 

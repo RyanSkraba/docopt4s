@@ -11,13 +11,7 @@ import scala.util.Properties
 trait Docopt {
 
   /** Get argument values as Strings */
-  val string: DocoptGet[String] = (key: String) => getStringOption(key)
-
-  def getStringOption(key: String): Option[String]
-
-  def getString(key: String, default: String): String = string.get(key, default)
-
-  def getString(key: String): String = string.get(key)
+  val string: DocoptGet[String]
 
   def getStringsOption(key: String): Option[Iterable[String]]
 
@@ -203,7 +197,7 @@ object Docopt {
         case None                                    => None
       }
 
-      override def getStringOption(key: String): Option[String] = argMap.get(key) match {
+      private def getStringOption(key: String): Option[String] = argMap.get(key) match {
         case Some(value: String)                     => Some(value)
         case Some(value: Iterable[String])           => Some(value.mkString(","))
         case Some(value: java.lang.Iterable[String]) => Some(value.asScala.mkString(","))
@@ -217,6 +211,9 @@ object Docopt {
         case Some(value)                             => Some(value.toString.toBooleanOption.getOrElse(false))
         case None                                    => None
       }
+
+      /** Get argument values as Strings */
+      override val string: DocoptGet[String] = (key: String) => getStringOption(key)
     }
   }
 }

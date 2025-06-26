@@ -56,7 +56,7 @@ trait MultiTaskMain {
     } else Seq("--help")
 
     // Get the command, but throw exceptions for --help and --version
-    val cmd = Docopt(Doc, Version, mainArgs, optionsFirst = true).getStringOption("<command>") match {
+    val cmd = Docopt(Doc, Version, mainArgs, optionsFirst = true).string.getOption("<command>") match {
       case Some("???") => throw new DocoptException("Missing command", exitCode = 1, docopt = Doc)
       case Some(cmd)   => cmd
     }

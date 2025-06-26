@@ -32,27 +32,27 @@ object Example1Task extends Task {
     println(s"Command:$Cmd")
     if (opt.getBoolean("--options")) {
       print(s"""--options:${opt.getBooleanOption("--options")}
-           |--default:${opt.getStringOption("--default")}
-           |ARG1:${opt.getStringOption("ARG1")}
+           |--default:${opt.string.getOption("--default")}
+           |ARG1:${opt.string.getOption("ARG1")}
            |ARG2:${opt.getIntOption("ARG2")}
-           |ARG3:${opt.getStringOption("ARG3")}
+           |ARG3:${opt.string.getOption("ARG3")}
            |ARG4:${opt.getStringsOption("ARG4").map(_.mkString("(", ",", ")"))}
            |""".stripMargin)
-    } else if (opt.getStringOption("--default").nonEmpty) {
-      val dflt = opt.getString("--default")
+    } else if (opt.string.getOption("--default").nonEmpty) {
+      val dflt = opt.string.get("--default")
       print(s"""--options:${opt.getBoolean("--options", default = false)}
            |--default:$dflt
-           |ARG1:${opt.getString("ARG1", dflt)}
+           |ARG1:${opt.string.get("ARG1", dflt)}
            |ARG2:${opt.getInt("ARG2", -1)}
-           |ARG3:${opt.getString("ARG3", dflt)}
+           |ARG3:${opt.string.get("ARG3", dflt)}
            |ARG4:${opt.getStrings("ARG4", Seq(dflt)).mkString("(", ",", ")")}
            |""".stripMargin)
     } else {
       print(s"""--options:${opt.getBoolean("--options")}
-           |--default:${opt.getStringOption("--default")}
-           |ARG1:${opt.getString("ARG1")}
+           |--default:${opt.string.getOption("--default")}
+           |ARG1:${opt.string.get("ARG1")}
            |ARG2:${opt.getInt("ARG2", default = 0)}
-           |ARG3:${opt.getString("ARG3", default = "--")}
+           |ARG3:${opt.string.get("ARG3", default = "--")}
            |ARG4:${opt.getStrings("ARG4").mkString("(", ",", ")")}
            |""".stripMargin)
     }

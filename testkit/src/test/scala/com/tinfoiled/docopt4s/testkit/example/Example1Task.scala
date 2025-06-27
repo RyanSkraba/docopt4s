@@ -36,7 +36,7 @@ object Example1Task extends Task {
            |ARG1:${opt.string.getOption("ARG1")}
            |ARG2:${opt.getIntOption("ARG2")}
            |ARG3:${opt.string.getOption("ARG3")}
-           |ARG4:${opt.getStringsOption("ARG4").map(_.mkString("(", ",", ")"))}
+           |ARG4:${opt.strings.getOption("ARG4").map(_.mkString("(", ",", ")"))}
            |""".stripMargin)
     } else if (opt.string.getOption("--default").nonEmpty) {
       val dflt = opt.string.get("--default")
@@ -45,7 +45,7 @@ object Example1Task extends Task {
            |ARG1:${opt.string.get("ARG1", dflt)}
            |ARG2:${opt.getInt("ARG2", -1)}
            |ARG3:${opt.string.get("ARG3", dflt)}
-           |ARG4:${opt.getStrings("ARG4", Seq(dflt)).mkString("(", ",", ")")}
+           |ARG4:${opt.strings.get("ARG4", Seq(dflt)).mkString("(", ",", ")")}
            |""".stripMargin)
     } else {
       print(s"""--options:${opt.getBoolean("--options")}
@@ -53,7 +53,7 @@ object Example1Task extends Task {
            |ARG1:${opt.string.get("ARG1")}
            |ARG2:${opt.getInt("ARG2", default = 0)}
            |ARG3:${opt.string.get("ARG3", default = "--")}
-           |ARG4:${opt.getStrings("ARG4").mkString("(", ",", ")")}
+           |ARG4:${opt.strings.get("ARG4").mkString("(", ",", ")")}
            |""".stripMargin)
     }
   }

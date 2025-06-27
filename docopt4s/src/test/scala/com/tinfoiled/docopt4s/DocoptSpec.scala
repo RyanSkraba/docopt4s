@@ -104,24 +104,24 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
   describe("Testing the getStrings methods") {
     describe("when getting an optional value") {
-      it("should get when present") { opt.getStringsOption("strings") shouldBe Some(Seq("x", "y")) }
-      it("should get when missing") { opt.getStringsOption("missing") shouldBe None }
+      it("should get when present") { opt.strings.getOption("strings") shouldBe Some(Seq("x", "y")) }
+      it("should get when missing") { opt.strings.getOption("missing") shouldBe None }
     }
 
     describe("when getting a required value") {
-      it("should get when present") { opt.getStrings("strings") shouldBe Seq("x", "y") }
-      it("should fail when missing") { failOnMissing() { opt.getStrings("missing") } }
+      it("should get when present") { opt.strings.get("strings") shouldBe Seq("x", "y") }
+      it("should fail when missing") { failOnMissing() { opt.strings.get("missing") } }
     }
 
     describe("when getting a required value with default") {
-      it("should get when present") { opt.getStrings("strings", Seq("def")) shouldBe Seq("x", "y") }
-      it("should get when missing") { opt.getStrings("missing", Seq("def")) shouldBe Seq("def") }
+      it("should get when present") { opt.strings.get("strings", Seq("def")) shouldBe Seq("x", "y") }
+      it("should get when missing") { opt.strings.get("missing", Seq("def")) shouldBe Seq("def") }
     }
 
     describe("when converting other types") {
-      it("should convert a string") { opt.getStrings("string", Seq.empty) shouldBe Seq("value") }
-      it("should convert an int") { opt.getStrings("int", Seq.empty) shouldBe Seq("12345") }
-      it("should convert a boolean") { opt.getStrings("bool", Seq.empty) shouldBe Seq("true") }
+      it("should convert a string") { opt.strings.get("string", Seq.empty) shouldBe Seq("value") }
+      it("should convert an int") { opt.strings.get("int", Seq.empty) shouldBe Seq("12345") }
+      it("should convert a boolean") { opt.strings.get("bool", Seq.empty) shouldBe Seq("true") }
     }
   }
 

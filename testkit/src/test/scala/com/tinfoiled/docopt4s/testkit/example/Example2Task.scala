@@ -33,7 +33,7 @@ object Example2Task extends Task {
 
   def go(opt: Docopt): Unit = {
     if (opt.getBoolean("ship") && opt.getBoolean("new")) {
-      val names = opt.getStrings("<name>")
+      val names = opt.strings.get("<name>")
       if (names.isEmpty) throw new DocoptException("Ship name is required.")
       else for (name <- names) println(s"Creating ship: $name")
     } else if (opt.getBoolean("ship") && opt.getBoolean("move")) {

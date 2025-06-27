@@ -13,13 +13,8 @@ trait Docopt {
   /** Get argument values as Strings */
   val string: DocoptGet[String]
 
-  def getStringsOption(key: String): Option[Iterable[String]]
-
-  def getStrings(key: String, default: Iterable[String]): Iterable[String] = getStringsOption(key).getOrElse(default)
-
-  def getStrings(key: String): Iterable[String] = getStringsOption(key).getOrElse {
-    throw new DocoptException(s"Expected $key not found")
-  }
+  /** Get argument values as a String list */
+  val strings: DocoptGet[Iterable[String]]
 
   def getIntOption(key: String): Option[Int] = string
     .getOption(key)
@@ -189,7 +184,7 @@ object Docopt {
   def apply(argMap: Map[String, Any]): Docopt = {
     new Docopt {
 
-      override def getStringsOption(key: String): Option[Iterable[String]] = argMap.get(key) match {
+      private def getStringsOption(key: String): Option[Iterable[String]] = argMap.get(key) match {
         case Some(value: String)                     => Some(Seq(value))
         case Some(value: Iterable[String])           => Some(value)
         case Some(value: java.lang.Iterable[String]) => Some(value.asScala)
@@ -212,8 +207,11 @@ object Docopt {
         case None                                    => None
       }
 
-      /** Get argument values as Strings */
+      /** Get argument values as a String */
       override val string: DocoptGet[String] = (key: String) => getStringOption(key)
+
+      /** Get argument values as a String list */
+      override val strings: DocoptGet[Iterable[String]] = (key: String) => getStringsOption(key)
     }
   }
 }

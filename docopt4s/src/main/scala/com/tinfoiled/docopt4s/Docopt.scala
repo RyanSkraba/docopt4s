@@ -10,25 +10,21 @@ import scala.util.Properties
   */
 trait Docopt {
 
-  /** Get argument values as Strings */
+  /** Get argument values a String */
   val string: DocoptGet[String]
 
   /** Get argument values as a String list */
   val strings: DocoptGet[Iterable[String]]
 
-  def getIntOption(key: String): Option[Int] = string
-    .getOption(key)
-    .map(value =>
-      value.toIntOption.getOrElse {
-        throw new DocoptException(s"Expected an integer for $key, but got $value")
-      }
-    )
-
-  def getInt(key: String, default: Int): Int = getIntOption(key).getOrElse(default)
-
-  def getInt(key: String): Int = getIntOption(key).getOrElse {
-    throw new DocoptException(s"Expected $key not found")
-  }
+  /** Get argument values an Int */
+  val int: DocoptGet[Int] = (key: String) =>
+    string
+      .getOption(key)
+      .map(value =>
+        value.toIntOption.getOrElse {
+          throw new DocoptException(s"Expected an integer for $key, but got $value")
+        }
+      )
 
   def getBooleanOption(key: String): Option[Boolean]
 

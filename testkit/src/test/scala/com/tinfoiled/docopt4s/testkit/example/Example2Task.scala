@@ -38,10 +38,10 @@ object Example2Task extends Task {
       else for (name <- names) println(s"Creating ship: $name")
     } else if (opt.getBoolean("ship") && opt.getBoolean("move")) {
       println(s"""Moving ${opt.string.get("<name>")} ship
-        |  to coordinates (${opt.getInt("<x>")}, ${opt.getInt("<y>")})
-        |  at speed ${opt.getInt("--speed")}""".stripMargin)
+        |  to coordinates (${opt.int.get("<x>")}, ${opt.int.get("<y>")})
+        |  at speed ${opt.int.get("--speed")}""".stripMargin)
     } else if (opt.getBoolean("ship") && opt.getBoolean("shoot")) {
-      println(s"Shooting at coordinates (${opt.getInt("<x>")}, ${opt.getInt("<y>")})")
+      println(s"Shooting at coordinates (${opt.int.get("<x>")}, ${opt.int.get("<y>")})")
     } else {
       throw new DocoptException("Unknown parsing error")
     }

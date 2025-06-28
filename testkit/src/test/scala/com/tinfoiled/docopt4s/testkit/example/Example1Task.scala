@@ -34,7 +34,7 @@ object Example1Task extends Task {
       print(s"""--options:${opt.getBooleanOption("--options")}
            |--default:${opt.string.getOption("--default")}
            |ARG1:${opt.string.getOption("ARG1")}
-           |ARG2:${opt.getIntOption("ARG2")}
+           |ARG2:${opt.int.getOption("ARG2")}
            |ARG3:${opt.string.getOption("ARG3")}
            |ARG4:${opt.strings.getOption("ARG4").map(_.mkString("(", ",", ")"))}
            |""".stripMargin)
@@ -43,7 +43,7 @@ object Example1Task extends Task {
       print(s"""--options:${opt.getBoolean("--options", default = false)}
            |--default:$dflt
            |ARG1:${opt.string.get("ARG1", dflt)}
-           |ARG2:${opt.getInt("ARG2", -1)}
+           |ARG2:${opt.int.get("ARG2", -1)}
            |ARG3:${opt.string.get("ARG3", dflt)}
            |ARG4:${opt.strings.get("ARG4", Seq(dflt)).mkString("(", ",", ")")}
            |""".stripMargin)
@@ -51,7 +51,7 @@ object Example1Task extends Task {
       print(s"""--options:${opt.getBoolean("--options")}
            |--default:${opt.string.getOption("--default")}
            |ARG1:${opt.string.get("ARG1")}
-           |ARG2:${opt.getInt("ARG2", default = 0)}
+           |ARG2:${opt.int.get("ARG2", default = 0)}
            |ARG3:${opt.string.get("ARG3", default = "--")}
            |ARG4:${opt.strings.get("ARG4").mkString("(", ",", ")")}
            |""".stripMargin)

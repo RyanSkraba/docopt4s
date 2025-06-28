@@ -165,30 +165,30 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
   describe("Testing the getInt methods") {
     describe("when getting an optional value") {
-      it("should get when present") { opt.getIntOption("int") shouldBe Some(12345) }
-      it("should get when missing") { opt.getIntOption("missing") shouldBe None }
+      it("should get when present") { opt.int.getOption("int") shouldBe Some(12345) }
+      it("should get when missing") { opt.int.getOption("missing") shouldBe None }
     }
 
     describe("when getting a required value") {
-      it("should get when present") { opt.getInt("int") shouldBe 12345 }
-      it("should fail when missing") { failOnMissing() { opt.getInt("missing") } }
+      it("should get when present") { opt.int.get("int") shouldBe 12345 }
+      it("should fail when missing") { failOnMissing() { opt.int.get("missing") } }
     }
 
     describe("when getting a required value with default") {
-      it("should get when present") { opt.getInt("int", -99999) shouldBe 12345 }
-      it("should get when missing") { opt.getInt("missing", -99999) shouldBe -99999 }
+      it("should get when present") { opt.int.get("int", -99999) shouldBe 12345 }
+      it("should get when missing") { opt.int.get("missing", -99999) shouldBe -99999 }
     }
 
     describe("when converting other types") {
       it("should fail to convert a string") {
-        failOn(opt.getInt("string", -99999)) shouldBe "Expected an integer for string, but got value"
+        failOn(opt.int.get("string", -99999)) shouldBe "Expected an integer for string, but got value"
       }
-      it("should convert a string") { optWith("x" -> 98765).getInt("x", -99999) shouldBe 98765 }
+      it("should convert a string") { optWith("x" -> 98765).int.get("x", -99999) shouldBe 98765 }
       it("should fail to convert a string list") {
-        failOn(opt.getInt("strings", -99999)) shouldBe "Expected an integer for strings, but got x,y"
+        failOn(opt.int.get("strings", -99999)) shouldBe "Expected an integer for strings, but got x,y"
       }
       it("should fail to convert a boolean") {
-        failOn(opt.getInt("bool", -99999)) shouldBe "Expected an integer for bool, but got true"
+        failOn(opt.int.get("bool", -99999)) shouldBe "Expected an integer for bool, but got true"
       }
     }
   }

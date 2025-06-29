@@ -30,8 +30,8 @@ object Example1Task extends Task {
 
   def go(opt: Docopt): Unit = {
     println(s"Command:$Cmd")
-    if (opt.getBoolean("--options")) {
-      print(s"""--options:${opt.getBooleanOption("--options")}
+    if (opt.boolean.get("--options")) {
+      print(s"""--options:${opt.boolean.getOption("--options")}
            |--default:${opt.string.getOption("--default")}
            |ARG1:${opt.string.getOption("ARG1")}
            |ARG2:${opt.int.getOption("ARG2")}
@@ -40,7 +40,7 @@ object Example1Task extends Task {
            |""".stripMargin)
     } else if (opt.string.getOption("--default").nonEmpty) {
       val dflt = opt.string.get("--default")
-      print(s"""--options:${opt.getBoolean("--options", default = false)}
+      print(s"""--options:${opt.boolean.get("--options", default = false)}
            |--default:$dflt
            |ARG1:${opt.string.get("ARG1", dflt)}
            |ARG2:${opt.int.get("ARG2", -1)}
@@ -48,7 +48,7 @@ object Example1Task extends Task {
            |ARG4:${opt.strings.get("ARG4", Seq(dflt)).mkString("(", ",", ")")}
            |""".stripMargin)
     } else {
-      print(s"""--options:${opt.getBoolean("--options")}
+      print(s"""--options:${opt.boolean.get("--options")}
            |--default:${opt.string.getOption("--default")}
            |ARG1:${opt.string.get("ARG1")}
            |ARG2:${opt.int.get("ARG2", default = 0)}

@@ -127,39 +127,39 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
   describe("Testing the getBoolean methods") {
     describe("when getting an optional value") {
-      it("should get when present") { opt.getBooleanOption("bool") shouldBe Some(true) }
-      it("should get when missing") { opt.getBooleanOption("missing") shouldBe None }
+      it("should get when present") { opt.boolean.getOption("bool") shouldBe Some(true) }
+      it("should get when missing") { opt.boolean.getOption("missing") shouldBe None }
     }
 
     describe("when getting a required value") {
-      it("should get when present") { opt.getBoolean("bool") shouldBe true }
-      it("should fail when missing") { failOnMissing() { opt.getBoolean("missing") } }
+      it("should get when present") { opt.boolean.get("bool") shouldBe true }
+      it("should fail when missing") { failOnMissing() { opt.boolean.get("missing") } }
     }
 
     describe("when getting a required value with default") {
-      it("should get when present") { opt.getBoolean("bool", default = false) shouldBe true }
-      it("should get when missing") { opt.getBoolean("missing", default = false) shouldBe false }
+      it("should get when present") { opt.boolean.get("bool", default = false) shouldBe true }
+      it("should get when missing") { opt.boolean.get("missing", default = false) shouldBe false }
     }
 
     describe("when converting other types") {
-      it("should convert a string list") { opt.getBoolean("strings", default = false) shouldBe true }
+      it("should convert a string list") { opt.boolean.get("strings", default = false) shouldBe true }
       it(s"should convert a false (empty) string list") {
-        optWith("x" -> Seq.empty).getBoolean("x", default = true) shouldBe false
+        optWith("x" -> Seq.empty).boolean.get("x", default = true) shouldBe false
       }
-      it("should convert a string") { opt.getBoolean("string", default = false) shouldBe false }
+      it("should convert a string") { opt.boolean.get("string", default = false) shouldBe false }
       for (x <- Seq("true", "TRUE", "True")) {
-        it(s"should convert a true string: $x") { optWith("x" -> x).getBoolean("x", default = false) shouldBe true }
+        it(s"should convert a true string: $x") { optWith("x" -> x).boolean.get("x", default = false) shouldBe true }
         it(s"should convert a true (non-empty) string list: $x") {
-          optWith("x" -> Seq(x)).getBoolean("x", default = false) shouldBe true
+          optWith("x" -> Seq(x)).boolean.get("x", default = false) shouldBe true
         }
       }
       for (x <- Seq("", "false", "1", "Anything1", "Yes")) {
-        it(s"should convert a false string: $x") { optWith("x" -> x).getBoolean("x", default = true) shouldBe false }
+        it(s"should convert a false string: $x") { optWith("x" -> x).boolean.get("x", default = true) shouldBe false }
         it(s"should convert a true (non-empty) string list: $x") {
-          optWith("x" -> Seq(x)).getBoolean("x", default = false) shouldBe true
+          optWith("x" -> Seq(x)).boolean.get("x", default = false) shouldBe true
         }
       }
-      it("should convert an int") { opt.getBoolean("int", default = false) shouldBe false }
+      it("should convert an int") { opt.boolean.get("int", default = false) shouldBe false }
     }
   }
 

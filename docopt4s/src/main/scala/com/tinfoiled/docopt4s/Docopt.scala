@@ -16,6 +16,9 @@ trait Docopt {
   /** Get argument values as a String list */
   val strings: DocoptGet[Iterable[String]]
 
+  /** Get argument values a boolean */
+  val boolean: DocoptGet[Boolean]
+
   /** Get argument values an Int */
   val int: DocoptGet[Int] = (key: String) =>
     string
@@ -25,14 +28,6 @@ trait Docopt {
           throw new DocoptException(s"Expected an integer for $key, but got $value")
         }
       )
-
-  def getBooleanOption(key: String): Option[Boolean]
-
-  def getBoolean(key: String, default: Boolean): Boolean = getBooleanOption(key).getOrElse(default)
-
-  def getBoolean(key: String): Boolean = getBooleanOption(key).getOrElse {
-    throw new DocoptException(s"Expected $key not found")
-  }
 
   def getPathOption(key: String, vld: PathValidator = PathValidator()): Option[Path] =
     string.getOption(key).map(_ => vld.validate(string.get(key)))
@@ -196,7 +191,7 @@ object Docopt {
         case None                                    => None
       }
 
-      override def getBooleanOption(key: String): Option[Boolean] = argMap.get(key) match {
+      private def getBooleanOption(key: String): Option[Boolean] = argMap.get(key) match {
         case Some(value: Iterable[String])           => Some(value.nonEmpty)
         case Some(value: java.lang.Iterable[String]) => Some(value.iterator().hasNext)
         case Some(value)                             => Some(value.toString.toBooleanOption.getOrElse(false))
@@ -208,6 +203,9 @@ object Docopt {
 
       /** Get argument values as a String list */
       override val strings: DocoptGet[Iterable[String]] = (key: String) => getStringsOption(key)
+
+      /** Get argument values as a String list */
+      override val boolean: DocoptGet[Boolean] = (key: String) => getBooleanOption(key)
     }
   }
 }

@@ -175,37 +175,34 @@ object Docopt {
   def apply(argMap: Map[String, Any]): Docopt = {
     new Docopt {
 
-      private def getStringsOption(key: String): Option[Iterable[String]] = argMap.get(key) match {
-        case Some(value: String)                     => Some(Seq(value))
-        case Some(value: Iterable[String])           => Some(value)
-        case Some(value: java.lang.Iterable[String]) => Some(value.asScala)
-        case Some(value)                             => Some(Seq(value.toString))
-        case None                                    => None
-      }
-
-      private def getStringOption(key: String): Option[String] = argMap.get(key) match {
-        case Some(value: String)                     => Some(value)
-        case Some(value: Iterable[String])           => Some(value.mkString(","))
-        case Some(value: java.lang.Iterable[String]) => Some(value.asScala.mkString(","))
-        case Some(value)                             => Some(value.toString)
-        case None                                    => None
-      }
-
-      private def getBooleanOption(key: String): Option[Boolean] = argMap.get(key) match {
-        case Some(value: Iterable[String])           => Some(value.nonEmpty)
-        case Some(value: java.lang.Iterable[String]) => Some(value.iterator().hasNext)
-        case Some(value)                             => Some(value.toString.toBooleanOption.getOrElse(false))
-        case None                                    => None
-      }
-
       /** Get argument values as a String */
-      override val string: DocoptGet[String] = (key: String) => getStringOption(key)
+      override val string: DocoptGet[String] = (key: String) =>
+        argMap.get(key) match {
+          case Some(value: String)                     => Some(value)
+          case Some(value: Iterable[String])           => Some(value.mkString(","))
+          case Some(value: java.lang.Iterable[String]) => Some(value.asScala.mkString(","))
+          case Some(value)                             => Some(value.toString)
+          case None                                    => None
+        }
 
       /** Get argument values as a String list */
-      override val strings: DocoptGet[Iterable[String]] = (key: String) => getStringsOption(key)
+      override val strings: DocoptGet[Iterable[String]] = (key: String) =>
+        argMap.get(key) match {
+          case Some(value: String)                     => Some(Seq(value))
+          case Some(value: Iterable[String])           => Some(value)
+          case Some(value: java.lang.Iterable[String]) => Some(value.asScala)
+          case Some(value)                             => Some(Seq(value.toString))
+          case None                                    => None
+        }
 
       /** Get argument values as a String list */
-      override val boolean: DocoptGet[Boolean] = (key: String) => getBooleanOption(key)
+      override val boolean: DocoptGet[Boolean] = (key: String) =>
+        argMap.get(key) match {
+          case Some(value: Iterable[String])           => Some(value.nonEmpty)
+          case Some(value: java.lang.Iterable[String]) => Some(value.iterator().hasNext)
+          case Some(value)                             => Some(value.toString.toBooleanOption.getOrElse(false))
+          case None                                    => None
+        }
     }
   }
 }

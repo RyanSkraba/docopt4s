@@ -195,59 +195,59 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
   describe("Testing the getPath methods") {
     describe("when getting an optional value") {
-      it("should get when present") { opt.getPathOption("dir") shouldBe Some(Tmp) }
-      it("should get when missing") { opt.getPathOption("missing") shouldBe None }
+      it("should get when present") { opt.path.getOption("dir") shouldBe Some(Tmp) }
+      it("should get when missing") { opt.path.getOption("missing") shouldBe None }
     }
 
     describe("when getting a required value") {
-      it("should get when present as dir") { opt.getPath("dir") shouldBe Tmp }
-      it("should get when present as file") { opt.getPath("file") shouldBe ExistingFile }
-      it("should fail when missing") { failOnMissing() { opt.getPath("missing") } }
+      it("should get when present as dir") { opt.path.get("dir") shouldBe Tmp }
+      it("should get when present as file") { opt.path.get("file") shouldBe ExistingFile }
+      it("should fail when missing") { failOnMissing() { opt.path.get("missing") } }
     }
 
     describe("when getting a required value with default") {
-      it("should get when present") { opt.getPathOr("dir", Tmp / "x") shouldBe Tmp }
-      it("should get when missing") { opt.getPathOr("missing", Tmp / "x") shouldBe (Tmp / "x") }
+      it("should get when present") { opt.path.getOr("dir", Tmp / "x") shouldBe Tmp }
+      it("should get when missing") { opt.path.getOr("missing", Tmp / "x") shouldBe (Tmp / "x") }
     }
 
     describe("when requiring that it doesn't exist") {
-      it("should get when it doesn't exist") { opt.getPath("nox", vldNox) shouldBe NonExistingPath }
+      it("should get when it doesn't exist") { opt.path.get("nox", vldNox) shouldBe NonExistingPath }
       it("should fail when it does exist as a file") {
-        failOn(opt.getPath("file", vldNox)) shouldBe s"Path already exists: $ExistingFile"
-        failOn(opt.getPath("file", vldNox.withTag("Src"))) shouldBe s"Src already exists: $ExistingFile"
+        failOn(opt.path.get("file", vldNox)) shouldBe s"Path already exists: $ExistingFile"
+        failOn(opt.path.get("file", vldNox.withTag("Src"))) shouldBe s"Src already exists: $ExistingFile"
       }
       it("should fail when it does exist as a directory") {
-        failOn(opt.getPath("dir", vldNox)) shouldBe s"Path already exists: $Tmp"
-        failOn(opt.getPath("dir", vldNox.withTag("Src"))) shouldBe s"Src already exists: $Tmp"
+        failOn(opt.path.get("dir", vldNox)) shouldBe s"Path already exists: $Tmp"
+        failOn(opt.path.get("dir", vldNox.withTag("Src"))) shouldBe s"Src already exists: $Tmp"
       }
     }
 
     describe("when optionally it exists") {
-      it("should get when it doesn't exist") { opt.getPath("nox", vldMaybe) shouldBe NonExistingPath }
-      it("should get when it exists as a file") { opt.getPath("file", vldMaybe) shouldBe ExistingFile }
-      it("should get when it exists as a directory") { opt.getPath("dir", vldMaybe) shouldBe Tmp }
+      it("should get when it doesn't exist") { opt.path.get("nox", vldMaybe) shouldBe NonExistingPath }
+      it("should get when it exists as a file") { opt.path.get("file", vldMaybe) shouldBe ExistingFile }
+      it("should get when it exists as a directory") { opt.path.get("dir", vldMaybe) shouldBe Tmp }
     }
 
     describe("when converting other types") {
       it("should fail to convert a string") {
         assume(!(Pwd / "value").exists)
-        failOn(opt.getPathOr("string", Tmp)) shouldBe s"Path doesn't exist: $Pwd/value"
-        failOn(opt.getPathOr("string", Tmp, vldTag)) shouldBe s"Source doesn't exist: $Pwd/value"
+        failOn(opt.path.getOr("string", Tmp)) shouldBe s"Path doesn't exist: $Pwd/value"
+        failOn(opt.path.getOr("string", Tmp, vldTag)) shouldBe s"Source doesn't exist: $Pwd/value"
       }
       it("should fail to convert a string list") {
         assume(!(Pwd / "x,y").exists)
-        failOn(opt.getPathOr("strings", Tmp)) shouldBe s"Path doesn't exist: $Pwd/x,y"
-        failOn(opt.getPathOr("strings", Tmp, vldTag)) shouldBe s"Source doesn't exist: $Pwd/x,y"
+        failOn(opt.path.getOr("strings", Tmp)) shouldBe s"Path doesn't exist: $Pwd/x,y"
+        failOn(opt.path.getOr("strings", Tmp, vldTag)) shouldBe s"Source doesn't exist: $Pwd/x,y"
       }
       it("should fail to convert a boolean") {
         assume(!(Pwd / "true").exists)
-        failOn(opt.getPathOr("bool", Tmp)) shouldBe s"Path doesn't exist: $Pwd/true"
-        failOn(opt.getPathOr("bool", Tmp, vldTag)) shouldBe s"Source doesn't exist: $Pwd/true"
+        failOn(opt.path.getOr("bool", Tmp)) shouldBe s"Path doesn't exist: $Pwd/true"
+        failOn(opt.path.getOr("bool", Tmp, vldTag)) shouldBe s"Source doesn't exist: $Pwd/true"
       }
       it("should fail to convert a int") {
         assume(!(Pwd / "12345").exists)
-        failOn(opt.getPathOr("int", Tmp)) shouldBe s"Path doesn't exist: $Pwd/12345"
-        failOn(opt.getPathOr("int", Tmp, vldTag)) shouldBe s"Source doesn't exist: $Pwd/12345"
+        failOn(opt.path.getOr("int", Tmp)) shouldBe s"Path doesn't exist: $Pwd/12345"
+        failOn(opt.path.getOr("int", Tmp, vldTag)) shouldBe s"Source doesn't exist: $Pwd/12345"
       }
     }
   }

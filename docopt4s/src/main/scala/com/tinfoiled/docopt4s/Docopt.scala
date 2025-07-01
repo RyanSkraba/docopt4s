@@ -29,24 +29,24 @@ trait Docopt {
         }
       )
 
-  def getPathOption(key: String, vld: PathValidator = PathValidator()): Option[Path] =
-    string.getOption(key).map(_ => vld.validate(string.get(key)))
-  def getPathOr(key: String, default: Path, vld: PathValidator = PathValidator()): Path =
-    getPathOption(key, vld).getOrElse(default)
-  def getPath(key: String, vld: PathValidator = PathValidator()): Path = vld.validate(string.get(key))
+  /** Get argument values as a Path */
+  val path: PathDocoptGet[Path] = new PathDocoptGet[Path] {
+    override def getOption(key: String, vld: PathValidator): Option[Path] =
+      string.getOption(key).map(_ => vld.validate(string.get(key)))
+  }
 
   def getFileOption(key: String, vld: PathValidator = PathValidator()): Option[File] =
-    getPathOption(key, vld.isFile).map(_.toFile)
+    path.getOption(key, vld.isFile).map(_.toFile)
   def getFileOr(key: String, default: File, vld: PathValidator = PathValidator()): File =
     getFileOption(key, vld).getOrElse(default)
-  def getFile(key: String, vld: PathValidator = PathValidator()): File = getPath(key, vld.isFile).toFile
+  def getFile(key: String, vld: PathValidator = PathValidator()): File = path.get(key, vld.isFile).toFile
 
   def getDirectoryOption(key: String, vld: PathValidator = PathValidator()): Option[Directory] =
-    getPathOption(key, vld.isDir).map(_.toDirectory)
+    path.getOption(key, vld.isDir).map(_.toDirectory)
   def getDirectoryOr(key: String, default: Directory, vld: PathValidator = PathValidator()): Directory =
     getDirectoryOption(key, vld).getOrElse(default)
   def getDirectory(key: String, vld: PathValidator = PathValidator()): Directory =
-    getPath(key, vld.isDir).toDirectory
+    path.get(key, vld.isDir).toDirectory
 }
 
 /** Gets options of a certain type from the command line arguments.
@@ -81,6 +81,50 @@ trait DocoptGet[T] {
     *   present but can't be converted or is invalid, throws a DocoptException.
     */
   def get(key: String): T = getOption(key).getOrElse { throw new DocoptException(s"Expected $key not found") }
+}
+
+/** Gets path options of a certain type from the command line arguments.
+  *
+  * @tparam T
+  *   The expected type of the command line argument.
+  */
+trait PathDocoptGet[T] {
+
+  val DefaultVld: PathValidator = PathValidator().isPath
+
+  /** @param key
+    *   The option key for the argument
+    * @param vld
+    *   The validator used to check whether the path value exists, and/or is of the right type.
+    * @return
+    *   If present and can be transformed to the type, return the transformed argument value or [[None]] if not present.
+    *   If it is present but can't be converted or is invalid, throws a DocoptException.
+    */
+  def getOption(key: String, vld: PathValidator = DefaultVld): Option[T]
+
+  /** @param key
+    *   The option key for the argument
+    * @param default
+    *   The default value for the argument if it is not present.
+    * @param vld
+    *   The validator used to check whether the path value exists, and/or is of the right type.
+    * @return
+    *   If present and can be transformed to the type, return the transformed argument value or use the default if not
+    *   present. If it is present but can't be converted or is invalid, throws a DocoptException.
+    */
+  def getOr(key: String, default: T, vld: PathValidator = DefaultVld): T = getOption(key, vld).getOrElse(default)
+
+  /** @param key
+    *   The option key for the argument
+    * @param vld
+    *   The validator used to check whether the path value exists, and/or is of the right type.
+    * @return
+    *   If present and can be transformed to the type, return the transformed argument value. If it is not present, or
+    *   present but can't be converted or is invalid, throws a DocoptException.
+    */
+  def get(key: String, vld: PathValidator = DefaultVld): T = getOption(key, vld).getOrElse {
+    throw new DocoptException(s"Expected $key not found")
+  }
 }
 
 /** Helper to validate command line arguments against an expected filesystem state.

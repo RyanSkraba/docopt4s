@@ -257,65 +257,65 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     val default = (Tmp / "x").toFile
 
     describe("when getting an optional value") {
-      it("should get when present") { opt.getFileOption("file") shouldBe Some(ExistingFile) }
-      it("should get when missing") { opt.getFileOption("missing") shouldBe None }
+      it("should get when present") { opt.file.getOption("file") shouldBe Some(ExistingFile) }
+      it("should get when missing") { opt.file.getOption("missing") shouldBe None }
     }
 
     describe("when getting a required value") {
-      it("should get when present") { opt.getFile("file") shouldBe ExistingFile }
+      it("should get when present") { opt.file.get("file") shouldBe ExistingFile }
       it("should fail when present but the wrong type") {
-        failOn(opt.getFile("dir")) shouldBe s"Expected a file, found directory: $Tmp"
-        failOn(opt.getFile("dir", vldTag)) shouldBe s"Source expected a file, found directory: $Tmp"
+        failOn(opt.file.get("dir")) shouldBe s"Expected a file, found directory: $Tmp"
+        failOn(opt.file.get("dir", vldTag)) shouldBe s"Source expected a file, found directory: $Tmp"
       }
-      it("should fail when missing") { failOnMissing() { opt.getFile("missing") } }
+      it("should fail when missing") { failOnMissing() { opt.file.get("missing") } }
     }
 
     describe("when getting a required value with default") {
-      it("should get when present") { opt.getFileOr("file", default) shouldBe ExistingFile }
-      it("should get when missing") { opt.getFileOr("missing", default) shouldBe (Tmp / "x") }
+      it("should get when present") { opt.file.getOr("file", default) shouldBe ExistingFile }
+      it("should get when missing") { opt.file.getOr("missing", default) shouldBe (Tmp / "x") }
     }
 
     describe("when requiring that it doesn't exist") {
-      it("should get when it doesn't exist") { opt.getFile("nox", vldNox) shouldBe NonExistingPath }
+      it("should get when it doesn't exist") { opt.file.get("nox", vldNox) shouldBe NonExistingPath }
       it("should fail when it does exist as a file") {
-        failOn(opt.getFile("file", vldNox)) shouldBe s"File already exists: $ExistingFile"
-        failOn(opt.getFile("file", vldNox.withTag("Src"))) shouldBe s"Src already exists: $ExistingFile"
+        failOn(opt.file.get("file", vldNox)) shouldBe s"File already exists: $ExistingFile"
+        failOn(opt.file.get("file", vldNox.withTag("Src"))) shouldBe s"Src already exists: $ExistingFile"
       }
       it("should fail when it does exist as a directory") {
-        failOn(opt.getFile("dir", vldNox)) shouldBe s"File already exists: $Tmp"
-        failOn(opt.getFile("dir", vldNox.withTag("Src"))) shouldBe s"Src already exists: $Tmp"
+        failOn(opt.file.get("dir", vldNox)) shouldBe s"File already exists: $Tmp"
+        failOn(opt.file.get("dir", vldNox.withTag("Src"))) shouldBe s"Src already exists: $Tmp"
       }
     }
 
     describe("when optionally it exists") {
-      it("should get when it doesn't exist") { opt.getFile("nox", vldMaybe) shouldBe NonExistingPath }
-      it("should get when it exists as a file") { opt.getFile("file", vldMaybe) shouldBe ExistingFile }
+      it("should get when it doesn't exist") { opt.file.get("nox", vldMaybe) shouldBe NonExistingPath }
+      it("should get when it exists as a file") { opt.file.get("file", vldMaybe) shouldBe ExistingFile }
       it("should fail when present but the wrong type") {
-        failOn(opt.getFile("dir", vldMaybe)) shouldBe s"Expected a file, found directory: $Tmp"
-        failOn(opt.getFile("dir", vldMaybe.withTag("Src"))) shouldBe s"Src expected a file, found directory: $Tmp"
+        failOn(opt.file.get("dir", vldMaybe)) shouldBe s"Expected a file, found directory: $Tmp"
+        failOn(opt.file.get("dir", vldMaybe.withTag("Src"))) shouldBe s"Src expected a file, found directory: $Tmp"
       }
     }
 
     describe("when converting other types") {
       it("should fail to convert a string") {
         assume(!(Pwd / "value").exists)
-        failOn(opt.getFileOr("string", default)) shouldBe s"File doesn't exist: $Pwd/value"
-        failOn(opt.getFileOr("string", default, vldTag)) shouldBe s"Source doesn't exist: $Pwd/value"
+        failOn(opt.file.getOr("string", default)) shouldBe s"File doesn't exist: $Pwd/value"
+        failOn(opt.file.getOr("string", default, vldTag)) shouldBe s"Source doesn't exist: $Pwd/value"
       }
       it("should fail to convert a string list") {
         assume(!(Pwd / "x,y").exists)
-        failOn(opt.getFileOr("strings", default)) shouldBe s"File doesn't exist: $Pwd/x,y"
-        failOn(opt.getFileOr("strings", default, vldTag)) shouldBe s"Source doesn't exist: $Pwd/x,y"
+        failOn(opt.file.getOr("strings", default)) shouldBe s"File doesn't exist: $Pwd/x,y"
+        failOn(opt.file.getOr("strings", default, vldTag)) shouldBe s"Source doesn't exist: $Pwd/x,y"
       }
       it("should fail to convert a boolean") {
         assume(!(Pwd / "true").exists)
-        failOn(opt.getFileOr("bool", default)) shouldBe s"File doesn't exist: $Pwd/true"
-        failOn(opt.getFileOr("bool", default, vldTag)) shouldBe s"Source doesn't exist: $Pwd/true"
+        failOn(opt.file.getOr("bool", default)) shouldBe s"File doesn't exist: $Pwd/true"
+        failOn(opt.file.getOr("bool", default, vldTag)) shouldBe s"Source doesn't exist: $Pwd/true"
       }
       it("should fail to convert a int") {
         assume(!(Pwd / "12345").exists)
-        failOn(opt.getFileOr("int", default)) shouldBe s"File doesn't exist: $Pwd/12345"
-        failOn(opt.getFileOr("int", default, vldTag)) shouldBe s"Source doesn't exist: $Pwd/12345"
+        failOn(opt.file.getOr("int", default)) shouldBe s"File doesn't exist: $Pwd/12345"
+        failOn(opt.file.getOr("int", default, vldTag)) shouldBe s"Source doesn't exist: $Pwd/12345"
       }
     }
   }

@@ -29,17 +29,12 @@ trait Docopt {
         }
       )
 
-  /** Get argument values as a Path */
-  val path: PathDocoptGet[Path] = new PathDocoptGet[Path] {
-    override def getOption(key: String, vld: PathValidator): Option[Path] =
-      string.getOption(key).map(_ => vld.validate(string.get(key)))
-  }
+  /** Get argument values as a [[Path]] */
+  val path: PathDocoptGet[Path] = (key: String, vld: PathValidator) =>
+    string.getOption(key).map(_ => vld.validate(string.get(key)))
 
-  def getFileOption(key: String, vld: PathValidator = PathValidator()): Option[File] =
-    path.getOption(key, vld.isFile).map(_.toFile)
-  def getFileOr(key: String, default: File, vld: PathValidator = PathValidator()): File =
-    getFileOption(key, vld).getOrElse(default)
-  def getFile(key: String, vld: PathValidator = PathValidator()): File = path.get(key, vld.isFile).toFile
+  /** Get argument values as a [[File]] */
+  val file: PathDocoptGet[File] = (key: String, vld: PathValidator) => path.getOption(key, vld.isFile).map(_.toFile)
 
   def getDirectoryOption(key: String, vld: PathValidator = PathValidator()): Option[Directory] =
     path.getOption(key, vld.isDir).map(_.toDirectory)

@@ -36,12 +36,9 @@ trait Docopt {
   /** Get argument values as a [[File]] */
   val file: PathDocoptGet[File] = (key: String, vld: PathValidator) => path.getOption(key, vld.isFile).map(_.toFile)
 
-  def getDirectoryOption(key: String, vld: PathValidator = PathValidator()): Option[Directory] =
+  /** Get argument values as a [[Directory]] */
+  val dir: PathDocoptGet[Directory] = (key: String, vld: PathValidator) =>
     path.getOption(key, vld.isDir).map(_.toDirectory)
-  def getDirectoryOr(key: String, default: Directory, vld: PathValidator = PathValidator()): Directory =
-    getDirectoryOption(key, vld).getOrElse(default)
-  def getDirectory(key: String, vld: PathValidator = PathValidator()): Directory =
-    path.get(key, vld.isDir).toDirectory
 }
 
 /** Gets options of a certain type from the command line arguments.

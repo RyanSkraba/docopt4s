@@ -32,15 +32,15 @@ object Example2Task extends Task {
        |""".stripMargin.trim
 
   def go(opt: Docopt): Unit = {
-    if (opt.getBoolean("ship") && opt.getBoolean("new")) {
+    if (opt.boolean.get("ship") && opt.boolean.get("new")) {
       val names = opt.strings.get("<name>")
       if (names.isEmpty) throw new DocoptException("Ship name is required.")
       else for (name <- names) println(s"Creating ship: $name")
-    } else if (opt.getBoolean("ship") && opt.getBoolean("move")) {
+    } else if (opt.boolean.get("ship") && opt.boolean.get("move")) {
       println(s"""Moving ${opt.string.get("<name>")} ship
         |  to coordinates (${opt.int.get("<x>")}, ${opt.int.get("<y>")})
         |  at speed ${opt.int.get("--speed")}""".stripMargin)
-    } else if (opt.getBoolean("ship") && opt.getBoolean("shoot")) {
+    } else if (opt.boolean.get("ship") && opt.boolean.get("shoot")) {
       println(s"Shooting at coordinates (${opt.int.get("<x>")}, ${opt.int.get("<y>")})")
     } else {
       throw new DocoptException("Unknown parsing error")

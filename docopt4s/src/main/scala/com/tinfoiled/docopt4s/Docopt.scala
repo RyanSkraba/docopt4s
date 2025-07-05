@@ -4,22 +4,26 @@ import scala.jdk.CollectionConverters._
 import scala.reflect.io.{Directory, File, Path}
 import scala.util.Properties
 
-/** A [[Docopt]] provides a means to interpret command line arguments.
+/** A [[Docopt]] provides a means to interpret command line arguments via a help text.
+  *
+  * An "argument" refers to strings passed to the application from the command line. The Docopt specification describes
+  * how arguments can be parsed into "options" by associating them with a key (taken from the Docopt help string) and
+  * returning a value.
   *
   * The Docopt text spec is described at https://docopt.org/.
   */
 trait Docopt {
 
-  /** Get argument values a String */
+  /** Get option values as a [[String]] */
   val string: DocoptGet[String]
 
-  /** Get argument values as a String list */
+  /** Get option values as an [[Iterable]] String list */
   val strings: DocoptGet[Iterable[String]]
 
-  /** Get argument values a boolean */
+  /** Get option values as a [[Boolean]] */
   val boolean: DocoptGet[Boolean]
 
-  /** Get argument values an Int */
+  /** Get option values as an [[Int]] */
   val int: DocoptGet[Int] = (key: String) =>
     string
       .getOption(key)
@@ -29,19 +33,20 @@ trait Docopt {
         }
       )
 
-  /** Get argument values as a [[Path]] */
+  /** Get option values as a [[Path]] */
   val path: PathDocoptGet[Path] = (key: String, vld: PathValidator) =>
     string.getOption(key).map(_ => vld.validate(string.get(key)))
 
-  /** Get argument values as a [[File]] */
+  /** Get option values as a [[File]] */
   val file: PathDocoptGet[File] = (key: String, vld: PathValidator) => path.getOption(key, vld.isFile).map(_.toFile)
 
-  /** Get argument values as a [[Directory]] */
+  /** Get option values as a [[Directory]] */
   val dir: PathDocoptGet[Directory] = (key: String, vld: PathValidator) =>
     path.getOption(key, vld.isDir).map(_.toDirectory)
 }
 
-/** Gets options of a certain type from the command line arguments.
+/** Given the option key, finds the option value converted to the expected type. The different methods determine how
+  * missing option keys are treated: as an error, using a default or as a Scala [[Option]].
   *
   * @tparam T
   *   The expected type of the command line argument.
@@ -49,29 +54,37 @@ trait Docopt {
 trait DocoptGet[T] {
 
   /** @param key
-    *   The option key for the argument
+    *   The option key
     * @return
-    *   If present and can be transformed to the type, return the transformed argument value or [[None]] if not present.
-    *   If it is present but can't be converted or is invalid, throws a DocoptException.
+    *   If the key is present and can be transformed to the type, return the transformed option value or [[None]] if not
+    *   present.
+    * @throws DocoptException
+    *   If it is present but can't be converted or is invalid.
     */
+  @throws[DocoptException]
   def getOption(key: String): Option[T]
 
   /** @param key
-    *   The option key for the argument
+    *   The option key
     * @param default
-    *   The default value for the argument if it is not present.
+    *   The default option value to use if the key is not present.
     * @return
-    *   If present and can be transformed to the type, return the transformed argument value or use the default if not
-    *   present. If it is present but can't be converted or is invalid, throws a DocoptException.
+    *   If the key is present and can be transformed to the type, return the transformed option value or use the default
+    *   if not present.
+    * @throws DocoptException
+    *   If it is present but can't be converted or is invalid.
     */
+  @throws[DocoptException]
   def get(key: String, default: T): T = getOption(key).getOrElse(default)
 
   /** @param key
-    *   The option key for the argument
+    *   The option key
     * @return
-    *   If present and can be transformed to the type, return the transformed argument value. If it is not present, or
-    *   present but can't be converted or is invalid, throws a DocoptException.
+    *   If the key present and can be transformed to the type, return the transformed argument value.
+    * @throws DocoptException
+    *   If it is not present, or present but can't be converted or is invalid.
     */
+  @throws[DocoptException]
   def get(key: String): T = getOption(key).getOrElse { throw new DocoptException(s"Expected $key not found") }
 }
 
@@ -85,50 +98,58 @@ trait PathDocoptGet[T] {
   val DefaultVld: PathValidator = PathValidator().isPath
 
   /** @param key
-    *   The option key for the argument
+    *   The option key
     * @param vld
     *   The validator used to check whether the path value exists, and/or is of the right type.
     * @return
-    *   If present and can be transformed to the type, return the transformed argument value or [[None]] if not present.
-    *   If it is present but can't be converted or is invalid, throws a DocoptException.
+    *   If the key is present and can be transformed to the type, return the transformed option value or [[None]] if not
+    *   present.
+    * @throws DocoptException
+    *   If it is present but can't be converted or is invalid.
     */
+  @throws[DocoptException]
   def getOption(key: String, vld: PathValidator = DefaultVld): Option[T]
 
   /** @param key
-    *   The option key for the argument
-    * @param default
-    *   The default value for the argument if it is not present.
+    *   The option key
     * @param vld
     *   The validator used to check whether the path value exists, and/or is of the right type.
+    * @param default
+    *   The default option value to use if the key is not present.
     * @return
-    *   If present and can be transformed to the type, return the transformed argument value or use the default if not
-    *   present. If it is present but can't be converted or is invalid, throws a DocoptException.
+    *   If the key is present and can be transformed to the type, return the transformed option value or use the default
+    *   if not present.
+    * @throws DocoptException
+    *   If it is present but can't be converted or is invalid.
     */
+  @throws[DocoptException]
   def getOr(key: String, default: T, vld: PathValidator = DefaultVld): T = getOption(key, vld).getOrElse(default)
 
   /** @param key
-    *   The option key for the argument
+    *   The option key
     * @param vld
     *   The validator used to check whether the path value exists, and/or is of the right type.
     * @return
-    *   If present and can be transformed to the type, return the transformed argument value. If it is not present, or
-    *   present but can't be converted or is invalid, throws a DocoptException.
+    *   If the key present and can be transformed to the type, return the transformed argument value.
+    * @throws DocoptException
+    *   If it is not present, or present but can't be converted or is invalid.
     */
+  @throws[DocoptException]
   def get(key: String, vld: PathValidator = DefaultVld): T = getOption(key, vld).getOrElse {
     throw new DocoptException(s"Expected $key not found")
   }
 }
 
-/** Helper to validate command line arguments against an expected filesystem state.
+/** Helper to validate option values against an expected filesystem state.
   *
   * @param root
   *   An absolute directory to use in constructing the path
   * @param tag
-  *   A human-readable description to describe the argument, used in exceptions.
+  *   A human-readable description to describe the option, used in exceptions.
   * @param ifIsDir
-  *   Whether to test to ensure the argument must be a Directory or must be a File (or None if it doesn't matter).
+  *   Whether to test to ensure the option value must be a Directory or must be a File (or None if it doesn't matter).
   * @param ifExists
-  *   Whether to test to ensure the argument must exist or must not exist (or None if it doesn't matter).
+  *   Whether to test to ensure the option value must exist or must not exist (or None if it doesn't matter).
   */
 case class PathValidator(
     root: Option[AnyRef] = None,
@@ -147,9 +168,9 @@ case class PathValidator(
   )
 
   /** @param value
-    *   The path to validate as a string.
+    *   An option value (as a string) to convert and test as a Path, File or Directory
     * @return
-    *   The absolute, validated path that the argument represents on the filesystem.
+    *   The absolute, validated path that the option value represents on the filesystem.
     */
   def validate(value: String): Path = {
     val path: Path = Path(
@@ -191,7 +212,7 @@ object Docopt {
 
   def apply(doc: String, version: String, args: Iterable[String], optionsFirst: Boolean = false): Docopt = {
     try {
-      // Delegate to the Java implementation to obtain a map of arguments
+      // Delegate to the Java implementation to obtain a map of option keys and values
       apply(
         new org.docopt.Docopt(doc)
           .withVersion(version)
@@ -211,7 +232,7 @@ object Docopt {
   def apply(argMap: Map[String, Any]): Docopt = {
     new Docopt {
 
-      /** Get argument values as a String */
+      /** Get option values as a String */
       override val string: DocoptGet[String] = (key: String) =>
         argMap.get(key) match {
           case Some(value: String)                     => Some(value)
@@ -221,7 +242,7 @@ object Docopt {
           case None                                    => None
         }
 
-      /** Get argument values as a String list */
+      /** Get option values as a String list */
       override val strings: DocoptGet[Iterable[String]] = (key: String) =>
         argMap.get(key) match {
           case Some(value: String)                     => Some(Seq(value))
@@ -231,7 +252,7 @@ object Docopt {
           case None                                    => None
         }
 
-      /** Get argument values as a String list */
+      /** Get option values as a Boolean list */
       override val boolean: DocoptGet[Boolean] = (key: String) =>
         argMap.get(key) match {
           case Some(value: Iterable[String])           => Some(value.nonEmpty)

@@ -1,6 +1,6 @@
 package com.tinfoiled.docopt4s
 
-/** Exception thrown when a docopt command line should cause the main application to abort (such as --help).
+/** Exception thrown when a docopt command line should cause the main application to abort (such as --help), or when an option value can't be validated as an expected type.
   *
   * @param msg
   *   the detail for the message returned by [[getMessage]]

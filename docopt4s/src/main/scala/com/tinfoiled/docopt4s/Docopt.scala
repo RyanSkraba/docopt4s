@@ -75,7 +75,7 @@ trait DocoptGet[T] {
     *   If it is present but can't be converted or is invalid.
     */
   @throws[DocoptException]
-  def get(key: String, default: T): T = getOption(key).getOrElse(default)
+  def getOr(key: String, default: T): T = getOption(key).getOrElse(default)
 
   /** @param key
     *   The option key

@@ -91,14 +91,14 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     }
 
     describe("when getting a required value with default") {
-      it("should get when present") { opt.string.get("string", "default") shouldBe "value" }
-      it("should get when missing") { opt.string.get("missing", "default") shouldBe "default" }
+      it("should get when present") { opt.string.getOr("string", "default") shouldBe "value" }
+      it("should get when missing") { opt.string.getOr("missing", "default") shouldBe "default" }
     }
 
     describe("when converting other types") {
-      it("should convert a string list") { opt.string.get("strings", "default") shouldBe "x,y" }
-      it("should convert an int") { opt.string.get("int", "default") shouldBe "12345" }
-      it("should convert a boolean") { opt.string.get("bool", "default") shouldBe "true" }
+      it("should convert a string list") { opt.string.getOr("strings", "default") shouldBe "x,y" }
+      it("should convert an int") { opt.string.getOr("int", "default") shouldBe "12345" }
+      it("should convert a boolean") { opt.string.getOr("bool", "default") shouldBe "true" }
     }
   }
 
@@ -114,14 +114,14 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     }
 
     describe("when getting a required value with default") {
-      it("should get when present") { opt.strings.get("strings", Seq("def")) shouldBe Seq("x", "y") }
-      it("should get when missing") { opt.strings.get("missing", Seq("def")) shouldBe Seq("def") }
+      it("should get when present") { opt.strings.getOr("strings", Seq("def")) shouldBe Seq("x", "y") }
+      it("should get when missing") { opt.strings.getOr("missing", Seq("def")) shouldBe Seq("def") }
     }
 
     describe("when converting other types") {
-      it("should convert a string") { opt.strings.get("string", Seq.empty) shouldBe Seq("value") }
-      it("should convert an int") { opt.strings.get("int", Seq.empty) shouldBe Seq("12345") }
-      it("should convert a boolean") { opt.strings.get("bool", Seq.empty) shouldBe Seq("true") }
+      it("should convert a string") { opt.strings.getOr("string", Seq.empty) shouldBe Seq("value") }
+      it("should convert an int") { opt.strings.getOr("int", Seq.empty) shouldBe Seq("12345") }
+      it("should convert a boolean") { opt.strings.getOr("bool", Seq.empty) shouldBe Seq("true") }
     }
   }
 
@@ -137,29 +137,29 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     }
 
     describe("when getting a required value with default") {
-      it("should get when present") { opt.boolean.get("bool", default = false) shouldBe true }
-      it("should get when missing") { opt.boolean.get("missing", default = false) shouldBe false }
+      it("should get when present") { opt.boolean.getOr("bool", default = false) shouldBe true }
+      it("should get when missing") { opt.boolean.getOr("missing", default = false) shouldBe false }
     }
 
     describe("when converting other types") {
-      it("should convert a string list") { opt.boolean.get("strings", default = false) shouldBe true }
+      it("should convert a string list") { opt.boolean.getOr("strings", default = false) shouldBe true }
       it(s"should convert a false (empty) string list") {
-        optWith("x" -> Seq.empty).boolean.get("x", default = true) shouldBe false
+        optWith("x" -> Seq.empty).boolean.getOr("x", default = true) shouldBe false
       }
-      it("should convert a string") { opt.boolean.get("string", default = false) shouldBe false }
+      it("should convert a string") { opt.boolean.getOr("string", default = false) shouldBe false }
       for (x <- Seq("true", "TRUE", "True")) {
-        it(s"should convert a true string: $x") { optWith("x" -> x).boolean.get("x", default = false) shouldBe true }
+        it(s"should convert a true string: $x") { optWith("x" -> x).boolean.getOr("x", default = false) shouldBe true }
         it(s"should convert a true (non-empty) string list: $x") {
-          optWith("x" -> Seq(x)).boolean.get("x", default = false) shouldBe true
+          optWith("x" -> Seq(x)).boolean.getOr("x", default = false) shouldBe true
         }
       }
       for (x <- Seq("", "false", "1", "Anything1", "Yes")) {
-        it(s"should convert a false string: $x") { optWith("x" -> x).boolean.get("x", default = true) shouldBe false }
+        it(s"should convert a false string: $x") { optWith("x" -> x).boolean.getOr("x", default = true) shouldBe false }
         it(s"should convert a true (non-empty) string list: $x") {
-          optWith("x" -> Seq(x)).boolean.get("x", default = false) shouldBe true
+          optWith("x" -> Seq(x)).boolean.getOr("x", default = false) shouldBe true
         }
       }
-      it("should convert an int") { opt.boolean.get("int", default = false) shouldBe false }
+      it("should convert an int") { opt.boolean.getOr("int", default = false) shouldBe false }
     }
   }
 
@@ -175,20 +175,20 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     }
 
     describe("when getting a required value with default") {
-      it("should get when present") { opt.int.get("int", -99999) shouldBe 12345 }
-      it("should get when missing") { opt.int.get("missing", -99999) shouldBe -99999 }
+      it("should get when present") { opt.int.getOr("int", -99999) shouldBe 12345 }
+      it("should get when missing") { opt.int.getOr("missing", -99999) shouldBe -99999 }
     }
 
     describe("when converting other types") {
       it("should fail to convert a string") {
-        failOn(opt.int.get("string", -99999)) shouldBe "Expected an integer for string, but got value"
+        failOn(opt.int.getOr("string", -99999)) shouldBe "Expected an integer for string, but got value"
       }
-      it("should convert a string") { optWith("x" -> 98765).int.get("x", -99999) shouldBe 98765 }
+      it("should convert a string") { optWith("x" -> 98765).int.getOr("x", -99999) shouldBe 98765 }
       it("should fail to convert a string list") {
-        failOn(opt.int.get("strings", -99999)) shouldBe "Expected an integer for strings, but got x,y"
+        failOn(opt.int.getOr("strings", -99999)) shouldBe "Expected an integer for strings, but got x,y"
       }
       it("should fail to convert a boolean") {
-        failOn(opt.int.get("bool", -99999)) shouldBe "Expected an integer for bool, but got true"
+        failOn(opt.int.getOr("bool", -99999)) shouldBe "Expected an integer for bool, but got true"
       }
     }
   }

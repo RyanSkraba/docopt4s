@@ -15,34 +15,42 @@ import scala.util.Properties
 trait Docopt {
 
   /** Get option values as a [[String]] */
-  val string: DocoptGet[String]
+  val string: DocoptGet[String, Null]
 
   /** Get option values as an [[Iterable]] String list */
-  val strings: DocoptGet[Iterable[String]]
+  val strings: DocoptGet[Iterable[String], Null]
 
   /** Get option values as a [[Boolean]] */
-  val boolean: DocoptGet[Boolean]
+  val boolean: DocoptGet[Boolean, Null]
 
   /** Get option values as an [[Int]] */
-  val int: DocoptGet[Int] = (key: String) =>
-    string
+  val int: DocoptGet[Int, Null] = new DocoptGet[Int, Null](null) {
+    override def getOption(key: String, vld: Null): Option[Int] = string
       .getOption(key)
       .map(value =>
         value.toIntOption.getOrElse {
           throw new DocoptException(s"Expected an integer for $key, but got $value")
         }
       )
+  }
 
   /** Get option values as a [[Path]] */
-  val path: PathDocoptGet[Path] = (key: String, vld: PathValidator) =>
-    string.getOption(key).map(_ => vld.validate(string.get(key)))
+  val path: DocoptGet[Path, PathValidator] = new DocoptGet[Path, PathValidator](PathValidator().isPath) {
+    override def getOption(key: String, vld: PathValidator): Option[Path] =
+      string.getOption(key).map(_ => vld.validate(string.get(key)))
+  }
 
   /** Get option values as a [[File]] */
-  val file: PathDocoptGet[File] = (key: String, vld: PathValidator) => path.getOption(key, vld.isFile).map(_.toFile)
+  val file: DocoptGet[File, PathValidator] = new DocoptGet[File, PathValidator](PathValidator().isFile) {
+    override def getOption(key: String, vld: PathValidator): Option[File] =
+      path.getOption(key, vld.isFile).map(_.toFile)
+  }
 
   /** Get option values as a [[Directory]] */
-  val dir: PathDocoptGet[Directory] = (key: String, vld: PathValidator) =>
-    path.getOption(key, vld.isDir).map(_.toDirectory)
+  val dir: DocoptGet[Directory, PathValidator] = new DocoptGet[Directory, PathValidator](PathValidator().isDir) {
+    override def getOption(key: String, vld: PathValidator): Option[Directory] =
+      path.getOption(key, vld.isDir).map(_.toDirectory)
+  }
 }
 
 /** Given the option key, finds the option value converted to the expected type. The different methods determine how
@@ -50,52 +58,10 @@ trait Docopt {
   *
   * @tparam T
   *   The expected type of the command line argument.
+  * @tparam VLD
+  *   A helper validator type.
   */
-trait DocoptGet[T] {
-
-  /** @param key
-    *   The option key
-    * @return
-    *   If the key is present and can be transformed to the type, return the transformed option value or [[None]] if not
-    *   present.
-    * @throws DocoptException
-    *   If it is present but can't be converted or is invalid.
-    */
-  @throws[DocoptException]
-  def getOption(key: String): Option[T]
-
-  /** @param key
-    *   The option key
-    * @param default
-    *   The default option value to use if the key is not present.
-    * @return
-    *   If the key is present and can be transformed to the type, return the transformed option value or use the default
-    *   if not present.
-    * @throws DocoptException
-    *   If it is present but can't be converted or is invalid.
-    */
-  @throws[DocoptException]
-  def getOr(key: String, default: T): T = getOption(key).getOrElse(default)
-
-  /** @param key
-    *   The option key
-    * @return
-    *   If the key present and can be transformed to the type, return the transformed argument value.
-    * @throws DocoptException
-    *   If it is not present, or present but can't be converted or is invalid.
-    */
-  @throws[DocoptException]
-  def get(key: String): T = getOption(key).getOrElse { throw new DocoptException(s"Expected $key not found") }
-}
-
-/** Gets path options of a certain type from the command line arguments.
-  *
-  * @tparam T
-  *   The expected type of the command line argument.
-  */
-trait PathDocoptGet[T] {
-
-  val DefaultVld: PathValidator = PathValidator().isPath
+abstract class DocoptGet[T, VLD](DefaultVld: VLD) {
 
   /** @param key
     *   The option key
@@ -108,7 +74,7 @@ trait PathDocoptGet[T] {
     *   If it is present but can't be converted or is invalid.
     */
   @throws[DocoptException]
-  def getOption(key: String, vld: PathValidator = DefaultVld): Option[T]
+  def getOption(key: String, vld: VLD = DefaultVld): Option[T]
 
   /** @param key
     *   The option key
@@ -123,7 +89,7 @@ trait PathDocoptGet[T] {
     *   If it is present but can't be converted or is invalid.
     */
   @throws[DocoptException]
-  def getOr(key: String, default: T, vld: PathValidator = DefaultVld): T = getOption(key, vld).getOrElse(default)
+  def getOr(key: String, default: T, vld: VLD = DefaultVld): T = getOption(key, vld).getOrElse(default)
 
   /** @param key
     *   The option key
@@ -135,7 +101,7 @@ trait PathDocoptGet[T] {
     *   If it is not present, or present but can't be converted or is invalid.
     */
   @throws[DocoptException]
-  def get(key: String, vld: PathValidator = DefaultVld): T = getOption(key, vld).getOrElse {
+  def get(key: String, vld: VLD = DefaultVld): T = getOption(key, vld).getOrElse {
     throw new DocoptException(s"Expected $key not found")
   }
 }
@@ -232,34 +198,34 @@ object Docopt {
   def apply(argMap: Map[String, Any]): Docopt = {
     new Docopt {
 
-      /** Get option values as a String */
-      override val string: DocoptGet[String] = (key: String) =>
-        argMap.get(key) match {
+      override val string: DocoptGet[String, Null] = new DocoptGet[String, Null](null) {
+        override def getOption(key: String, vld: Null): Option[String] = argMap.get(key) match {
           case Some(value: String)                     => Some(value)
           case Some(value: Iterable[String])           => Some(value.mkString(","))
           case Some(value: java.lang.Iterable[String]) => Some(value.asScala.mkString(","))
           case Some(value)                             => Some(value.toString)
           case None                                    => None
         }
+      }
 
-      /** Get option values as a String list */
-      override val strings: DocoptGet[Iterable[String]] = (key: String) =>
-        argMap.get(key) match {
+      override val strings: DocoptGet[Iterable[String], Null] = new DocoptGet[Iterable[String], Null](null) {
+        override def getOption(key: String, vld: Null): Option[Iterable[String]] = argMap.get(key) match {
           case Some(value: String)                     => Some(Seq(value))
           case Some(value: Iterable[String])           => Some(value)
           case Some(value: java.lang.Iterable[String]) => Some(value.asScala)
           case Some(value)                             => Some(Seq(value.toString))
           case None                                    => None
         }
+      }
 
-      /** Get option values as a Boolean list */
-      override val boolean: DocoptGet[Boolean] = (key: String) =>
-        argMap.get(key) match {
+      override val boolean: DocoptGet[Boolean, Null] = new DocoptGet[Boolean, Null](null) {
+        override def getOption(key: String, vld: Null): Option[Boolean] = argMap.get(key) match {
           case Some(value: Iterable[String])           => Some(value.nonEmpty)
           case Some(value: java.lang.Iterable[String]) => Some(value.iterator().hasNext)
           case Some(value)                             => Some(value.toString.toBooleanOption.getOrElse(false))
           case None                                    => None
         }
+      }
     }
   }
 }

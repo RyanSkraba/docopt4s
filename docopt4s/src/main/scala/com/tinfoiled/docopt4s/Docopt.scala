@@ -15,24 +15,24 @@ import scala.util.Properties
 trait Docopt {
 
   /** Get option values as a [[String]] */
-  val string: DocoptGet[String, Null]
+  val string: DocoptGetNoVld[String]
 
   /** Get option values as an [[Iterable]] String list */
-  val strings: DocoptGet[Iterable[String], Null]
+  val strings: DocoptGetNoVld[Iterable[String]]
 
   /** Get option values as a [[Boolean]] */
-  val boolean: DocoptGet[Boolean, Null]
+  val boolean: DocoptGetNoVld[Boolean]
 
   /** Get option values as an [[Int]] */
-  val int: DocoptGet[Int, Null] = new DocoptGet[Int, Null](null) {
-    override def getOption(key: String, vld: Null): Option[Int] = string
+  val int: DocoptGetNoVld[Int] = new DocoptGetNoVld[Int](key =>
+    string
       .getOption(key)
       .map(value =>
         value.toIntOption.getOrElse {
           throw new DocoptException(s"Expected an integer for $key, but got $value")
         }
       )
-  }
+  )
 
   /** Get option values as a [[Path]] */
   val path: DocoptGet[Path, PathValidator] = new DocoptGet[Path, PathValidator](PathValidator().isPath) {
@@ -104,6 +104,10 @@ abstract class DocoptGet[T, VLD](DefaultVld: VLD) {
   def get(key: String, vld: VLD = DefaultVld): T = getOption(key, vld).getOrElse {
     throw new DocoptException(s"Expected $key not found")
   }
+}
+
+class DocoptGetNoVld[T](getter: String => Option[T]) extends DocoptGet[T, Option[Nothing]](None) {
+  override def getOption(key: String, vld: Option[Nothing]): Option[T] = getter(key)
 }
 
 /** Helper to validate option values against an expected filesystem state.
@@ -198,34 +202,29 @@ object Docopt {
   def apply(argMap: Map[String, Any]): Docopt = {
     new Docopt {
 
-      override val string: DocoptGet[String, Null] = new DocoptGet[String, Null](null) {
-        override def getOption(key: String, vld: Null): Option[String] = argMap.get(key) match {
-          case Some(value: String)                     => Some(value)
-          case Some(value: Iterable[String])           => Some(value.mkString(","))
-          case Some(value: java.lang.Iterable[String]) => Some(value.asScala.mkString(","))
-          case Some(value)                             => Some(value.toString)
-          case None                                    => None
-        }
-      }
+      override val string: DocoptGetNoVld[String] = new DocoptGetNoVld[String](argMap.get(_) match {
+        case Some(value: String)                     => Some(value)
+        case Some(value: Iterable[String])           => Some(value.mkString(","))
+        case Some(value: java.lang.Iterable[String]) => Some(value.asScala.mkString(","))
+        case Some(value)                             => Some(value.toString)
+        case None                                    => None
+      })
 
-      override val strings: DocoptGet[Iterable[String], Null] = new DocoptGet[Iterable[String], Null](null) {
-        override def getOption(key: String, vld: Null): Option[Iterable[String]] = argMap.get(key) match {
+      override val strings: DocoptGetNoVld[Iterable[String]] =
+        new DocoptGetNoVld[Iterable[String]](argMap.get(_) match {
           case Some(value: String)                     => Some(Seq(value))
           case Some(value: Iterable[String])           => Some(value)
           case Some(value: java.lang.Iterable[String]) => Some(value.asScala)
           case Some(value)                             => Some(Seq(value.toString))
           case None                                    => None
-        }
-      }
+        })
 
-      override val boolean: DocoptGet[Boolean, Null] = new DocoptGet[Boolean, Null](null) {
-        override def getOption(key: String, vld: Null): Option[Boolean] = argMap.get(key) match {
-          case Some(value: Iterable[String])           => Some(value.nonEmpty)
-          case Some(value: java.lang.Iterable[String]) => Some(value.iterator().hasNext)
-          case Some(value)                             => Some(value.toString.toBooleanOption.getOrElse(false))
-          case None                                    => None
-        }
-      }
+      override val boolean: DocoptGetNoVld[Boolean] = new DocoptGetNoVld[Boolean](argMap.get(_) match {
+        case Some(value: Iterable[String])           => Some(value.nonEmpty)
+        case Some(value: java.lang.Iterable[String]) => Some(value.iterator().hasNext)
+        case Some(value)                             => Some(value.toString.toBooleanOption.getOrElse(false))
+        case None                                    => None
+      })
     }
   }
 }

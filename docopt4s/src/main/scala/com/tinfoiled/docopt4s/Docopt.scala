@@ -23,6 +23,13 @@ trait Docopt {
   /** Get option values as a [[Boolean]] */
   val boolean: DocoptGetNoVld[Boolean]
 
+  /** @param key
+    *   The option key
+    * @return
+    *   True only if the flag is present (and evaluates to true) else false.
+    */
+  def flag(key: String): Boolean = boolean.getOr(key, false)
+
   /** Get option values as an [[Int]] */
   val int: DocoptGetNoVld[Int] = new DocoptGetNoVld[Int](key =>
     string

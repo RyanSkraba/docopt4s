@@ -141,6 +141,11 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       it("should get when missing") { opt.boolean.getOr("missing", default = false) shouldBe false }
     }
 
+    describe("when using the flat shortcut") {
+      it("should get when present") { opt.flag("bool") shouldBe true }
+      it("should get when missing") { opt.flag("missing") shouldBe false }
+    }
+
     describe("when converting other types") {
       it("should convert a string list") { opt.boolean.getOr("strings", default = false) shouldBe true }
       it(s"should convert a false (empty) string list") {

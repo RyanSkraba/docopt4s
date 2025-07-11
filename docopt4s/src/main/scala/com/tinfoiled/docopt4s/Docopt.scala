@@ -176,6 +176,7 @@ case class PathValidator(
   }
 
   def withTag(tag: String): PathValidator = copy(tag = Some(tag))
+  def withRoot(root: String): PathValidator = copy(tag = Some(root))
   def isPath: PathValidator = copy(ifIsDir = None)
   def isDir: PathValidator = copy(ifIsDir = Some(true))
   def isFile: PathValidator = copy(ifIsDir = Some(false))

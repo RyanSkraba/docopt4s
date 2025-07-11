@@ -199,6 +199,9 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
   }
 
   describe("Testing the getPath methods") {
+
+    // TODO: withRoot tests
+
     describe("when getting an optional value") {
       it("should get when present") { opt.path.getOption("dir") shouldBe Some(Tmp) }
       it("should get when missing") { opt.path.getOption("missing") shouldBe None }

@@ -3,7 +3,6 @@ package com.tinfoiled.docopt4s.testkit
 import com.tinfoiled.docopt4s.AnsiConsole.withConsoleMatch
 import com.tinfoiled.docopt4s.{MultiTaskMain, Task, DocoptException}
 import org.scalactic.source
-import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funspec.AnyFunSpecLike
 import org.scalatest.matchers.should.Matchers
 
@@ -12,8 +11,7 @@ import scala.reflect.ClassTag
 /** Unit test specification base for an [[MultiTaskMain]] */
 abstract class MultiTaskMainSpec(protected val Main: MultiTaskMain, protected val Task: Option[Task] = None)
     extends AnyFunSpecLike
-    with Matchers
-    with BeforeAndAfterAll {
+    with Matchers {
 
   /** The Docopt for the Task (if present) but defaulting to the Cli if not. */
   lazy val Doc: String = Task.map(_.Doc).getOrElse(Main.Doc)

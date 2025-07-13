@@ -4,8 +4,8 @@ import org.scalatest.{BeforeAndAfterAll, Suite}
 
 import scala.reflect.io.{Directory, File, Path}
 
-/** Trait for creating a temporary directory and deleting it after the suite is done.  */
-trait TmpDir extends BeforeAndAfterAll {this: Suite =>
+/** Trait for creating a temporary directory and deleting it after the suite is done. */
+trait TmpDir extends BeforeAndAfterAll { this: Suite =>
 
   /** A local temporary directory for test file storage. */
   val Tmp: Directory = Directory.makeTemp(getClass.getSimpleName)
@@ -21,9 +21,9 @@ trait TmpDir extends BeforeAndAfterAll {this: Suite =>
   val NonExistingPath: Path = nonExisting(Tmp)
 
   /** @return a path that is guaranteed not to exist when the method is called */
-  def nonExisting(path: Directory, tag: String="nox"): Path = {
-    if(!(path/tag).exists) return path / tag
-    LazyList.from(1).map(tag+_).map(path/_).filterNot(_.exists).head
+  def nonExisting(path: Directory, tag: String = "nox"): Path = {
+    if (!(path / tag).exists) return path / tag
+    LazyList.from(1).map(tag + _).map(path / _).filterNot(_.exists).head
   }
 
   /** Delete temporary resources after the script. */

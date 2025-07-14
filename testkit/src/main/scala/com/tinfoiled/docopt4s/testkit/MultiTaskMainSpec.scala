@@ -88,15 +88,6 @@ abstract class MultiTaskMainSpec(protected val Main: MultiTaskMain, protected va
     */
   def interceptGoDocoptEx(args: Any*): DocoptException = interceptGo[DocoptException](args: _*)
 
-  /** A helper method used to capture an [[IllegalArgumentException]] thrown by [[withGo]]
-    *
-    * @param args
-    *   String arguments to pass to the [[MultiTaskMain.go()]] method
-    * @return
-    *   The exception thrown when the arguments are run
-    */
-  def interceptGoIAEx(args: Any*): IllegalArgumentException = interceptGo[IllegalArgumentException](args: _*)
-
   /** Run tests on the --help and --version flags that cause a system exit. */
   val itShouldThrowOnHelpAndVersionFlags: () => Unit = () => {
 

@@ -8,6 +8,7 @@ import org.scalatest.matchers.should.Matchers
 class TmpDirSpec extends AnyFunSpecLike with Matchers with TmpDir {
 
   override def afterAll(): Unit = {
+    Tmp.jfile should exist
     super.afterAll()
     // Check that the cleanup succeeded
     Tmp.jfile shouldNot exist
@@ -29,5 +30,29 @@ class TmpDirSpec extends AnyFunSpecLike with Matchers with TmpDir {
       nonExisting(Tmp).jfile shouldNot exist
       nonExisting(Tmp).name shouldBe "nox1"
     }
+  }
+}
+
+/** Unit tests for [[TmpDir]] with [[TmpDir.Keep]] set to True */
+class TmpDirKeepSpec extends AnyFunSpecLike with Matchers with TmpDir {
+
+  override lazy val Keep: Boolean = true;
+
+  describe(s"Using TmpDir") {
+    it("should create a temporary directory and some resources") {
+      Tmp.jfile should exist
+      Pwd.jfile should exist
+    }
+  }
+
+  override def afterAll(): Unit = {
+    Tmp.jfile should exist
+    super.afterAll()
+    // When Keep is true, the temporary file shouldn't be deleted at the end.
+    Tmp.jfile should exist
+    // But we'll clean it up manually anyway.
+    try { Tmp.deleteRecursively() }
+    catch { case ex: Exception => ex.printStackTrace() }
+    Tmp.jfile shouldNot exist
   }
 }

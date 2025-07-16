@@ -20,6 +20,9 @@ trait TmpDir extends BeforeAndAfterAll { this: Suite =>
   /** A simple file that is guaranteed not to exist at the start. */
   val NonExistingPath: Path = nonExisting(Tmp)
 
+  /** Override this to keep the temporary directory after writing. */
+  lazy val Keep: Boolean = false
+
   /** @return a path that is guaranteed not to exist when the method is called */
   def nonExisting(path: Directory, tag: String = "nox"): Path = {
     if (!(path / tag).exists) return path / tag
@@ -29,7 +32,9 @@ trait TmpDir extends BeforeAndAfterAll { this: Suite =>
   /** Delete temporary resources after the script. */
   override protected def afterAll(): Unit = {
     super.afterAll()
-    try { Tmp.deleteRecursively() }
-    catch { case ex: Exception => ex.printStackTrace() }
+    if (!Keep) {
+      try { Tmp.deleteRecursively() }
+      catch { case ex: Exception => ex.printStackTrace() }
+    }
   }
 }

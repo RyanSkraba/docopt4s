@@ -14,17 +14,20 @@ trait TmpDir extends BeforeAndAfterAll { this: Suite =>
   val Pwd: Directory = Directory(".").toCanonical.toDirectory
 
   /** A file with a basic scenario. */
-  val ExistingFile: File = (Tmp / "file.txt").createFile()
-  ExistingFile.writeAll("file")
+  lazy val ExistingFile: File = {
+    val existing=nonExisting(Tmp, "existing.txt").toFile
+    existing.writeAll("file")
+    existing
+  }
 
   /** A simple file that is guaranteed not to exist at the start. */
-  val NonExistingPath: Path = nonExisting(Tmp)
+  val NonExistingPath: Path = nonExisting()
 
   /** Override this to keep the temporary directory after writing. */
   lazy val Keep: Boolean = false
 
   /** @return a path that is guaranteed not to exist when the method is called */
-  def nonExisting(path: Directory, tag: String = "nox"): Path = {
+  def nonExisting(path: Directory=Tmp, tag: String = "nox"): Path = {
     if (!(path / tag).exists) return path / tag
     LazyList.from(1).map(tag + _).map(path / _).filterNot(_.exists).head
   }

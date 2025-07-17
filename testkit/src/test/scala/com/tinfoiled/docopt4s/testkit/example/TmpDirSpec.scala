@@ -15,20 +15,24 @@ class TmpDirSpec extends AnyFunSpecLike with Matchers with TmpDir {
   }
 
   describe(s"Using TmpDir") {
-    it("should create a temporary directory and some resources") {
-      Tmp.jfile should exist
-      Pwd.jfile should exist
+    it("should create a temporary directory") {      Tmp.jfile should exist    }
 
-      // An existing file and a non-existing file
+    it("should create a resource when requested") {
+      // The file doesn't exist until it is used.
+      Tmp.list shouldBe empty
       ExistingFile.jfile should exist
+      Tmp.list should have size 1
+    }
+
+    it("should paths that don't exist on demand") {
       NonExistingPath.jfile shouldNot exist
       NonExistingPath.name shouldBe "nox"
 
       // Creating new non-existing files by incrementing
       NonExistingPath.toFile.writeAll("")
       NonExistingPath.jfile should exist
-      nonExisting(Tmp).jfile shouldNot exist
-      nonExisting(Tmp).name shouldBe "nox1"
+      nonExisting().jfile shouldNot exist
+      nonExisting().name shouldBe "nox1"
     }
   }
 }
@@ -39,9 +43,8 @@ class TmpDirKeepSpec extends AnyFunSpecLike with Matchers with TmpDir {
   override lazy val Keep: Boolean = true;
 
   describe(s"Using TmpDir") {
-    it("should create a temporary directory and some resources") {
+    it("should create a temporary directory") {
       Tmp.jfile should exist
-      Pwd.jfile should exist
     }
   }
 

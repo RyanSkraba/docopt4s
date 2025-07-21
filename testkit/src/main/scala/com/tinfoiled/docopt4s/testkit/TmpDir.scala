@@ -15,7 +15,7 @@ trait TmpDir extends BeforeAndAfterAll { this: Suite =>
 
   /** A file with a basic scenario. */
   lazy val ExistingFile: File = {
-    val existing=nonExisting(Tmp, "existing.txt").toFile
+    val existing = nonExisting(Tmp, "existing.txt").toFile
     existing.writeAll("file")
     existing
   }
@@ -27,7 +27,7 @@ trait TmpDir extends BeforeAndAfterAll { this: Suite =>
   lazy val Keep: Boolean = false
 
   /** @return a path that is guaranteed not to exist when the method is called */
-  def nonExisting(path: Directory=Tmp, tag: String = "nox"): Path = {
+  def nonExisting(path: Directory = Tmp, tag: String = "nox"): Path = {
     if (!(path / tag).exists) return path / tag
     LazyList.from(1).map(tag + _).map(path / _).filterNot(_.exists).head
   }

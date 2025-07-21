@@ -15,7 +15,7 @@ class TmpDirSpec extends AnyFunSpecLike with Matchers with TmpDir {
   }
 
   describe(s"Using TmpDir") {
-    it("should create a temporary directory") {      Tmp.jfile should exist    }
+    it("should create a temporary directory") { Tmp.jfile should exist }
 
     it("should create a resource when requested") {
       // The file doesn't exist until it is used.

@@ -9,7 +9,7 @@ object ExampleGo extends MultiTaskMain {
 
   override lazy val Version: String = "0.0.5-SNAPSHOT"
 
-  override lazy val Tasks: Seq[Task] = Seq(Example1Task, Example2Task)
+  override lazy val Tasks: Seq[Task] = Seq(DumpTask, NavalFateTask)
 
   override lazy val Doc: String = "An example command line interface with multiple tasks.\n\n" + SimpleDoc
 

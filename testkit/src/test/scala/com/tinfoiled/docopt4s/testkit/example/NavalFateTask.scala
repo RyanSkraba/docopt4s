@@ -5,7 +5,7 @@ import com.tinfoiled.docopt4s.{Docopt, DocoptException, Task}
 /** An example task that can be integrated into the main [[ExampleGo]] driver. This implements the standard Naval Fate
   * docopt example.
   */
-object Example2Task extends Task {
+object NavalFateTask extends Task {
 
   val Cmd = "naval_fate"
 

@@ -2,8 +2,8 @@ package com.tinfoiled.docopt4s.testkit.example
 
 import com.tinfoiled.docopt4s.testkit.MultiTaskMainSpec
 
-/** Unit tests for [[Example2Task]] */
-class Example2TaskSpec extends MultiTaskMainSpec(ExampleGo, Some(Example2Task)) {
+/** Unit tests for [[NavalFateTask]] */
+class NavalFateTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(NavalFateTask)) {
 
   /*
   """$Description

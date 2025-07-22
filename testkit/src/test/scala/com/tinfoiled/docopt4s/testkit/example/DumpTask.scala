@@ -2,10 +2,10 @@ package com.tinfoiled.docopt4s.testkit.example
 
 import com.tinfoiled.docopt4s.{Docopt, Task}
 
-/** An example task that can be integrated into the main [[ExampleGo]] driver. */
-object Example1Task extends Task {
+/** An example task that only writes information about all the arguments it has parsed. */
+object DumpTask extends Task {
 
-  val Cmd = "example1"
+  val Cmd = "dump"
 
   val Description = "The first example task for the utility."
 

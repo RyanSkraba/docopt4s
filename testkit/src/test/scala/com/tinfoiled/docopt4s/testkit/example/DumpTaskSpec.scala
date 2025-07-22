@@ -2,8 +2,8 @@ package com.tinfoiled.docopt4s.testkit.example
 
 import com.tinfoiled.docopt4s.testkit.MultiTaskMainSpec
 
-/** Unit tests for [[Example1Task]] */
-class Example1TaskSpec extends MultiTaskMainSpec(ExampleGo, Some(Example1Task)) {
+/** Unit tests for [[DumpTask]] */
+class DumpTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(DumpTask)) {
 
   describe(s"Standard ${Main.Name} $TaskCmd command line help, versions and exceptions") {
     itShouldThrowOnHelpAndVersionFlags()

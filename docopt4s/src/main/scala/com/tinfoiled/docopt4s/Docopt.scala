@@ -113,6 +113,12 @@ abstract class DocoptGet[T, VLD](DefaultVld: VLD) {
   }
 }
 
+/** A [[DocoptGet]] that doesn't require or use a validator.
+  * @param getter
+  *   A helper method to get the option value.
+  * @tparam T
+  *   The expected type of the command line argument.
+  */
 class DocoptGetNoVld[T](getter: String => Option[T]) extends DocoptGet[T, Option[Nothing]](None) {
   override def getOption(key: String, vld: Option[Nothing]): Option[T] = getter(key)
 }

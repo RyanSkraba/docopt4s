@@ -47,41 +47,36 @@ class NavalFateTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(NavalFateTask)
   describe("When running the ship sub-subtask ") {
 
     it("should accept 'ship new' with name arguments") {
-      withGoMatching(TaskCmd, "ship", "new", "titanic") { case (stdout, stderr) =>
-        stderr shouldBe empty
-        stdout shouldBe
+      withGoStdout(TaskCmd, "ship", "new", "titanic") shouldBe
           """Creating ship: titanic
             |""".stripMargin
-      }
-      withGoMatching(TaskCmd, "ship", "new", "titanic", "minnow") { case (stdout, stderr) =>
-        stderr shouldBe empty
-        stdout shouldBe
+      withGoStdout(TaskCmd, "ship", "new", "titanic", "minnow") shouldBe
           """Creating ship: titanic
             |Creating ship: minnow
             |""".stripMargin
-      }
     }
 
     it("should accept 'ship <name> move' with the default speed") {
-      withGoMatching(TaskCmd, "ship", "titanic", "move", "123", "987") { case (stdout, stderr) =>
-        stderr shouldBe empty
-        stdout shouldBe
+      withGoStdout(TaskCmd, "ship", "titanic", "move", "123", "987") shouldBe
           """Moving titanic ship
             |  to coordinates (123, 987)
             |  at speed 10
             |""".stripMargin
-      }
-    }
+          }
 
     it("should accept 'ship <name> move' with a specific speed") {
-      withGoMatching(TaskCmd, "ship", "titanic", "move", "123", "987", "--speed", "-123") { case (stdout, stderr) =>
-        stderr shouldBe empty
-        stdout shouldBe
+      withGoStdout(TaskCmd, "ship", "titanic", "move", "123", "987", "--speed", "-123") shouldBe
           """Moving titanic ship
             |  to coordinates (123, 987)
             |  at speed -123
             |""".stripMargin
-      }
+          }
+
+    it("should accept the mining commands") {
+      withGoStdout(TaskCmd, "mine", "set", "10", "20")  shouldBe
+          """Setting a mine
+            |  at coordinates (10, 20)
+            |""".stripMargin
     }
   }
 }

@@ -42,6 +42,11 @@ object NavalFateTask extends Task {
         |  at speed ${opt.int.get("--speed")}""".stripMargin)
     } else if (opt.boolean.get("ship") && opt.boolean.get("shoot")) {
       println(s"Shooting at coordinates (${opt.int.get("<x>")}, ${opt.int.get("<y>")})")
+    } else if (opt.boolean.get("mine")) {
+      val verb = if (opt.flag("set")) "Setting" else "Removing"
+      val adjective = if (opt.flag("--moored")) "moored" else if(opt.flag("--drifting")) "drifting"  else ""
+      println(s"""$verb a ${adjective}mine
+                 |  at coordinates (${opt.int.get("<x>")}, ${opt.int.get("<y>")})""".stripMargin)
     } else {
       throw new DocoptException("Unknown parsing error")
     }

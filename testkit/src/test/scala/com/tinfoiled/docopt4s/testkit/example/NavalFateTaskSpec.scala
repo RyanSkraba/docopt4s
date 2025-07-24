@@ -74,9 +74,26 @@ class NavalFateTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(NavalFateTask)
 
     it("should accept the mining commands") {
       withGoStdout(TaskCmd, "mine", "set", "10", "20")  shouldBe
-          """Setting a mine
-            |  at coordinates (10, 20)
-            |""".stripMargin
+        """Setting a mine
+          |  at coordinates (10, 20)
+          |""".stripMargin
+      withGoStdout(TaskCmd, "mine", "remove", "10", "20")  shouldBe
+        """Removing a mine
+          |  at coordinates (10, 20)
+          |""".stripMargin
+      withGoStdout(TaskCmd, "mine", "set", "10", "20", "--drifting")  shouldBe
+        """Setting a drifting mine
+          |  at coordinates (10, 20)
+          |""".stripMargin
+      withGoStdout(TaskCmd, "mine", "remove", "10", "20", "--moored")  shouldBe
+        """Removing a moored mine
+          |  at coordinates (10, 20)
+          |""".stripMargin
+      // Note the partial flag
+      withGoStdout(TaskCmd, "mine", "remove", "10", "20", "--dri")  shouldBe
+        """Removing a drifting mine
+          |  at coordinates (10, 20)
+          |""".stripMargin
     }
   }
 }

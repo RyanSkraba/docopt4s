@@ -78,7 +78,7 @@ abstract class MultiTaskMainSpec(protected val Main: MultiTaskMain, protected va
    *   The stdout
    */
   def withGoStdout(args: Any*): String = withGoMatching(args: _*) {
-    case (stderr, stdout) =>
+    case (stdout, stderr) =>
     stderr shouldBe empty
       stdout
   }

@@ -44,7 +44,7 @@ object NavalFateTask extends Task {
       println(s"Shooting at coordinates (${opt.int.get("<x>")}, ${opt.int.get("<y>")})")
     } else if (opt.boolean.get("mine")) {
       val verb = if (opt.flag("set")) "Setting" else "Removing"
-      val adjective = if (opt.flag("--moored")) "moored" else if(opt.flag("--drifting")) "drifting"  else ""
+      val adjective = if (opt.flag("--moored")) "moored " else if(opt.flag("--drifting")) "drifting "  else ""
       println(s"""$verb a ${adjective}mine
                  |  at coordinates (${opt.int.get("<x>")}, ${opt.int.get("<y>")})""".stripMargin)
     } else {

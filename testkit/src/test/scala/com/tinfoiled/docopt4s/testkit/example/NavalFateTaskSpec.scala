@@ -48,49 +48,49 @@ class NavalFateTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(NavalFateTask)
 
     it("should accept 'ship new' with name arguments") {
       withGoStdout(TaskCmd, "ship", "new", "titanic") shouldBe
-          """Creating ship: titanic
+        """Creating ship: titanic
             |""".stripMargin
       withGoStdout(TaskCmd, "ship", "new", "titanic", "minnow") shouldBe
-          """Creating ship: titanic
+        """Creating ship: titanic
             |Creating ship: minnow
             |""".stripMargin
     }
 
     it("should accept 'ship <name> move' with the default speed") {
       withGoStdout(TaskCmd, "ship", "titanic", "move", "123", "987") shouldBe
-          """Moving titanic ship
+        """Moving titanic ship
             |  to coordinates (123, 987)
             |  at speed 10
             |""".stripMargin
-          }
+    }
 
     it("should accept 'ship <name> move' with a specific speed") {
       withGoStdout(TaskCmd, "ship", "titanic", "move", "123", "987", "--speed", "-123") shouldBe
-          """Moving titanic ship
+        """Moving titanic ship
             |  to coordinates (123, 987)
             |  at speed -123
             |""".stripMargin
-          }
+    }
 
     it("should accept the mining commands") {
-      withGoStdout(TaskCmd, "mine", "set", "10", "20")  shouldBe
+      withGoStdout(TaskCmd, "mine", "set", "10", "20") shouldBe
         """Setting a mine
           |  at coordinates (10, 20)
           |""".stripMargin
-      withGoStdout(TaskCmd, "mine", "remove", "10", "20")  shouldBe
+      withGoStdout(TaskCmd, "mine", "remove", "10", "20") shouldBe
         """Removing a mine
           |  at coordinates (10, 20)
           |""".stripMargin
-      withGoStdout(TaskCmd, "mine", "set", "10", "20", "--drifting")  shouldBe
+      withGoStdout(TaskCmd, "mine", "set", "10", "20", "--drifting") shouldBe
         """Setting a drifting mine
           |  at coordinates (10, 20)
           |""".stripMargin
-      withGoStdout(TaskCmd, "mine", "remove", "10", "20", "--moored")  shouldBe
+      withGoStdout(TaskCmd, "mine", "remove", "10", "20", "--moored") shouldBe
         """Removing a moored mine
           |  at coordinates (10, 20)
           |""".stripMargin
       // Note the partial flag
-      withGoStdout(TaskCmd, "mine", "remove", "10", "20", "--dri")  shouldBe
+      withGoStdout(TaskCmd, "mine", "remove", "10", "20", "--dri") shouldBe
         """Removing a drifting mine
           |  at coordinates (10, 20)
           |""".stripMargin

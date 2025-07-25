@@ -70,17 +70,16 @@ abstract class MultiTaskMainSpec(protected val Main: MultiTaskMain, protected va
   def withGo(args: Any*): (String, String) = withGoMatching(args: _*) { case any => any }
 
   /** A helper method used to capture the console of a Cli execution and return only stdout, ensuring that nothing is
-   *  written to stderr.
-   *
-   * @param args
-   *   String arguments to pass to the [[MultiTaskMain.go()]] method
-   * @return
-   *   The stdout
-   */
-  def withGoStdout(args: Any*): String = withGoMatching(args: _*) {
-    case (stdout, stderr) =>
+    * written to stderr.
+    *
+    * @param args
+    *   String arguments to pass to the [[MultiTaskMain.go()]] method
+    * @return
+    *   The stdout
+    */
+  def withGoStdout(args: Any*): String = withGoMatching(args: _*) { case (stdout, stderr) =>
     stderr shouldBe empty
-      stdout
+    stdout
   }
 
   /** A helper method used to capture an exception thrown by [[withGo]]

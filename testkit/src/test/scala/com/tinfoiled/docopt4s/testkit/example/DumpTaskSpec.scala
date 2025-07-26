@@ -9,8 +9,9 @@ class DumpTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(DumpTask)) {
     itShouldThrowOnHelpAndVersionFlags()
     itShouldThrowOnUnknownFlag()
     itShouldThrowOnIncompleteArgs(Seq.empty)
-    itShouldThrowOnMissingFlagValue(Seq("arg", "--default"))
-    itShouldThrowOnIncompatibleOpts(Seq("arg", "--options", "--default", "dflt"))
+    itShouldThrowOnIncompleteArgs(Seq("unknown"))
+    itShouldThrowOnMissingFlagValue(Seq("string", "arg", "--default"))
+    itShouldThrowOnIncompatibleOpts(Seq("string", "arg", "--options", "--default", "dflt"))
   }
 
   describe("When running without any flags") {

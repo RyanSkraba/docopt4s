@@ -26,7 +26,7 @@ trait Docopt {
   /** @param key
     *   The option key
     * @return
-    *   True only if the flag is present (and evaluates to true) else false.
+    *   True only if the option key is present (and the value evaluates to true) else false.
     */
   def flag(key: String): Boolean = boolean.getOr(key, false)
 

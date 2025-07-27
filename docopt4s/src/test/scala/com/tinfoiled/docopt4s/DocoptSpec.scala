@@ -141,8 +141,12 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       it("should get when missing") { opt.boolean.getOr("missing", default = false) shouldBe false }
     }
 
-    describe("when using the flat shortcut") {
+    describe("when using the flag shortcut") {
       it("should get when present") { opt.flag("bool") shouldBe true }
+      for (falsey <- Seq(false, "false", "tru", "yes", 1, 0, Seq.empty))
+        it(s"should get when  ${falsey.getClass}:'$falsey''") { optWith("x" -> falsey).flag("x") shouldBe false }
+      for (truthy <- Seq(true, "true", "TruE", "TRUE", Seq("false")))
+        it(s"should get when  ${truthy.getClass}:'$truthy''") { optWith("x" -> truthy).flag("x") shouldBe true }
       it("should get when missing") { opt.flag("missing") shouldBe false }
     }
 

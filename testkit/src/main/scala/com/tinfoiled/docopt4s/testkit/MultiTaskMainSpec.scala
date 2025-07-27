@@ -141,6 +141,7 @@ abstract class MultiTaskMainSpec(protected val Main: MultiTaskMain, protected va
     it("throws an exception on missing options: " + allArgs.mkString(" ")) {
       val t = interceptGoDocoptEx(allArgs: _*)
       t.docopt shouldBe Doc
+      // TODO: This could be a better message
       t.getMessage shouldBe null
     }
   }

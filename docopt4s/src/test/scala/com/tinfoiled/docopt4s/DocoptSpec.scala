@@ -143,10 +143,6 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
     describe("when using the flag shortcut") {
       it("should get when present") { opt.flag("bool") shouldBe true }
-      for (falsey <- Seq(false, "false", "tru", "yes", 1, 0, Seq.empty))
-        it(s"should get when  ${falsey.getClass}:'$falsey''") { optWith("x" -> falsey).flag("x") shouldBe false }
-      for (truthy <- Seq(true, "true", "TruE", "TRUE", Seq("false")))
-        it(s"should get when  ${truthy.getClass}:'$truthy''") { optWith("x" -> truthy).flag("x") shouldBe true }
       it("should get when missing") { opt.flag("missing") shouldBe false }
     }
 
@@ -156,19 +152,34 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
         optWith("x" -> Seq.empty).boolean.getOr("x", default = true) shouldBe false
       }
       it("should convert a string") { opt.boolean.getOr("string", default = false) shouldBe false }
-      for (x <- Seq("true", "TRUE", "True")) {
-        it(s"should convert a true string: $x") { optWith("x" -> x).boolean.getOr("x", default = false) shouldBe true }
-        it(s"should convert a true (non-empty) string list: $x") {
-          optWith("x" -> Seq(x)).boolean.getOr("x", default = false) shouldBe true
+      for (x <- Seq(true, "true", "TRUE", "True")) {
+        describe(s"when converting ${x.getClass}:'$x'") {
+          it(s"should convert true values") {
+            optWith("x" -> x).boolean.get("x") shouldBe true
+            optWith("x" -> x).boolean.getOr("x", default = false) shouldBe true
+          }
+          it(s"should be the same as the flag shortcut") {
+            optWith("x" -> x).flag("x") shouldBe true
+          }
+          it(s"any (non-empty) string list resolves as true") {
+            optWith("x" -> Seq(x)).boolean.getOr("x", default = false) shouldBe true
+          }
         }
       }
-      for (x <- Seq("", "false", "1", "Anything1", "Yes")) {
-        it(s"should convert a false string: $x") { optWith("x" -> x).boolean.getOr("x", default = true) shouldBe false }
-        it(s"should convert a true (non-empty) string list: $x") {
-          optWith("x" -> Seq(x)).boolean.getOr("x", default = false) shouldBe true
+      for (x <- Seq(false, "false", "tru", "yes", 1, 0, Seq.empty, "1", "Anything1", "Yes", "")) {
+        describe(s"when converting ${x.getClass}:'$x'") {
+          it(s"should convert false values") {
+            optWith("x" -> x).boolean.get("x") shouldBe false
+            optWith("x" -> x).boolean.getOr("x", default = true) shouldBe false
+          }
+          it(s"should be the same as the flag shortcut") {
+            optWith("x" -> x).flag("x") shouldBe false
+          }
+          it(s"any (non-empty) string list resolves as true") {
+            optWith("x" -> Seq(x)).boolean.getOr("x", default = false) shouldBe true
+          }
         }
       }
-      it("should convert an int") { opt.boolean.getOr("int", default = false) shouldBe false }
     }
   }
 

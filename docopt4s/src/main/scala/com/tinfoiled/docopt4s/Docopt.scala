@@ -217,27 +217,27 @@ object Docopt {
     new Docopt {
 
       override val string: DocoptGetNoVld[String] = new DocoptGetNoVld[String](argMap.get(_) match {
-        case Some(value: String)                     => Some(value)
-        case Some(value: Iterable[String])           => Some(value.mkString(","))
-        case Some(value: java.lang.Iterable[String]) => Some(value.asScala.mkString(","))
-        case Some(value)                             => Some(value.toString)
-        case None                                    => None
+        case Some(value: String)                => Some(value)
+        case Some(value: Iterable[_])           => Some(value.mkString(","))
+        case Some(value: java.lang.Iterable[_]) => Some(value.asScala.mkString(","))
+        case Some(value)                        => Some(value.toString)
+        case None                               => None
       })
 
       override val strings: DocoptGetNoVld[Iterable[String]] =
         new DocoptGetNoVld[Iterable[String]](argMap.get(_) match {
-          case Some(value: String)                     => Some(Seq(value))
-          case Some(value: Iterable[String])           => Some(value)
-          case Some(value: java.lang.Iterable[String]) => Some(value.asScala)
-          case Some(value)                             => Some(Seq(value.toString))
-          case None                                    => None
+          case Some(value: String)                => Some(Seq(value))
+          case Some(value: Iterable[_])           => Some(value.map(_.toString))
+          case Some(value: java.lang.Iterable[_]) => Some(value.asScala.map(_.toString))
+          case Some(value)                        => Some(Seq(value.toString))
+          case None                               => None
         })
 
       override val boolean: DocoptGetNoVld[Boolean] = new DocoptGetNoVld[Boolean](argMap.get(_) match {
-        case Some(value: Iterable[String])           => Some(value.nonEmpty)
-        case Some(value: java.lang.Iterable[String]) => Some(value.iterator().hasNext)
-        case Some(value)                             => Some(value.toString.toBooleanOption.getOrElse(false))
-        case None                                    => None
+        case Some(value: Iterable[_])           => Some(value.nonEmpty)
+        case Some(value: java.lang.Iterable[_]) => Some(value.iterator().hasNext)
+        case Some(value)                        => Some(value.toString.toBooleanOption.getOrElse(false))
+        case None                               => None
       })
     }
   }

@@ -141,13 +141,13 @@ trait AnsiConsole {
       }
       .mkString(" ")
 
-  /** Only if verbose is turned on, calls [[Console.print]] on the input. */
+  /** Only if verbose is turned on, calls {{Console.print}} on the input. */
   def vPrint(in: => Any): Unit = if (_verbose) _print.getOrElse(Console.print _)(in)
 
-  /** Only if verbose is turned on, calls [[Console.println]] on the input. */
+  /** Only if verbose is turned on, calls {{Console.println}} on the input. */
   def vPrintln(in: => Any): Unit = if (_verbose) _print.map(_(in.toString + "\n")).getOrElse(Console.println(in))
 
-  /** Only if verbose is turned on, calls [[Console.println]] on the input. */
+  /** Only if verbose is turned on, calls {{Console.println}} on the input. */
   def vPrintln(): Unit = if (_verbose) _print.map(_("\n")).getOrElse(Console.println())
 
   /** Prompt the user and execute a function based on the response.
@@ -163,12 +163,12 @@ trait AnsiConsole {
     * @param qFn
     *   A function to execute if the prompt is to abort (q), by default this is sys.exit(1)
     * @param otherFn
-    *   A function to execute on other lines. This returns [[None]] if the prompt should be retried, {{Some(None)}} if
-    *   [[None]] is the final answer, and {{Some(Some(x))}} if {{x}} should be returned.
+    *   A function to execute on other lines. This returns {{None}} if the prompt should be retried, {{Some(None)}} if
+    *   {{None}} is the final answer, and {{Some(Some(x))}} if {{x}} should be returned.
     * @tparam T
     *   The return value of the function
     * @return
-    *   The value returned by the function that was executed, or None if no function was called.
+    *   The value returned by the function that was executed, or {{None} if no function was called.
     */
   def ask[T](prompt: String)(
       yFn: => T,
@@ -212,7 +212,7 @@ object AnsiConsole {
 
   /** A helper method used to capture the console and apply it to a partial function.
     * @param thunk
-    *   code to execute that may use Console.out and Console.err print streams
+    *   code to execute that may use {{Console.out}} and {{Console.err}} print streams
     * @param pf
     *   A partial function to apply matchers
     * @tparam T

@@ -14,13 +14,13 @@ import scala.util.Properties
   */
 trait Docopt {
 
-  /** Get option values as a [[String]] */
+  /** Get option values as a {{String}} */
   val string: DocoptGetNoVld[String]
 
-  /** Get option values as an [[Iterable]] String list */
+  /** Get option values as an {{Iterable}} String list */
   val strings: DocoptGetNoVld[Iterable[String]]
 
-  /** Get option values as a [[Boolean]] */
+  /** Get option values as a {{Boolean}} */
   val boolean: DocoptGetNoVld[Boolean]
 
   /** @param key
@@ -30,7 +30,7 @@ trait Docopt {
     */
   def flag(key: String): Boolean = boolean.getOr(key, false)
 
-  /** Get option values as an [[Int]] */
+  /** Get option values as an {{Int}} */
   val int: DocoptGetNoVld[Int] = new DocoptGetNoVld[Int](key =>
     string
       .getOption(key)
@@ -41,19 +41,19 @@ trait Docopt {
       )
   )
 
-  /** Get option values as a [[Path]] */
+  /** Get option values as a {{Path}} */
   val path: DocoptGet[Path, PathValidator] = new DocoptGet[Path, PathValidator](PathValidator().isPath) {
     override def getOption(key: String, vld: PathValidator): Option[Path] =
       string.getOption(key).map(_ => vld.validate(string.get(key)))
   }
 
-  /** Get option values as a [[File]] */
+  /** Get option values as a {{File}} */
   val file: DocoptGet[File, PathValidator] = new DocoptGet[File, PathValidator](PathValidator().isFile) {
     override def getOption(key: String, vld: PathValidator): Option[File] =
       path.getOption(key, vld.isFile).map(_.toFile)
   }
 
-  /** Get option values as a [[Directory]] */
+  /** Get option values as a {{Directory}} */
   val dir: DocoptGet[Directory, PathValidator] = new DocoptGet[Directory, PathValidator](PathValidator().isDir) {
     override def getOption(key: String, vld: PathValidator): Option[Directory] =
       path.getOption(key, vld.isDir).map(_.toDirectory)
@@ -61,7 +61,7 @@ trait Docopt {
 }
 
 /** Given the option key, finds the option value converted to the expected type. The different methods determine how
-  * missing option keys are treated: as an error, using a default or as a Scala [[Option]].
+  * missing option keys are treated: as an error, using a default or as a Scala {{Option}}.
   *
   * @tparam T
   *   The expected type of the command line argument.
@@ -75,7 +75,7 @@ abstract class DocoptGet[T, VLD](DefaultVld: VLD) {
     * @param vld
     *   The validator used to check whether the path value exists, and/or is of the right type.
     * @return
-    *   If the key is present and can be transformed to the type, return the transformed option value or [[None]] if not
+    *   If the key is present and can be transformed to the type, return the transformed option value or {{None}} if not
     *   present.
     * @throws DocoptException
     *   If it is present but can't be converted or is invalid.

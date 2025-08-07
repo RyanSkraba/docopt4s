@@ -7,8 +7,11 @@ import scala.reflect.io.{Directory, File, Path}
 /** Trait for creating a temporary directory and deleting it after the suite is done. */
 trait TmpDir extends BeforeAndAfterAll { this: Suite =>
 
+  /** The prefix to use for the temporary directory. */
+  val Prefix: String = s"TmpDirScalatest_${getClass.getSimpleName}"
+
   /** A local temporary directory for test file storage. */
-  val Tmp: Directory = Directory.makeTemp(getClass.getSimpleName)
+  val Tmp: Directory = Directory.makeTemp(prefix = Prefix)
 
   /** The directory that we're being run in (used for relative paths) */
   val Pwd: Directory = Directory(".").toCanonical.toDirectory

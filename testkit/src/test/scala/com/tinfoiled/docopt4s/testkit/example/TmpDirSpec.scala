@@ -4,6 +4,8 @@ import com.tinfoiled.docopt4s.testkit.TmpDir
 import org.scalatest.funspec.AnyFunSpecLike
 import org.scalatest.matchers.should.Matchers
 
+import java.util.prefs.Preferences
+
 /** Unit tests for [[TmpDir]] */
 class TmpDirSpec extends AnyFunSpecLike with Matchers with TmpDir {
 
@@ -16,6 +18,11 @@ class TmpDirSpec extends AnyFunSpecLike with Matchers with TmpDir {
 
   describe(s"Using TmpDir") {
     it("should create a temporary directory") { Tmp.jfile should exist }
+
+    it("should be named after the class") {
+      Tmp.name should startWith(Prefix)
+      Tmp.name should include(getClass.getSimpleName)
+    }
 
     it("should create a resource when requested") {
       // The file doesn't exist until it is used.

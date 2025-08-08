@@ -15,7 +15,7 @@ import scala.reflect.io.{Directory, File, Path}
   */
 class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
-  /** A local temporary directory for test file storage. */
+  /** A local temporary directory for test file storage.  Note that we can't use TmpDir from docopt4s-testkit yet. */
   val Tmp: Directory = Directory.makeTemp(getClass.getSimpleName)
 
   /** The directory that we're being run in (used for relative paths) */
@@ -54,6 +54,9 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
   /** A path validator that doesn't care if a file exists or not */
   val vldMaybe: PathValidator = PathValidator().optionallyExists()
+
+  /** A path validator that has a root */
+  val vldRoot: PathValidator = PathValidator().withRoot(Tmp.toString())
 
   /** Helper method to capture a DocoptException with no docopt and an exitCode of 1.
     *
@@ -215,8 +218,6 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
   describe("Testing the getPath methods") {
 
-    // TODO: withRoot tests
-
     describe("when getting an optional value") {
       it("should get when present") { opt.path.getOption("dir") shouldBe Some(Tmp) }
       it("should get when missing") { opt.path.getOption("missing") shouldBe None }
@@ -231,6 +232,27 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     describe("when getting a required value with default") {
       it("should get when present") { opt.path.getOr("dir", Tmp / "x") shouldBe Tmp }
       it("should get when missing") { opt.path.getOr("missing", Tmp / "x") shouldBe (Tmp / "x") }
+    }
+
+    // The same tests as above using a specified root, with relative and absolute option values
+    for (tc <- Map("absolute" -> opt, "relative" -> optWith("dir" -> ".", "file" -> ExistingFile.name))) {
+      describe(s"Testing the getPath methods with a specified root and ${tc._1} argument") {
+        describe("when getting an optional value") {
+          it("should get when present") { tc._2.path.getOption("dir", vldRoot) shouldBe Some(Tmp) }
+          it("should get when missing") { tc._2.path.getOption("missing", vldRoot) shouldBe None }
+        }
+
+        describe("when getting a required value") {
+          it("should get when present as dir") { tc._2.path.get("dir", vldRoot) shouldBe Tmp }
+          it("should get when present as file") { tc._2.path.get("file", vldRoot) shouldBe ExistingFile }
+          it("should fail when missing") { failOnMissing() { tc._2.path.get("missing", vldRoot) } }
+        }
+
+        describe("when getting a required value with default") {
+          it("should get when present") { tc._2.path.getOr("dir", Tmp / "x", vldRoot) shouldBe Tmp }
+          it("should get when missing") { tc._2.path.getOr("missing", Tmp / "x", vldRoot) shouldBe (Tmp / "x") }
+        }
+      }
     }
 
     describe("when requiring that it doesn't exist") {

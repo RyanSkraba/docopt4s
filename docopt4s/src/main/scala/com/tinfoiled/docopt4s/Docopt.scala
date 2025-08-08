@@ -179,10 +179,10 @@ case class PathValidator(
         throw new DocoptException(s"$t expected a file, found directory: $path")
       case _ => path
     }
-  }
+  }.toCanonical
 
   def withTag(tag: String): PathValidator = copy(tag = Some(tag))
-  def withRoot(root: String): PathValidator = copy(tag = Some(root))
+  def withRoot(root: String): PathValidator = copy(root = Some(root))
   def isPath: PathValidator = copy(ifIsDir = None)
   def isDir: PathValidator = copy(ifIsDir = Some(true))
   def isFile: PathValidator = copy(ifIsDir = Some(false))

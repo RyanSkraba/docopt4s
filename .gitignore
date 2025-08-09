@@ -5,6 +5,8 @@
 **/.project
 **/.classpath
 **/.checkstyle
+**/.metals
+**/.vscode
 **/.gradle
 **/build
 **/dependency-reduced-pom.xml

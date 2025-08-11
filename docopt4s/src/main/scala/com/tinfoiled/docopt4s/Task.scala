@@ -1,7 +1,7 @@
 package com.tinfoiled.docopt4s
 
 /** A task (or subcommand) supported by an [[MultiTaskMain]] application. */
-abstract class Task() {
+abstract class Task {
 
   /** The [[Docopt]] string text for the task */
   val Doc: String

@@ -8,7 +8,8 @@
     <version>0.0.5-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
-  <artifactId>docopt4s-testkit_${scala.binary.version}</artifactId>
+  <!-- Avoid using ${scala.binary.version} in the artifactId -->
+  <artifactId>docopt4s-testkit_2.13</artifactId>
   <packaging>jar</packaging>
 
   <name>${project.groupId}:docopt4s-testkit_${scala.binary.version}</name>

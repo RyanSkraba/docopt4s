@@ -131,6 +131,7 @@ abstract class MultiTaskMainSpec(protected val Main: MultiTaskMain, protected va
     it("throws an exception with unknown option") {
       val t = interceptGoDocoptEx(prefixArgs :+ UnknownFlag: _*)
       t.docopt shouldBe Doc
+      // TODO: This could be a better error message
       t.getMessage shouldBe null
     }
   }

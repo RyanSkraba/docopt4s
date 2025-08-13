@@ -114,8 +114,8 @@ trait AnsiConsole {
     *   The string to print for that script.
     */
   def helpHeader(cli: String, description: String, subcommands: (String, String)*): String = {
-    val tmpl = s" $Cyan%1$$${subcommands.map(_._1.length).max}s$Reset : %2$$s"
-    s"""$Bold$Green$cli$Reset - $description
+    val tmpl = s"$Cyan%1$$${subcommands.map(_._1.length).max + 1}s$Reset : %2$$s"
+    s"""${green(cli, bold = true)} - $description
        |
        |${subcommands.map(p => tmpl.format(p._1, p._2)).mkString("\n")}
        |

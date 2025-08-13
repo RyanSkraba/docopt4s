@@ -251,6 +251,25 @@ class AnsiConsoleSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matcher
     }
   }
 
+  describe("The text helper generator methods") {
+    it("should provide a nice help header") {
+      val cfg = AnsiConsole()
+      cfg.helpHeader(
+        "myscript.sc",
+        "A script using the console.",
+        "execute" -> "Does many things",
+        "etc" -> "and more"
+      ) shouldBe
+        s"""${cfg.green("myscript.sc", bold = true)} - A script using the console.
+           |
+           |${cfg.cyan(" execute")} : Does many things
+           |${cfg.cyan("     etc")} : and more
+           |
+           |${cfg.bold("Usage:")}
+           |""".stripMargin
+    }
+  }
+
   describe("The ask() method") {
 
     def simpleAsk(

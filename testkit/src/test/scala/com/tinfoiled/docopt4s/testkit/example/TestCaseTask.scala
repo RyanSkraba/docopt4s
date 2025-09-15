@@ -3,7 +3,6 @@ package com.tinfoiled.docopt4s.testkit.example
 import com.tinfoiled.docopt4s.{Docopt, Task}
 
 import scala.io.Source
-import scala.util.Try
 
 /** The test case can be used to parse arguments given a dynamically provided [[Docopt]] text. */
 object TestCaseTask extends Task {
@@ -38,7 +37,7 @@ object TestCaseTask extends Task {
     val tcArgs = opt.strings.get("ARGS")
 
     // Create a new Docopt from the arguments
-    val tcOpts = Docopt(tcDoc, "0-ignored", tcArgs)
+    val tcOpts = Docopt(tcDoc, "0.0.0-ignored", tcArgs)
 
     // Print the values in a pseudo-JSON object with null for non-present keys, a single string value when there is
     // only one option value, and a list when there is more than one option value.

@@ -7,7 +7,7 @@ object ExampleGo extends MultiTaskMain {
 
   override lazy val Name: String = "ExampleGo"
 
-  override lazy val Version: String = "0.0.5-SNAPSHOT"
+  override lazy val Version: String = "0.0.5"
 
   override lazy val Tasks: Seq[Task] = Seq(DumpTask, NavalFateTask, TestCaseTask)
 

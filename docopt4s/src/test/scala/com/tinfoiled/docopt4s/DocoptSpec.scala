@@ -47,7 +47,8 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     "bool" -> true,
     "dir" -> Tmp.toString,
     "file" -> ExistingFile.toString,
-    "nox" -> NonExistingPath.toString()
+    "nox" -> NonExistingPath.toString,
+    "badFileParent" -> (ExistingFile / "cant-exist").toString
   )
 
   /** A path validator with the tag source */
@@ -269,6 +270,14 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
         failOn(opt.path.get("dir", vldNox)) shouldBe s"Path already exists: $Tmp"
         failOn(opt.path.get("dir", vldNox.withTag("Src"))) shouldBe s"Src already exists: $Tmp"
       }
+      it("should fail when it doesn't exist but one of the parent segments is a file") {
+        failOn(
+          opt.path.get("badFileParent", vldNox)
+        ) shouldBe s"Path is uncreatable, $ExistingFile exists: $ExistingFile/cant-exist"
+        failOn(
+          opt.path.get("badFileParent", vldNox.withTag("Src"))
+        ) shouldBe s"Src is uncreatable, $ExistingFile exists: $ExistingFile/cant-exist"
+      }
     }
 
     describe("when optionally it exists") {
@@ -331,6 +340,14 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       it("should fail when it does exist as a directory") {
         failOn(opt.file.get("dir", vldNox)) shouldBe s"File already exists: $Tmp"
         failOn(opt.file.get("dir", vldNox.withTag("Src"))) shouldBe s"Src already exists: $Tmp"
+      }
+      it("should fail when it doesn't exist but one of the parent segments is a file") {
+        failOn(
+          opt.file.get("badFileParent", vldNox)
+        ) shouldBe s"File is uncreatable, $ExistingFile exists: $ExistingFile/cant-exist"
+        failOn(
+          opt.file.get("badFileParent", vldNox.withTag("Src"))
+        ) shouldBe s"Src is uncreatable, $ExistingFile exists: $ExistingFile/cant-exist"
       }
     }
 
@@ -397,6 +414,14 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       it("should fail when it does exist as a directory") {
         failOn(opt.dir.get("dir", vldNox)) shouldBe s"Directory already exists: $Tmp"
         failOn(opt.dir.get("dir", vldNox.withTag("Src"))) shouldBe s"Src already exists: $Tmp"
+      }
+      it("should fail when it doesn't exist but one of the parent segments is a file") {
+        failOn(
+          opt.dir.get("badFileParent", vldNox)
+        ) shouldBe s"Directory is uncreatable, $ExistingFile exists: $ExistingFile/cant-exist"
+        failOn(
+          opt.dir.get("badFileParent", vldNox.withTag("Src"))
+        ) shouldBe s"Src is uncreatable, $ExistingFile exists: $ExistingFile/cant-exist"
       }
     }
 

@@ -177,6 +177,12 @@ case class PathValidator(
         throw new DocoptException(s"Expected a file, found directory: $path")
       case (_, Some(false), Some(t), true) if !path.isFile =>
         throw new DocoptException(s"$t expected a file, found directory: $path")
+      case (Some(false), _, _, false) =>
+        val existingParent = LazyList.iterate(path)(_.parent).dropWhile(!_.exists).headOption
+        // If it must not exist, and it does not exist, there's another constraint -- none of the parent paths must exist as a file, or the path is unusable as a file OR directory.
+        if (existingParent.exists(_.jfile.isFile))
+          throw new DocoptException(s"$pathTag is uncreatable, ${existingParent.get} exists: $path")
+        else path
       case _ => path
     }
   }.toCanonical

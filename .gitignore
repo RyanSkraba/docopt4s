@@ -5,8 +5,9 @@
 **/.project
 **/.classpath
 **/.checkstyle
-**/.metals
-**/.vscode
 **/.gradle
 **/build
+.bloop/
+.metals/
+.vscode/
 **/dependency-reduced-pom.xml

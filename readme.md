@@ -23,6 +23,7 @@ Building
 ------------------------------------------------------------------------------
 
 ```sh
-# Build and run all tests
-mvn clean verify
+# Build, format and run all tests
+mvn spotless:apply clean verify
 ```
+

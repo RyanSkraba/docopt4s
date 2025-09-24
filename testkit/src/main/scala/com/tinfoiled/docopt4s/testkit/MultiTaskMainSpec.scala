@@ -8,8 +8,14 @@ import org.scalatest.matchers.should.Matchers
 
 import scala.reflect.ClassTag
 
-/** Unit test specification base for an [[MultiTaskMain]] */
-abstract class MultiTaskMainSpec(protected val Main: MultiTaskMain, protected val Task: Option[Task] = None)
+/** Unit test specification base for an [[MultiTaskMain]] implementation.
+  *
+  * @param Main
+  *   The main driver to be tested.
+  * @param Task
+  *   Optionally, the subtask of the main driver.
+  */
+abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain, protected val Task: Option[Tsk] = None)
     extends AnyFunSpecLike
     with Matchers {
 
@@ -108,12 +114,7 @@ abstract class MultiTaskMainSpec(protected val Main: MultiTaskMain, protected va
 
     it(s"throws an exception with ${prefixArgs.mkString(" ")} --help") {
       val t = interceptGoDocoptEx(prefixArgs :+ "--help": _*)
-      t.getMessage shouldBe Doc
-      t.exitCode shouldBe 0
-    }
-
-    it(s"throws an exception with a bare ${prefixArgs.mkString(" ")}") {
-      val t = interceptGoDocoptEx(prefixArgs :+ "--help": _*)
+      // TODO: Specific subclass of DocoptException for help and version?
       t.getMessage shouldBe Doc
       t.exitCode shouldBe 0
     }
@@ -121,6 +122,13 @@ abstract class MultiTaskMainSpec(protected val Main: MultiTaskMain, protected va
     it(s"throws an exception with ${prefixArgs.mkString(" ")} --version") {
       val t = interceptGoDocoptEx(prefixArgs :+ "--version": _*)
       t.getMessage shouldBe Main.Version
+      t.exitCode shouldBe 0
+    }
+
+    it(s"throws an exception with a bare ${prefixArgs.mkString(" ")}") {
+      val t = interceptGoDocoptEx(prefixArgs: _*)
+      // TODO: This should have the help message, like --help above
+      t.getMessage shouldBe null
       t.exitCode shouldBe 0
     }
   }

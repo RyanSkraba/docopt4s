@@ -128,8 +128,9 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     it(s"throws an exception with a bare ${prefixArgs.mkString(" ")}") {
       val t = interceptGoDocoptEx(prefixArgs: _*)
       // TODO: This should have the help message, like --help above
-      t.getMessage shouldBe null
-      t.exitCode shouldBe 0
+      // TODO: This should always have the help text
+      t.getMessage shouldBe Task.map(_ => null).getOrElse(Doc)
+      t.exitCode shouldBe Task.map(_ => 1).getOrElse(0)
     }
   }
 

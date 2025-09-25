@@ -26,8 +26,8 @@ class NavalFateTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(NavalFateTask)
      |""".stripMargin.trim
    */
 
-  describe(s"Standard ${Main.Name} $TaskCmd command line help, versions and exceptions") {
-    itShouldThrowOnHelpAndVersionFlags()
+  describe(s"Standard $MainName $TaskCmd command line help, versions and exceptions") {
+    itShouldHandleHelpAndVersionFlags()
     itShouldThrowOnUnknownFlag()
     itShouldThrowOnIncompleteArgs(Seq.empty)
     itShouldThrowOnIncompleteArgs(Seq("ship"))

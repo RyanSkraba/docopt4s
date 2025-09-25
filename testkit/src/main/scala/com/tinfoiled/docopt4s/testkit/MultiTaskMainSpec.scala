@@ -22,13 +22,25 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
   /** The Docopt for the Task (if present) but defaulting to the Cli if not. */
   lazy val Doc: String = Task.map(_.Doc).getOrElse(Main.Doc)
 
+  /** Shortcut to the main script name for descriptions. */
+  lazy val MainName: String = Main.Name
+
   /** The command used to specify the task (if present) or the empty string if not. */
   lazy val TaskCmd: String = Task.map(_.Cmd).getOrElse("")
+
+  /** Either the task command as a Seq, or empty. Used for building arguments. */
+  lazy val TaskCmdArg: Seq[String] = Task.map(_.Cmd).toSeq
+
+  /** The command used to specify the task with a space suffix (if present) or the empty string if not. */
+  lazy val TaskCmdPost: String = Task.map(_.Cmd + " ").getOrElse("")
+
+  /** The command used to specify the task with a space prefix (if present) or the empty string if not. */
+  lazy val TaskCmdPre: String = Task.map(_.Cmd + " ").getOrElse("")
 
   /** A flag that doesn't exist in the Docopt. */
   lazy val UnknownFlag: String = "--unknownDoesNotExistGarbage"
 
-  describe(Main.Name + Task.map(" " + _.Cmd).getOrElse("") + " docopt check") {
+  describe(Main.Name + s"$TaskCmdPre docopt check") {
     it(s"should have less than 80 characters per string for readability.") {
       for (line <- Doc.split("\n")) {
         withClue(line) {
@@ -108,25 +120,22 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
   def interceptGoDocoptEx(args: Any*): DocoptException = interceptGo[DocoptException](args: _*)
 
   /** Run tests on the --help and --version flags that cause a system exit. */
-  val itShouldThrowOnHelpAndVersionFlags: () => Unit = () => {
-
-    val prefixArgs = Task.map(_.Cmd).toSeq
-
-    it(s"throws an exception with ${prefixArgs.mkString(" ")} --help") {
-      val t = interceptGoDocoptEx(prefixArgs :+ "--help": _*)
+  val itShouldHandleHelpAndVersionFlags: () => Unit = () => {
+    it(s"throws an exception with '$TaskCmdPost--help'") {
+      val t = interceptGoDocoptEx(TaskCmdArg :+ "--help": _*)
       // TODO: Specific subclass of DocoptException for help and version?
       t.getMessage shouldBe Doc
       t.exitCode shouldBe 0
     }
 
-    it(s"throws an exception with ${prefixArgs.mkString(" ")} --version") {
-      val t = interceptGoDocoptEx(prefixArgs :+ "--version": _*)
+    it(s"throws an exception with '$TaskCmdPost--version'") {
+      val t = interceptGoDocoptEx(TaskCmdArg :+ "--version": _*)
       t.getMessage shouldBe Main.Version
       t.exitCode shouldBe 0
     }
 
-    it(s"throws an exception with a bare ${prefixArgs.mkString(" ")}") {
-      val t = interceptGoDocoptEx(prefixArgs: _*)
+    it(s"throws an exception with no arguments") {
+      val t = interceptGoDocoptEx(TaskCmdArg: _*)
       // TODO: This should have the help message, like --help above
       // TODO: This should always have the help text
       t.getMessage shouldBe Task.map(_ => null).getOrElse(Doc)
@@ -134,11 +143,30 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     }
   }
 
+  /** When nothing is passed to a main, it acts as help. If a flag is passed but no other arguments, then it's missing
+    * the command.
+    */
+  val itShouldThrowOnMissingTaskCommand: String => Unit = arg => {
+    it("throw an exception like --help when run without a command") {
+      val t = interceptGoDocoptEx(arg)
+      t.getMessage shouldBe "Missing command"
+      t.docopt shouldBe Main.Doc
+    }
+  }
+
+  /** When a garbage command is passed. */
+  val itShouldThrowOnUnknownTaskCommand: () => Unit = () => {
+    it("throws an exception with an unknown command") {
+      val t = intercept[DocoptException] { withGo("garbage") }
+      t.getMessage shouldBe "Unknown command: garbage"
+      t.docopt shouldBe Main.Doc
+    }
+  }
+
   /** Run tests on an unrecognized flag. */
   val itShouldThrowOnUnknownFlag: () => Unit = () => {
-    val prefixArgs = Task.map(_.Cmd).toSeq
     it("throws an exception with unknown option") {
-      val t = interceptGoDocoptEx(prefixArgs :+ UnknownFlag: _*)
+      val t = interceptGoDocoptEx(TaskCmdArg :+ UnknownFlag: _*)
       t.docopt shouldBe Doc
       // TODO: This could be a better error message
       t.getMessage shouldBe null

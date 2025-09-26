@@ -119,6 +119,13 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     */
   def interceptGoDocoptEx(args: Any*): DocoptException = interceptGo[DocoptException](args: _*)
 
+  /** This helper allows the built-in test cases to be called using a string or string sequence. */
+  class BuiltInAdapter(thunk: Seq[String] => Unit) extends Function[Seq[String], Unit] {
+    def apply(): Unit = thunk(Seq.empty)
+    def apply(in: String, in2: String*): Unit = thunk(in +: in2)
+    override def apply(in: Seq[String]): Unit = thunk(in)
+  }
+
   /** Run tests on the --help and --version flags that cause a system exit. */
   val itShouldHandleHelpAndVersionFlags: () => Unit = () => {
     it(s"throws an exception with '$TaskCmdPost--help'") {
@@ -146,13 +153,13 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
   /** When nothing is passed to a main, it acts as help. If a flag is passed but no other arguments, then it's missing
     * the command.
     */
-  val itShouldThrowOnMissingTaskCommand: String => Unit = arg => {
+  val itShouldThrowOnMissingTaskCommand: BuiltInAdapter = new BuiltInAdapter(args => {
     it("throw an exception like --help when run without a command") {
-      val t = interceptGoDocoptEx(arg)
+      val t = interceptGoDocoptEx(args: _*)
       t.getMessage shouldBe "Missing command"
       t.docopt shouldBe Main.Doc
     }
-  }
+  })
 
   /** When a garbage command is passed. */
   val itShouldThrowOnUnknownTaskCommand: () => Unit = () => {
@@ -174,7 +181,7 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
   }
 
   /** Run tests on a command line that is missing necessary information for the Cli to proceed. */
-  val itShouldThrowOnIncompleteArgs: Seq[String] => Unit = args => {
+  val itShouldThrowOnIncompleteArgs: BuiltInAdapter = new BuiltInAdapter(args => {
     val allArgs = Task.map(_.Cmd).toSeq ++ args
     it("throws an exception on missing options: " + allArgs.mkString(" ")) {
       val t = interceptGoDocoptEx(allArgs: _*)
@@ -182,20 +189,20 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
       // TODO: This could be a better message
       t.getMessage shouldBe null
     }
-  }
+  })
 
   /** Run tests on a command line where the last argument is an option missing its value. */
-  val itShouldThrowOnMissingFlagValue: Seq[String] => Unit = args => {
+  val itShouldThrowOnMissingFlagValue: BuiltInAdapter = new BuiltInAdapter(args => {
     val allArgs = Task.map(_.Cmd).toSeq ++ args
     it("throws an exception on missing option parameters: " + allArgs.mkString(" ")) {
       val t = interceptGoDocoptEx(allArgs: _*)
       t.exitCode shouldBe 1
       t.getMessage shouldBe s"${args.last} requires argument"
     }
-  }
+  })
 
   /** Run tests on a command line with incompatible options. */
-  val itShouldThrowOnIncompatibleOpts: Seq[String] => Unit = args => {
+  val itShouldThrowOnIncompatibleOpts: BuiltInAdapter = new BuiltInAdapter(args => {
     val allArgs = Task.map(_.Cmd).toSeq ++ args
     it("throws an exception on incompatible arguments: " + allArgs.mkString(" ")) {
       val t = interceptGoDocoptEx(allArgs: _*)
@@ -203,5 +210,5 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
       // TODO: This could be a better message
       t.getMessage shouldBe null
     }
-  }
+  })
 }

@@ -8,10 +8,10 @@ class DumpTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(DumpTask)) {
   describe(s"Standard $MainName $TaskCmd command line help, versions and exceptions") {
     itShouldHandleHelpAndVersionFlags()
     itShouldThrowOnUnknownFlag()
-    itShouldThrowOnIncompleteArgs(Seq.empty)
-    itShouldThrowOnIncompleteArgs(Seq("unknown"))
-    itShouldThrowOnMissingFlagValue(Seq("string", "arg", "--default"))
-    itShouldThrowOnIncompatibleOpts(Seq("string", "arg", "--options", "--default", "dflt"))
+    itShouldThrowOnIncompleteArgs()
+    itShouldThrowOnIncompleteArgs("unknown")
+    itShouldThrowOnMissingFlagValue("string", "arg", "--default")
+    itShouldThrowOnIncompatibleOpts("string", "arg", "--options", "--default", "dflt")
   }
 
   describe("When running without any flags") {

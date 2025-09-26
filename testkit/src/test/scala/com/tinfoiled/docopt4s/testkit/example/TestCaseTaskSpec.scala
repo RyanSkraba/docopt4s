@@ -8,9 +8,9 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
   describe(s"Standard $MainName $TaskCmd command line help, versions and exceptions") {
     itShouldHandleHelpAndVersionFlags()
     itShouldThrowOnUnknownFlag()
-    itShouldThrowOnIncompleteArgs(Seq("unknown"))
-    itShouldThrowOnIncompleteArgs(Seq("--docopt", "doc"))
-    itShouldThrowOnMissingFlagValue(Seq("--docopt"))
+    itShouldThrowOnIncompleteArgs("unknown")
+    itShouldThrowOnIncompleteArgs("--docopt", "doc")
+    itShouldThrowOnMissingFlagValue("--docopt")
   }
 
   describe("Running a basic test case") {

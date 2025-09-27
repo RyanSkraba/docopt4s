@@ -171,7 +171,7 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
   }
 
   /** Run tests on an unrecognized flag. */
-  val itShouldThrowOnUnknownFlag: () => Unit = () => {
+  val itShouldThrowOnUnknownOptKey: () => Unit = () => {
     it("throws an exception with unknown option") {
       val t = interceptGoDocoptEx(TaskCmdArg :+ UnknownFlag: _*)
       t.docopt shouldBe Doc
@@ -192,7 +192,7 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
   })
 
   /** Run tests on a command line where the last argument is an option missing its value. */
-  val itShouldThrowOnMissingFlagValue: BuiltInAdapter = new BuiltInAdapter(args => {
+  val itShouldThrowOnMissingOptValue: BuiltInAdapter = new BuiltInAdapter(args => {
     val allArgs = Task.map(_.Cmd).toSeq ++ args
     it("throws an exception on missing option parameters: " + allArgs.mkString(" ")) {
       val t = interceptGoDocoptEx(allArgs: _*)

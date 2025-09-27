@@ -10,6 +10,11 @@ import scala.util.Properties
   * how arguments can be parsed into "options" by associating them with a key (taken from the Docopt help string) and
   * returning a value.
   *
+  * Frequently an option key corresponds to an argument "--keyname" and the following argument is the option value. For
+  * positional options, the key isn't an argument but the option value is.
+  *
+  * Options without a option value argument only rely on whether the option key is present, and is called a "flag".
+  *
   * The Docopt text spec is described at https://docopt.org/.
   */
 trait Docopt {

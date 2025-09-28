@@ -37,8 +37,8 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
   /** The command used to specify the task with a space prefix (if present) or the empty string if not. */
   lazy val TaskCmdPre: String = Task.map(_.Cmd + " ").getOrElse("")
 
-  /** A flag that doesn't exist in the Docopt. */
-  lazy val UnknownFlag: String = "--unknownDoesNotExistGarbage"
+  /** A string that is guaranteed not to exist in the Doc. */
+  lazy val UnknownTxt: String = ("garbage" +: LazyList.from(0).map("garbage" + _)).dropWhile(Doc.contains).head
 
   describe(Main.Name + s"$TaskCmdPre docopt check") {
     it(s"should have less than 80 characters per string for readability.") {
@@ -164,8 +164,8 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
   /** When a garbage command is passed. */
   val itShouldThrowOnUnknownTaskCommand: () => Unit = () => {
     it("throws an exception with an unknown command") {
-      val t = intercept[DocoptException] { withGo("garbage") }
-      t.getMessage shouldBe "Unknown command: garbage"
+      val t = intercept[DocoptException] { withGo(UnknownTxt) }
+      t.getMessage shouldBe s"Unknown command: $UnknownTxt"
       t.docopt shouldBe Main.Doc
     }
   }
@@ -173,7 +173,7 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
   /** Run tests on an unrecognized flag. */
   val itShouldThrowOnUnknownOptKey: () => Unit = () => {
     it("throws an exception with unknown option") {
-      val t = interceptGoDocoptEx(TaskCmdArg :+ UnknownFlag: _*)
+      val t = interceptGoDocoptEx(TaskCmdArg :+ s"--$UnknownTxt": _*)
       t.docopt shouldBe Doc
       // TODO: This could be a better error message
       t.getMessage shouldBe null

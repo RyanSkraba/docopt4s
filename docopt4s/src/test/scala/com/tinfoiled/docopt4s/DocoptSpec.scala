@@ -155,7 +155,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     }
 
     describe("when converting other types") {
-      it("should convert a string list") { opt.boolean.getOr("strings", default = false) shouldBe true }
+      it("should convert a string list") { opt.boolean.getOr("strings", default = true) shouldBe false }
       it(s"should convert a false (empty) string list") {
         optWith("x" -> Seq.empty).boolean.getOr("x", default = true) shouldBe false
       }
@@ -169,8 +169,11 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
           it(s"should be the same as the flag shortcut") {
             optWith("x" -> x).flag("x") shouldBe true
           }
-          it(s"any (non-empty) string list resolves as true") {
+          it(s"any single element string list resolves as true") {
             optWith("x" -> Seq(x)).boolean.getOr("x", default = false) shouldBe true
+          }
+          it(s"any 2+ element string list resolves as false") {
+            optWith("x" -> Seq(x, "true")).boolean.getOr("x", default = true) shouldBe false
           }
         }
       }
@@ -183,8 +186,8 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
           it(s"should be the same as the flag shortcut") {
             optWith("x" -> x).flag("x") shouldBe false
           }
-          it(s"any (non-empty) string list resolves as true") {
-            optWith("x" -> Seq(x)).boolean.getOr("x", default = false) shouldBe true
+          it(s"any single string list resolves as false") {
+            optWith("x" -> Seq(x, x)).boolean.getOr("x", default = true) shouldBe false
           }
         }
       }

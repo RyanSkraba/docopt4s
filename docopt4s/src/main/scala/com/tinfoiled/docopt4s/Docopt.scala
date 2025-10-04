@@ -245,8 +245,8 @@ object Docopt {
         })
 
       override val boolean: DocoptGetNoVld[Boolean] = new DocoptGetNoVld[Boolean](argMap.get(_) match {
-        case Some(value: Iterable[_])           => Some(value.nonEmpty)
-        case Some(value: java.lang.Iterable[_]) => Some(value.iterator().hasNext)
+        case Some(value: Iterable[_])           => Some(value.mkString(",").toBooleanOption.getOrElse(false))
+        case Some(value: java.lang.Iterable[_]) => Some(value.asScala.mkString(",").toBooleanOption.getOrElse(false))
         case Some(value)                        => Some(value.toString.toBooleanOption.getOrElse(false))
         case None                               => None
       })

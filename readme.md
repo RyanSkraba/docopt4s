@@ -5,6 +5,7 @@ docopt4s - A scala library for using docopt
 
 [docopt]: http://docopt.org/ "The original docopt home"
 [docopt-github]: https://github.com/docopt/ "The original docopt source"
+[docopt-readthedocs]: https://docopt.readthedocs.io/en/latest/ "Read the docs"
 
 Using docopt4s
 ------------------------------------------------------------------------------

@@ -26,5 +26,23 @@ Building
 ```sh
 # Build, format and run all tests
 mvn spotless:apply clean verify
+
+# Using the uber jar from the command line
+alias docopt_go="java -jar $(find ~+ -name find ~+ -name docopt4s-testkit*.jar | sort | head -n1 | sort | head -n1)"
+skrync_go --help
 ```
 
+The project comes with an example CLI in the [testkit](testkit/) module, which you can run:
+
+```sh
+# From inside the root directory
+__cwd=$PWD
+function ExampleGo() {
+  mvn -q -f $__cwd/testkit/pom.xml exec:java \
+    -Dexec.classpathScope=test \
+    -Dexec.mainClass=com.tinfoiled.docopt4s.testkit.example.ExampleGo -Dexec.args="$*"
+}
+
+# Now you can run the examples in the example CLI
+ExampleGo naval_fate ship NOSTRADAMUS move 10 20 --speed=23
+```

@@ -39,6 +39,9 @@ object TestCaseTask extends Task {
        |
        |  {"--flag":"false","CMD":"a1","ARGS:["a2","a3","a4","a5"]}
        |
+       |  ${ExampleGo.Name} $Cmd --docopt "UsageX: program [--flag] CMD ARGS..." \\
+       |      --check $$'{"--flag":"false","CMD":"a1","ARGS:["a2","a3","a4","a5"]}'
+       |
        |""".stripMargin.trim
 
   def go(opt: Docopt): Unit = {

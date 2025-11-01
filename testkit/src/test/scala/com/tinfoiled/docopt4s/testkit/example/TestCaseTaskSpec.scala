@@ -7,7 +7,7 @@ import com.tinfoiled.docopt4s.testkit.MultiTaskMainSpec
 class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) {
 
   describe(s"Standard $MainName $TaskCmd command line help, versions and exceptions") {
-    itShouldHandleHelpAndVersionFlags()
+    itShouldHandleVersionAndHelpFlags()
     itShouldThrowOnUnknownOptKey()
     itShouldThrowOnIncompleteArgs("unknown")
     itShouldThrowOnIncompleteArgs("--docopt", "doc")

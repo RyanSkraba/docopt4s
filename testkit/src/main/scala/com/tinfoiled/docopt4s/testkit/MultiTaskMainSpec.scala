@@ -10,6 +10,9 @@ import scala.reflect.ClassTag
 
 /** Unit test specification base for an [[MultiTaskMain]] implementation.
   *
+  * Note that all of the built-in checks, like [[itShouldThrowOnIncompatibleOpts]], automatically prepend the task
+  * command before any additional arguments, but the [[withGo]] and associated commands do not.
+  *
   * @param Main
   *   The main driver to be tested.
   * @param Task
@@ -44,6 +47,7 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     it(s"should have less than 80 characters per string for readability.") {
       for (line <- Doc.split("\n")) {
         withClue(line) {
+          // TODO hint on where the line break should be
           line.length should be < 80
         }
       }
@@ -53,6 +57,7 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
         it(s"${task.Cmd} should have less than 80 characters per string for readability.") {
           for (line <- task.Doc.split("\n")) {
             withClue(line) {
+              // TODO hint on where the line break should be
               line.length should be < 80
             }
           }
@@ -126,22 +131,13 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     override def apply(in: Seq[String]): Unit = thunk(in)
   }
 
-  /** Run tests on the --help and --version flags that cause a system exit. */
-  val itShouldHandleHelpAndVersionFlags: () => Unit = () => {
-    it(s"throws an exception with '$TaskCmdPost--help'") {
-      val t = interceptGoDocoptEx(TaskCmdArg :+ "--help": _*)
-      // TODO: Specific subclass of DocoptException for help and version?
-      t.getMessage shouldBe Doc
-      t.exitCode shouldBe 0
-    }
+  /** Run tests on the --help and --version flags that cause a system exit, as well as when a no args call is supposed
+    * to appear like --help.
+    */
+  val itShouldHandleVersionAndHelpFlags: () => Unit = () => {
+    itShouldHandleVersionNoArgsAndHelpFlags()
 
-    it(s"throws an exception with '$TaskCmdPost--version'") {
-      val t = interceptGoDocoptEx(TaskCmdArg :+ "--version": _*)
-      t.getMessage shouldBe Main.Version
-      t.exitCode shouldBe 0
-    }
-
-    it(s"throws an exception with no arguments") {
+    it(s"throws a help exception with no arguments") {
       val t = interceptGoDocoptEx(TaskCmdArg: _*)
       // TODO: This should have the help message, like --help above
       // TODO: This should always have the help text
@@ -149,6 +145,26 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
       t.exitCode shouldBe Task.map(_ => 1).getOrElse(0)
     }
   }
+
+  /** Run tests on the --help and --version flags that cause a system exit. */
+  val itShouldHandleVersionNoArgsAndHelpFlags: () => Unit = () => {
+    it(s"throws an help exception with '$TaskCmdPost--help'") {
+      val t = interceptGoDocoptEx(TaskCmdArg :+ "--help": _*)
+      // TODO: Specific subclass of DocoptException for help and version?
+      t.getMessage shouldBe Doc
+      t.exitCode shouldBe 0
+    }
+
+    it(s"throws an version exception with '$TaskCmdPost--version'") {
+      val t = interceptGoDocoptEx(TaskCmdArg :+ "--version": _*)
+      t.getMessage shouldBe Main.Version
+      t.exitCode shouldBe 0
+    }
+  }
+
+  /** Run tests on the --help and --version flags that cause a system exit. */
+  @deprecated("Use itShouldHandleVersionAndHelpFlags() or itShouldHandleVersionNoArgsAndHelpFlags()")
+  val itShouldHandleHelpAndVersionFlags: () => Unit = itShouldHandleVersionNoArgsAndHelpFlags
 
   /** When nothing is passed to a main, it acts as help. If a flag is passed but no other arguments, then it's missing
     * the command.
@@ -170,7 +186,7 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     }
   }
 
-  /** Run tests on an unrecognized flag. */
+  /** When an unrecognized option key is passed. */
   val itShouldThrowOnUnknownOptKey: () => Unit = () => {
     it("throws an exception with unknown option") {
       val t = interceptGoDocoptEx(TaskCmdArg :+ s"--$UnknownTxt": _*)
@@ -180,7 +196,7 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     }
   }
 
-  /** Run tests on a command line that is missing necessary information for the Cli to proceed. */
+  /** When a command line is missing necessary information for the Cli to proceed. */
   val itShouldThrowOnIncompleteArgs: BuiltInAdapter = new BuiltInAdapter(args => {
     val allArgs = Task.map(_.Cmd).toSeq ++ args
     it("throws an exception on missing options: " + allArgs.mkString(" ")) {
@@ -191,7 +207,7 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     }
   })
 
-  /** Run tests on a command line where the last argument is an option missing its value. */
+  /** When the last argument is an option missing its value. */
   val itShouldThrowOnMissingOptValue: BuiltInAdapter = new BuiltInAdapter(args => {
     val allArgs = Task.map(_.Cmd).toSeq ++ args
     it("throws an exception on missing option parameters: " + allArgs.mkString(" ")) {
@@ -201,7 +217,7 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     }
   })
 
-  /** Run tests on a command line with incompatible options. */
+  /** When a command line contains incompatible options. */
   val itShouldThrowOnIncompatibleOpts: BuiltInAdapter = new BuiltInAdapter(args => {
     val allArgs = Task.map(_.Cmd).toSeq ++ args
     it("throws an exception on incompatible arguments: " + allArgs.mkString(" ")) {

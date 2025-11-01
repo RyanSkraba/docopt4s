@@ -6,7 +6,7 @@ import com.tinfoiled.docopt4s.testkit.MultiTaskMainSpec
 class DumpTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(DumpTask)) {
 
   describe(s"Standard $MainName $TaskCmd command line help, versions and exceptions") {
-    itShouldHandleHelpAndVersionFlags()
+    itShouldHandleVersionAndHelpFlags()
     itShouldThrowOnUnknownOptKey()
     itShouldThrowOnIncompleteArgs()
     itShouldThrowOnIncompleteArgs("unknown")

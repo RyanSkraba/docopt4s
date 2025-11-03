@@ -46,20 +46,14 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
   describe(Main.Name + s"$TaskCmdPre docopt check") {
     it(s"should have less than 80 characters per string for readability.") {
       for (line <- Doc.split("\n")) {
-        withClue(line) {
-          // TODO hint on where the line break should be
-          line.length should be < 80
-        }
+        withClue(s""""${line.take(80)}⛔️${line.drop(80)}" length""") { line.length should be < 80 }
       }
     }
     if (Task.isEmpty) {
       for (task <- Main.Tasks) {
         it(s"${task.Cmd} should have less than 80 characters per string for readability.") {
           for (line <- task.Doc.split("\n")) {
-            withClue(line) {
-              // TODO hint on where the line break should be
-              line.length should be < 80
-            }
+            withClue(s""""${line.take(80)}⛔️${line.drop(80)}" length""") { line.length should be < 80 }
           }
         }
       }

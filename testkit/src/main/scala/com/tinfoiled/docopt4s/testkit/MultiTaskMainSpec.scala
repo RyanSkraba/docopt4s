@@ -38,7 +38,7 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
   lazy val TaskCmdPost: String = Task.map(_.Cmd + " ").getOrElse("")
 
   /** The command used to specify the task with a space prefix (if present) or the empty string if not. */
-  lazy val TaskCmdPre: String = Task.map(_.Cmd + " ").getOrElse("")
+  lazy val TaskCmdPre: String = Task.map(" " + _.Cmd).getOrElse("")
 
   /** A string that is guaranteed not to exist in the Doc. */
   lazy val UnknownTxt: String = ("garbage" +: LazyList.from(0).map("garbage" + _)).dropWhile(Doc.contains).head

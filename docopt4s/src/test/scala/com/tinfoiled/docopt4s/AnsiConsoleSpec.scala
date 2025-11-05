@@ -80,6 +80,94 @@ class AnsiConsoleSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matcher
       }
     }
 
+    describe("via colour constants") {
+      it("should be populated when activated") {
+        val cfg = AnsiConsole()
+
+        cfg.Black shouldBe BLACK
+        cfg.Red shouldBe RED
+        cfg.Green shouldBe GREEN
+        cfg.Yellow shouldBe YELLOW
+        cfg.Blue shouldBe BLUE
+        cfg.Magenta shouldBe MAGENTA
+        cfg.Cyan shouldBe CYAN
+        cfg.White shouldBe WHITE
+
+        cfg.HiBlack shouldBe BLACK.replace("[3", "[9")
+        cfg.HiRed shouldBe RED.replace("[3", "[9")
+        cfg.HiGreen shouldBe GREEN.replace("[3", "[9")
+        cfg.HiYellow shouldBe YELLOW.replace("[3", "[9")
+        cfg.HiBlue shouldBe BLUE.replace("[3", "[9")
+        cfg.HiMagenta shouldBe MAGENTA.replace("[3", "[9")
+        cfg.HiCyan shouldBe CYAN.replace("[3", "[9")
+        cfg.HiWhite shouldBe WHITE.replace("[3", "[9")
+
+        cfg.BlackBg shouldBe BLACK_B
+        cfg.RedBg shouldBe RED_B
+        cfg.GreenBg shouldBe GREEN_B
+        cfg.YellowBg shouldBe YELLOW_B
+        cfg.BlueBg shouldBe BLUE_B
+        cfg.MagentaBg shouldBe MAGENTA_B
+        cfg.CyanBg shouldBe CYAN_B
+        cfg.WhiteBg shouldBe WHITE_B
+
+        cfg.HiBlackBg shouldBe BLACK.replace("[3", "[10")
+        cfg.HiRedBg shouldBe RED.replace("[3", "[10")
+        cfg.HiGreenBg shouldBe GREEN.replace("[3", "[10")
+        cfg.HiYellowBg shouldBe YELLOW.replace("[3", "[10")
+        cfg.HiBlueBg shouldBe BLUE.replace("[3", "[10")
+        cfg.HiMagentaBg shouldBe MAGENTA.replace("[3", "[10")
+        cfg.HiCyanBg shouldBe CYAN.replace("[3", "[10")
+        cfg.HiWhiteBg shouldBe WHITE.replace("[3", "[10")
+
+        cfg.Bold shouldBe BOLD
+        cfg.Reset shouldBe RESET
+      }
+
+      it("should be empty when deactivated") {
+        val cfg = AnsiConsole(plain = true)
+
+        cfg.Black shouldBe empty
+        cfg.Red shouldBe empty
+        cfg.Green shouldBe empty
+        cfg.Yellow shouldBe empty
+        cfg.Blue shouldBe empty
+        cfg.Magenta shouldBe empty
+        cfg.Cyan shouldBe empty
+        cfg.White shouldBe empty
+
+        cfg.HiBlack shouldBe empty
+        cfg.HiRed shouldBe empty
+        cfg.HiGreen shouldBe empty
+        cfg.HiYellow shouldBe empty
+        cfg.HiBlue shouldBe empty
+        cfg.HiMagenta shouldBe empty
+        cfg.HiCyan shouldBe empty
+        cfg.HiWhite shouldBe empty
+
+        cfg.BlackBg shouldBe empty
+        cfg.RedBg shouldBe empty
+        cfg.GreenBg shouldBe empty
+        cfg.YellowBg shouldBe empty
+        cfg.BlueBg shouldBe empty
+        cfg.MagentaBg shouldBe empty
+        cfg.CyanBg shouldBe empty
+        cfg.WhiteBg shouldBe empty
+
+        cfg.HiBlackBg shouldBe empty
+        cfg.HiRedBg shouldBe empty
+        cfg.HiGreenBg shouldBe empty
+        cfg.HiYellowBg shouldBe empty
+        cfg.HiBlueBg shouldBe empty
+        cfg.HiMagentaBg shouldBe empty
+        cfg.HiCyanBg shouldBe empty
+        cfg.HiWhiteBg shouldBe empty
+
+        cfg.Bold shouldBe empty
+        cfg.Reset shouldBe empty
+      }
+    }
+
     describe("for the 8 basic colours") {
       it("by default is activated and non-bold") {
         val cfg = AnsiConsole()
@@ -120,6 +208,25 @@ class AnsiConsoleSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matcher
         cfg.cyanBg("-", bold = true) shouldBe s"$BOLD$CYAN_B-$RESET"
         cfg.whiteBg("-", bold = true) shouldBe s"$BOLD$WHITE_B-$RESET"
       }
+      it("can be activated and hi-intensity") {
+        val cfg = AnsiConsole()
+        cfg.black("-", hi = true) shouldBe s"\u001b[90m-$RESET"
+        cfg.red("-", hi = true) shouldBe s"\u001b[91m-$RESET"
+        cfg.green("-", hi = true) shouldBe s"\u001b[92m-$RESET"
+        cfg.yellow("-", hi = true) shouldBe s"\u001b[93m-$RESET"
+        cfg.blue("-", hi = true) shouldBe s"\u001b[94m-$RESET"
+        cfg.magenta("-", hi = true) shouldBe s"\u001b[95m-$RESET"
+        cfg.cyan("-", hi = true) shouldBe s"\u001b[96m-$RESET"
+        cfg.white("-", hi = true) shouldBe s"\u001b[97m-$RESET"
+        cfg.blackBg("-", hi = true) shouldBe s"\u001b[100m-$RESET"
+        cfg.redBg("-", hi = true) shouldBe s"\u001b[101m-$RESET"
+        cfg.greenBg("-", hi = true) shouldBe s"\u001b[102m-$RESET"
+        cfg.yellowBg("-", hi = true) shouldBe s"\u001b[103m-$RESET"
+        cfg.blueBg("-", hi = true) shouldBe s"\u001b[104m-$RESET"
+        cfg.magentaBg("-", hi = true) shouldBe s"\u001b[105m-$RESET"
+        cfg.cyanBg("-", hi = true) shouldBe s"\u001b[106m-$RESET"
+        cfg.whiteBg("-", hi = true) shouldBe s"\u001b[107m-$RESET"
+      }
       it("can turn off the reset") {
         val cfg = AnsiConsole()
         cfg.bold("-", reset = false) shouldBe s"$BOLD-"
@@ -140,26 +247,26 @@ class AnsiConsoleSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matcher
         cfg.cyanBg("-", reset = false) shouldBe s"$CYAN_B-"
         cfg.whiteBg("-", reset = false) shouldBe s"$WHITE_B-"
       }
-      for (bold <- Seq(false, true); reset <- Seq(false, true)) {
-        it(s"can be deactivated for non-ansi use (bold: $bold, reset $reset)") {
+      for (bold <- Seq(false, true); reset <- Seq(false, true); hi <- Seq(false, true)) {
+        it(s"can be deactivated for non-ansi use (bold: $bold, reset $reset, hi $hi)") {
           val cfg = AnsiConsole(plain = true)
           cfg.bold("-", reset = reset) shouldBe "-"
-          cfg.black("-", bold = bold, reset = reset) shouldBe "-"
-          cfg.red("-", bold = bold, reset = reset) shouldBe "-"
-          cfg.green("-", bold = bold, reset = reset) shouldBe "-"
-          cfg.yellow("-", bold = bold, reset = reset) shouldBe "-"
-          cfg.blue("-", bold = bold, reset = reset) shouldBe "-"
-          cfg.magenta("-", bold = bold, reset = reset) shouldBe "-"
-          cfg.cyan("-", bold = bold, reset = reset) shouldBe "-"
-          cfg.white("-", bold = bold, reset = reset) shouldBe "-"
-          cfg.blackBg("-", bold = bold, reset = reset) shouldBe "-"
-          cfg.redBg("-", bold = bold, reset = reset) shouldBe "-"
-          cfg.greenBg("-", bold = bold, reset = reset) shouldBe "-"
-          cfg.yellowBg("-", bold = bold, reset = reset) shouldBe "-"
-          cfg.blueBg("-", bold = bold, reset = reset) shouldBe "-"
-          cfg.magentaBg("-", bold = bold, reset = reset) shouldBe "-"
-          cfg.cyanBg("-", bold = bold, reset = reset) shouldBe "-"
-          cfg.whiteBg("-", bold = bold, reset = reset) shouldBe "-"
+          cfg.black("-", bold = bold, reset = reset, hi = hi) shouldBe "-"
+          cfg.red("-", bold = bold, reset = reset, hi = hi) shouldBe "-"
+          cfg.green("-", bold = bold, reset = reset, hi = hi) shouldBe "-"
+          cfg.yellow("-", bold = bold, reset = reset, hi = hi) shouldBe "-"
+          cfg.blue("-", bold = bold, reset = reset, hi = hi) shouldBe "-"
+          cfg.magenta("-", bold = bold, reset = reset, hi = hi) shouldBe "-"
+          cfg.cyan("-", bold = bold, reset = reset, hi = hi) shouldBe "-"
+          cfg.white("-", bold = bold, reset = reset, hi = hi) shouldBe "-"
+          cfg.blackBg("-", bold = bold, reset = reset, hi = hi) shouldBe "-"
+          cfg.redBg("-", bold = bold, reset = reset, hi = hi) shouldBe "-"
+          cfg.greenBg("-", bold = bold, reset = reset, hi = hi) shouldBe "-"
+          cfg.yellowBg("-", bold = bold, reset = reset, hi = hi) shouldBe "-"
+          cfg.blueBg("-", bold = bold, reset = reset, hi = hi) shouldBe "-"
+          cfg.magentaBg("-", bold = bold, reset = reset, hi = hi) shouldBe "-"
+          cfg.cyanBg("-", bold = bold, reset = reset, hi = hi) shouldBe "-"
+          cfg.whiteBg("-", bold = bold, reset = reset, hi = hi) shouldBe "-"
         }
       }
     }
@@ -174,6 +281,7 @@ class AnsiConsoleSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matcher
         cfg.ok("-") shouldBe s"$GREEN-$RESET"
         cfg.warn("-") shouldBe s"$YELLOW-$RESET"
         cfg.error("-") shouldBe s"$RED-$RESET"
+        cfg.comment("-") shouldBe s"\u001b[90m-$RESET"
         cfg.left("-") shouldBe s"$CYAN-$RESET"
         cfg.right("-") shouldBe s"$MAGENTA-$RESET"
         cfg.kv("-", "x") shouldBe s"$MAGENTA-$RESET: x"
@@ -187,6 +295,7 @@ class AnsiConsoleSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matcher
         cfg.ok("-", bold = true) shouldBe s"$BOLD$GREEN-$RESET"
         cfg.warn("-", bold = true) shouldBe s"$BOLD$YELLOW-$RESET"
         cfg.error("-", bold = true) shouldBe s"$BOLD$RED-$RESET"
+        cfg.comment("-", bold = true) shouldBe s"$BOLD\u001b[90m-$RESET"
         cfg.left("-", bold = true) shouldBe s"$BOLD$CYAN-$RESET"
         cfg.right("-", bold = true) shouldBe s"$BOLD$MAGENTA-$RESET"
         cfg.kv("-", "x", bold = true) shouldBe s"$BOLD$MAGENTA-$RESET: x"
@@ -200,6 +309,7 @@ class AnsiConsoleSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matcher
         cfg.ok("-", reset = false) shouldBe s"$GREEN-"
         cfg.warn("-", reset = false) shouldBe s"$YELLOW-"
         cfg.error("-", reset = false) shouldBe s"$RED-"
+        cfg.comment("-", reset = false) shouldBe s"\u001b[90m-"
         cfg.left("-", reset = false) shouldBe s"$CYAN-"
         cfg.right("-", reset = false) shouldBe s"$MAGENTA-"
         cfg.kv("-", "x", reset = false) shouldBe s"$MAGENTA-: x"
@@ -214,6 +324,7 @@ class AnsiConsoleSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matcher
           cfg.ok("-", bold = bold, reset = reset) shouldBe "-"
           cfg.warn("-", bold = bold, reset = reset) shouldBe "-"
           cfg.error("-", bold = bold, reset = reset) shouldBe "-"
+          cfg.comment("-", bold = bold, reset = reset) shouldBe "-"
           cfg.left("-", bold = bold, reset = reset) shouldBe "-"
           cfg.right("-", bold = bold, reset = reset) shouldBe "-"
           cfg.kv("-", "x", bold = bold, reset = reset) shouldBe "-: x"

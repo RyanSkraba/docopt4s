@@ -154,7 +154,7 @@ trait AnsiConsole {
     *   The string to print for that script line
     */
   def helpUse(cli: String, subcommand: String, args: String*): String =
-    s"""$Green$cli $Cyan$subcommand$Reset """ + args
+    s"$Green$cli $Cyan$subcommand$Reset " + args
       .map {
         case arg if arg.startsWith("[") => arg
         case arg                        => bold(arg)

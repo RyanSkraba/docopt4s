@@ -379,6 +379,12 @@ class AnsiConsoleSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matcher
            |${cfg.bold("Usage:")}
            |""".stripMargin
     }
+
+    it("should provide a nice help use") {
+      val cfg = AnsiConsole()
+      cfg.helpUse("git", "commit", "--m", "[COMMIT MESSAGE]") shouldBe
+        s"${cfg.Green}git ${cfg.Cyan}commit${cfg.Reset} ${cfg.bold("--m")} [COMMIT MESSAGE]"
+    }
   }
 
   describe("The ask() method") {

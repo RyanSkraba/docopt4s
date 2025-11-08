@@ -1,6 +1,5 @@
 package com.tinfoiled.docopt4s.testkit.example
 
-import com.tinfoiled.docopt4s.DocoptException
 import com.tinfoiled.docopt4s.testkit.MultiTaskMainSpec
 
 /** Unit tests for [[ExampleGo]] */

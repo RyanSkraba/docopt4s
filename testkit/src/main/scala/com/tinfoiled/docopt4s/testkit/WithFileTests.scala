@@ -3,7 +3,7 @@ package com.tinfoiled.docopt4s.testkit
 import com.tinfoiled.docopt4s.Task
 
 /** Additional validators for files. */
-trait FileValidator extends TmpDir { this: MultiTaskMainSpec[? <: Task] =>
+trait WithFileTests extends TmpDir { this: MultiTaskMainSpec[? <: Task] =>
 
   class PathAdapter(thunk: (Option[String], String, Seq[Any]) => Unit)
       extends ((Option[String], String) => Function[Seq[String], Unit]) {
@@ -20,6 +20,25 @@ trait FileValidator extends TmpDir { this: MultiTaskMainSpec[? <: Task] =>
       val t = interceptGoDocoptEx(nonExistArgs: _*)
       t.docopt shouldBe Doc
       t.getMessage shouldBe s"${tag.getOrElse("Path")} doesn't exist: $NonExistingPath"
+    }
+  })
+
+  // TODO: Document
+  val itShouldBeANonExistingPath: PathAdapter = new PathAdapter((tag, holder, args) => {
+    for (exists <- Seq(ExistingFile, Tmp)) {
+      val existFileArgs = Task.map(_.Cmd).toSeq ++ args.map(arg => if (arg == holder) exists else arg)
+      it("throws an exception when the path already exists: " + existFileArgs.mkString(" ")) {
+        val t = interceptGoDocoptEx(existFileArgs: _*)
+        t.docopt shouldBe Doc
+        t.getMessage shouldBe s"${tag.getOrElse("Path")} already exists: $exists"
+      }
+    }
+
+    val uncreatableArgs = Task.map(_.Cmd).toSeq ++ args.map(arg => if (arg == holder) ExistingFile / "nox" else arg)
+    it("throws an exception when the path can't be created: " + uncreatableArgs.mkString(" ")) {
+      val t = interceptGoDocoptEx(uncreatableArgs: _*)
+      t.docopt shouldBe Doc
+      t.getMessage shouldBe s"${tag.getOrElse("Path")} is uncreatable, $ExistingFile exists: $ExistingFile/nox"
     }
   })
 

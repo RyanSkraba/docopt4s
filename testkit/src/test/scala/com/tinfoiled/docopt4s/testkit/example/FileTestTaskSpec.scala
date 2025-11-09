@@ -1,9 +1,9 @@
 package com.tinfoiled.docopt4s.testkit.example
 
-import com.tinfoiled.docopt4s.testkit.{FileValidator, MultiTaskMainSpec}
+import com.tinfoiled.docopt4s.testkit.{WithFileTests, MultiTaskMainSpec}
 
-/** Unit tests for [[FileCheckTask]] */
-class FileCheckTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(FileCheckTask)) with FileValidator {
+/** Unit tests for [[FileTestTask]] */
+class FileTestTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(FileTestTask)) with WithFileTests {
 
   describe(s"Standard $MainName $TaskCmd command line help, versions and exceptions") {
     itShouldHandleVersionAndHelpFlags()
@@ -17,9 +17,12 @@ class FileCheckTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(FileCheckTask)
     itShouldThrowOnIncompatibleOpts("--file", "--dir", "X")
     itShouldThrowOnIncompatibleOpts("--exists", "--no-exists", "X")
 
+    itShouldBeAnExistingPath()("--exists", "<>")
     itShouldBeAnExistingFile()("--file", "--exists", "<>")
     itShouldBeAnExistingDir()("--dir", "--exists", "<>")
+    itShouldBeANonExistingPath()("--no-exists", "<>")
 
+    itShouldBeAnExistingPath("Src")("--tag", "Src", "--exists", "<>")
     itShouldBeAnExistingFile("Src")("--tag", "Src", "--file", "--exists", "<>")
     itShouldBeAnExistingDir("Src")("--tag", "Src", "--dir", "--exists", "<>")
   }

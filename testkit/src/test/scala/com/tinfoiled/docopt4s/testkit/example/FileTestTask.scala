@@ -4,10 +4,10 @@ import com.tinfoiled.docopt4s.{Docopt, PathValidator, Task}
 
 import scala.reflect.io.Path
 
-/** A file check just verifies whether an argument is a path, file, directory and/or exists. */
-object FileCheckTask extends Task {
+/** A file test just verifies whether an argument is a path, file, directory and/or exists. */
+object FileTestTask extends Task {
 
-  val Cmd = "filecheck"
+  val Cmd = "filetest"
 
   val Description = "Run a test case."
 

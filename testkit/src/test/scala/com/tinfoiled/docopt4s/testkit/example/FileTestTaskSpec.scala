@@ -22,11 +22,13 @@ class FileTestTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(FileTestTask)) 
     itShouldBeAnExistingDir()("--dir", "--exists", "<>")
     itShouldBeANonExistingPath()("--no-exists", "<>")
     itShouldBeANonExistingFile()("--no-exists", "--file", "<>")
+    itShouldBeANonExistingDir()("--no-exists", "--dir", "<>")
 
     itShouldBeAnExistingPath("Src")("--tag", "Src", "--exists", "<>")
     itShouldBeAnExistingFile("Src")("--tag", "Src", "--file", "--exists", "<>")
     itShouldBeAnExistingDir("Src")("--tag", "Src", "--dir", "--exists", "<>")
     itShouldBeANonExistingPath("Src")("--tag", "Src", "--no-exists", "<>")
     itShouldBeANonExistingFile("Src")("--tag", "Src", "--no-exists", "--file", "<>")
+    itShouldBeANonExistingDir("Src")("--tag", "Src", "--no-exists", "--dir", "<>")
   }
 }

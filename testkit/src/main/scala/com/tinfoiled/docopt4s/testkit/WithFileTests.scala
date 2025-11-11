@@ -35,6 +35,35 @@ trait WithFileTests extends TmpDir { this: MultiTaskMainSpec[? <: Task] =>
       thunk(tag, holder, _)
   }
 
+  /** Builds the WithFileAdapter that can run tests for paths, files and directories that should not already exist.
+    *
+    * @param dfltTag
+    *   The default tag to use to describe the resource if it's untagged ("Path", "File" or "Directory"), used in error
+    *   messages.
+    */
+  private[this] def shouldBeNonExisting(dfltTag: String): WithFileAdapter = new WithFileAdapter((tag, holder, args) => {
+    val existFileArgs = Task.map(_.Cmd).toSeq ++ args.map(arg => if (arg == holder) ExistingFile else arg)
+    it("throws an exception when the file already exists: " + existFileArgs.mkString(" ")) {
+      val t = interceptGoDocoptEx(existFileArgs: _*)
+      t.docopt shouldBe Doc
+      t.getMessage shouldBe s"${tag.getOrElse("File")} already exists: $ExistingFile"
+    }
+
+    val existDirArgs = Task.map(_.Cmd).toSeq ++ args.map(arg => if (arg == holder) Tmp else arg)
+    it("throws an exception when the directory already exists: " + existDirArgs.mkString(" ")) {
+      val t = interceptGoDocoptEx(existDirArgs: _*)
+      t.docopt shouldBe Doc
+      t.getMessage shouldBe s"${tag.getOrElse("Directory")} already exists: $Tmp"
+    }
+
+    val uncreatableArgs = Task.map(_.Cmd).toSeq ++ args.map(arg => if (arg == holder) ExistingFile / "nox" else arg)
+    it("throws an exception when the path can't be created: " + uncreatableArgs.mkString(" ")) {
+      val t = interceptGoDocoptEx(uncreatableArgs: _*)
+      t.docopt shouldBe Doc
+      t.getMessage shouldBe s"${tag.getOrElse(dfltTag)} is uncreatable, $ExistingFile exists: $ExistingFile/nox"
+    }
+  })
+
   /** Adds a test to ensure that when the tool is run with the given arguments, it will fail because one of the
     * arguments was not an existing path. Use "<>" to specify the argument that should be replaced during the test.
     *
@@ -59,23 +88,7 @@ trait WithFileTests extends TmpDir { this: MultiTaskMainSpec[? <: Task] =>
     * itShouldBeANonExistingPath()("--output", "<>")
     * }}}
     */
-  val itShouldBeANonExistingPath: WithFileAdapter = new WithFileAdapter((tag, holder, args) => {
-    for (exists <- Seq(ExistingFile, Tmp)) {
-      val existFileArgs = Task.map(_.Cmd).toSeq ++ args.map(arg => if (arg == holder) exists else arg)
-      it("throws an exception when the path already exists: " + existFileArgs.mkString(" ")) {
-        val t = interceptGoDocoptEx(existFileArgs: _*)
-        t.docopt shouldBe Doc
-        t.getMessage shouldBe s"${tag.getOrElse("Path")} already exists: $exists"
-      }
-    }
-
-    val uncreatableArgs = Task.map(_.Cmd).toSeq ++ args.map(arg => if (arg == holder) ExistingFile / "nox" else arg)
-    it("throws an exception when the path can't be created: " + uncreatableArgs.mkString(" ")) {
-      val t = interceptGoDocoptEx(uncreatableArgs: _*)
-      t.docopt shouldBe Doc
-      t.getMessage shouldBe s"${tag.getOrElse("Path")} is uncreatable, $ExistingFile exists: $ExistingFile/nox"
-    }
-  })
+  val itShouldBeANonExistingPath: WithFileAdapter = shouldBeNonExisting("Path")
 
   /** Adds a test to ensure that when the tool is run with the given arguments, it will fail because one of the
     * arguments either does not exist, or exists but isn't a file. Use "<>" to specify the argument that should be
@@ -111,23 +124,7 @@ trait WithFileTests extends TmpDir { this: MultiTaskMainSpec[? <: Task] =>
     * itShouldBeANonExistingFile()("--outputFile", "<>")
     * }}}
     */
-  val itShouldBeANonExistingFile: WithFileAdapter = new WithFileAdapter((tag, holder, args) => {
-    for (exists <- Seq(ExistingFile, Tmp)) {
-      val existFileArgs = Task.map(_.Cmd).toSeq ++ args.map(arg => if (arg == holder) exists else arg)
-      it("throws an exception when the file already exists: " + existFileArgs.mkString(" ")) {
-        val t = interceptGoDocoptEx(existFileArgs: _*)
-        t.docopt shouldBe Doc
-        t.getMessage shouldBe s"${tag.getOrElse("File")} already exists: $exists"
-      }
-    }
-
-    val uncreatableArgs = Task.map(_.Cmd).toSeq ++ args.map(arg => if (arg == holder) ExistingFile / "nox" else arg)
-    it("throws an exception when the path can't be created: " + uncreatableArgs.mkString(" ")) {
-      val t = interceptGoDocoptEx(uncreatableArgs: _*)
-      t.docopt shouldBe Doc
-      t.getMessage shouldBe s"${tag.getOrElse("File")} is uncreatable, $ExistingFile exists: $ExistingFile/nox"
-    }
-  })
+  val itShouldBeANonExistingFile: WithFileAdapter = shouldBeNonExisting("File")
 
   // TODO: Document
   val itShouldBeAnExistingDir: WithFileAdapter = new WithFileAdapter((tag, holder, args) => {
@@ -147,4 +144,14 @@ trait WithFileTests extends TmpDir { this: MultiTaskMainSpec[? <: Task] =>
         .getOrElse(s"Expected a directory, found file: $ExistingFile")
     }
   })
+
+  /** Adds a test to ensure that when the tool is run with the given arguments, it will fail because one of the
+    * arguments already exists as a file or directory, OR that that argument is uncreatable because one of its parent
+    * segments exist as a file. Use "<>" to specify the argument that should be replaced during the test.
+    *
+    * {{{
+    * itShouldBeANonExistingFile()("--outputDir", "<>")
+    * }}}
+    */
+  val itShouldBeANonExistingDir: WithFileAdapter = shouldBeNonExisting("Directory")
 }

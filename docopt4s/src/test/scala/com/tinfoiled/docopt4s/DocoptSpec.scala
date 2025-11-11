@@ -266,11 +266,11 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     describe("when requiring that it doesn't exist") {
       it("should get when it doesn't exist") { opt.path.get("nox", vldNox) shouldBe NonExistingPath }
       it("should fail when it does exist as a file") {
-        failOn(opt.path.get("file", vldNox)) shouldBe s"Path already exists: $ExistingFile"
+        failOn(opt.path.get("file", vldNox)) shouldBe s"File already exists: $ExistingFile"
         failOn(opt.path.get("file", vldNox.withTag("Src"))) shouldBe s"Src already exists: $ExistingFile"
       }
       it("should fail when it does exist as a directory") {
-        failOn(opt.path.get("dir", vldNox)) shouldBe s"Path already exists: $Tmp"
+        failOn(opt.path.get("dir", vldNox)) shouldBe s"Directory already exists: $Tmp"
         failOn(opt.path.get("dir", vldNox.withTag("Src"))) shouldBe s"Src already exists: $Tmp"
       }
       it("should fail when it doesn't exist but one of the parent segments is a file") {
@@ -341,7 +341,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
         failOn(opt.file.get("file", vldNox.withTag("Src"))) shouldBe s"Src already exists: $ExistingFile"
       }
       it("should fail when it does exist as a directory") {
-        failOn(opt.file.get("dir", vldNox)) shouldBe s"File already exists: $Tmp"
+        failOn(opt.file.get("dir", vldNox)) shouldBe s"Directory already exists: $Tmp"
         failOn(opt.file.get("dir", vldNox.withTag("Src"))) shouldBe s"Src already exists: $Tmp"
       }
       it("should fail when it doesn't exist but one of the parent segments is a file") {
@@ -411,7 +411,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     describe("when requiring that it doesn't exist") {
       it("should get when it doesn't exist") { opt.dir.get("nox", vldNox) shouldBe NonExistingPath }
       it("should fail when it does exist as a file") {
-        failOn(opt.dir.get("file", vldNox)) shouldBe s"Directory already exists: $ExistingFile"
+        failOn(opt.dir.get("file", vldNox)) shouldBe s"File already exists: $ExistingFile"
         failOn(opt.dir.get("file", vldNox.withTag("Src"))) shouldBe s"Src already exists: $ExistingFile"
       }
       it("should fail when it does exist as a directory") {

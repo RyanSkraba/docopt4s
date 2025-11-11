@@ -172,8 +172,10 @@ case class PathValidator(
       .toAbsolute
 
     (ifExists, ifIsDir, tag, path.exists) match {
-      case (Some(true), _, _, false) => throw new DocoptException(s"$pathTag doesn't exist: $path")
-      case (Some(false), _, _, true) => throw new DocoptException(s"$pathTag already exists: $path")
+      case (Some(true), _, _, false)                => throw new DocoptException(s"$pathTag doesn't exist: $path")
+      case (Some(false), _, Some(t), true)          => throw new DocoptException(s"$t already exists: $path")
+      case (Some(false), _, _, true) if path.isFile => throw new DocoptException(s"File already exists: $path")
+      case (Some(false), _, _, true)                => throw new DocoptException(s"Directory already exists: $path")
       case (_, Some(true), None, true) if !path.isDirectory =>
         throw new DocoptException(s"Expected a directory, found file: $path")
       case (_, Some(true), Some(t), true) if !path.isDirectory =>

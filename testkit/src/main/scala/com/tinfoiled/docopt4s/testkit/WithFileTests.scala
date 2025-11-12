@@ -126,7 +126,14 @@ trait WithFileTests extends TmpDir { this: MultiTaskMainSpec[? <: Task] =>
     */
   val itShouldBeANonExistingFile: WithFileAdapter = shouldBeNonExisting("File")
 
-  // TODO: Document
+  /** Adds a test to ensure that when the tool is run with the given arguments, it will fail because one of the
+    * arguments either does not exist, or exists but isn't a directory. Use "<>" to specify the argument that should be
+    * replaced during the test.
+    *
+    * {{{
+    * itShouldBeAnExistingFile()("--inputDir", "<>")
+    * }}}
+    */
   val itShouldBeAnExistingDir: WithFileAdapter = new WithFileAdapter((tag, holder, args) => {
     val nonExistArgs = Task.map(_.Cmd).toSeq ++ args.map(arg => if (arg == holder) NonExistingPath else arg)
     it("throws an exception when the directory doesn't exist: " + nonExistArgs.mkString(" ")) {

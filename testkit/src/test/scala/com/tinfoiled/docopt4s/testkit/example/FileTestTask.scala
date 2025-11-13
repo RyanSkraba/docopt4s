@@ -46,6 +46,6 @@ object FileTestTask extends Task {
       opt.path.get("PATH", vldTag)
     }
 
-    println(s"OK $validated")
+    print(s"OK $validated")
   }
 }

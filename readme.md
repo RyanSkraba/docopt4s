@@ -20,7 +20,7 @@ You can import the library into your project from [maven central](https://centra
 <dependency>
   <groupId>com.tinfoiled</groupId>
   <artifactId>docopt4s_2.13</artifactId>
-  <version>0.0.6</version>
+  <version>0.0.7</version>
 </dependency>
 ```
 

@@ -5,7 +5,7 @@ import com.tinfoiled.docopt4s.{MultiTaskMain, Task}
 /** A simple command line utility that collects two simple tasks. */
 object ExampleGo extends MultiTaskMain {
   override lazy val Name: String = "ExampleGo"
-  override lazy val Version: String = "0.0.7"
+  override lazy val Version: String = "0.0.8-SNAPSHOT"
   override lazy val Tasks: Seq[Task] = Seq(DumpTask, FileTestTask, NavalFateTask, TestCaseTask)
   override lazy val Doc: String = "An example command line interface with multiple tasks.\n\n" + SimpleDoc
 }

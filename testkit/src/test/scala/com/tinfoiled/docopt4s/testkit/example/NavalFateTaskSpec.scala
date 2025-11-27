@@ -47,9 +47,11 @@ class NavalFateTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(NavalFateTask)
   describe("When running the ship sub-subtask ") {
 
     it("should accept 'ship new' with name arguments") {
-      withGoStdout(TaskCmd, "ship", "new", "titanic") shouldBe
-        """Creating ship: titanic
-            |""".stripMargin
+      // These three are the same, just different ways to pass to withGoStdOut
+      withGoStdout(TaskCmd, "ship", "new", "titanic") shouldBe "Creating ship: titanic\n"
+      withGoStdout(TaskCmd, Seq("ship", "new", "titanic")) shouldBe "Creating ship: titanic\n"
+      withGoStdout(TaskCmd, "ship" -> "new", "titanic") shouldBe "Creating ship: titanic\n"
+
       withGoStdout(TaskCmd, "ship", "new", "titanic", "minnow") shouldBe
         """Creating ship: titanic
             |Creating ship: minnow

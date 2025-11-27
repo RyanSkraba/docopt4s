@@ -72,10 +72,18 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     * @return
     *   The return value of the partial function.
     */
-  def withGoMatching[T, U](args: Any*)(pf: scala.PartialFunction[(String, String), U]): U =
-    withConsoleMatch(Main.go(args.map(_.toString): _*)) { case (_, stdout, stderr) =>
+  def withGoMatching[T, U](args: Any*)(pf: scala.PartialFunction[(String, String), U]): U = {
+    // Sequences and Tuple2 are expanded.
+    val stringArgs = args.flatMap {
+      case xs: Iterable[_] => xs.map(_.toString)
+      case key -> value    => Seq(key.toString, value.toString)
+      case other           => Seq(other.toString)
+    }
+
+    withConsoleMatch(Main.go(stringArgs: _*)) { case (_, stdout, stderr) =>
       pf(stdout, stderr)
     }
+  }
 
   /** A helper method used to capture the console of a Cli execution and return the output.
     *

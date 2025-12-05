@@ -23,7 +23,7 @@ trait Docopt {
   val string: DocoptGetNoVld[String]
 
   /** Get option values as an {{Iterable}} String list */
-  val strings: DocoptGetNoVld[Iterable[String]]
+  val strings: DocoptGetStrings
 
   /** Get option values as a {{Boolean}} */
   val boolean: DocoptGetNoVld[Boolean]
@@ -126,6 +126,17 @@ abstract class DocoptGet[T, VLD](DefaultVld: VLD) {
   */
 class DocoptGetNoVld[T](getter: String => Option[T]) extends DocoptGet[T, Option[Nothing]](None) {
   override def getOption(key: String, vld: Option[Nothing]): Option[T] = getter(key)
+}
+
+class DocoptGetStrings(getter: String => Option[Iterable[String]]) extends DocoptGetNoVld[Iterable[String]](getter) {
+  /**
+   * Shortcut to get the option value or an empty list if it isn't present.
+   * @param key
+   *   The option key
+   * @return
+   *   The transformed option value or an empty list if not present.
+   */
+  def getOrEmpty(key: String): Iterable[String] = getOr(key, Seq.empty)
 }
 
 /** Helper to validate option values against an expected filesystem state.
@@ -238,8 +249,8 @@ object Docopt {
         case None                               => None
       })
 
-      override val strings: DocoptGetNoVld[Iterable[String]] =
-        new DocoptGetNoVld[Iterable[String]](argMap.get(_) match {
+      override val strings: DocoptGetStrings =
+        new DocoptGetStrings(argMap.get(_) match {
           case Some(value: String)                => Some(Seq(value))
           case Some(value: Iterable[_])           => Some(value.map(_.toString))
           case Some(value: java.lang.Iterable[_]) => Some(value.asScala.map(_.toString))

@@ -87,7 +87,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
   def failOnMissing(key: String = "missing")(thunk: => Any): Assertion =
     failOn { thunk } shouldBe s"Expected $key not found"
 
-  describe("Testing the getString methods") {
+  describe("Testing the string methods") {
     describe("when getting an optional value") {
       it("should get when present") { opt.string.getOption("string") shouldBe Some("value") }
       it("should get when missing") { opt.string.getOption("missing") shouldBe None }
@@ -110,7 +110,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     }
   }
 
-  describe("Testing the getStrings methods") {
+  describe("Testing the strings methods") {
     describe("when getting an optional value") {
       it("should get when present") { opt.strings.getOption("strings") shouldBe Some(Seq("x", "y")) }
       it("should get when missing") { opt.strings.getOption("missing") shouldBe None }
@@ -119,6 +119,11 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     describe("when getting a required value") {
       it("should get when present") { opt.strings.get("strings") shouldBe Seq("x", "y") }
       it("should fail when missing") { failOnMissing() { opt.strings.get("missing") } }
+    }
+
+    describe("when getting an optional value with empty") {
+      it("should get when present") { opt.strings.getOrEmpty("strings") shouldBe Seq("x", "y") }
+      it("should fail when missing") { opt.strings.getOrEmpty("missing") shouldBe empty }
     }
 
     describe("when getting a required value with default") {
@@ -133,7 +138,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     }
   }
 
-  describe("Testing the getBoolean methods") {
+  describe("Testing the boolean methods") {
     describe("when getting an optional value") {
       it("should get when present") { opt.boolean.getOption("bool") shouldBe Some(true) }
       it("should get when missing") { opt.boolean.getOption("missing") shouldBe None }
@@ -194,7 +199,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     }
   }
 
-  describe("Testing the getInt methods") {
+  describe("Testing the int methods") {
     describe("when getting an optional value") {
       it("should get when present") { opt.int.getOption("int") shouldBe Some(12345) }
       it("should get when missing") { opt.int.getOption("missing") shouldBe None }
@@ -224,7 +229,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     }
   }
 
-  describe("Testing the getPath methods") {
+  describe("Testing the path methods") {
 
     describe("when getting an optional value") {
       it("should get when present") { opt.path.getOption("dir") shouldBe Some(Tmp) }
@@ -313,7 +318,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     }
   }
 
-  describe("Testing the getFile methods") {
+  describe("Testing the file methods") {
 
     describe("when getting an optional value") {
       it("should get when present") { opt.file.getOption("file") shouldBe Some(ExistingFile) }
@@ -387,7 +392,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     }
   }
 
-  describe("Testing the getDirectory methods") {
+  describe("Testing the directory methods") {
 
     describe("when getting an optional value") {
       it("should get when present") { opt.dir.getOption("dir") shouldBe Some(Tmp) }

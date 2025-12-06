@@ -7,7 +7,7 @@ import com.tinfoiled.docopt4s.{Docopt, DocoptException, Task}
   */
 object NavalFateTask extends Task {
 
-  val Cmd = "naval_fate"
+  override val Cmd = "naval_fate"
 
   val Description = "The naval fate example for docopt."
 

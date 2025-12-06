@@ -7,8 +7,6 @@ import scala.util.Try
 /** An example task that only writes information about all the arguments it has parsed. */
 object DumpTask extends Task {
 
-  val Cmd = "dump"
-
   val Description = "The first example task for the utility."
 
   val Doc: String =

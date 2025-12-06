@@ -129,13 +129,13 @@ class DocoptGetNoVld[T](getter: String => Option[T]) extends DocoptGet[T, Option
 }
 
 class DocoptGetStrings(getter: String => Option[Iterable[String]]) extends DocoptGetNoVld[Iterable[String]](getter) {
-  /**
-   * Shortcut to get the option value or an empty list if it isn't present.
-   * @param key
-   *   The option key
-   * @return
-   *   The transformed option value or an empty list if not present.
-   */
+
+  /** Shortcut to get the option value or an empty list if it isn't present.
+    * @param key
+    *   The option key
+    * @return
+    *   The transformed option value or an empty list if not present.
+    */
   def getOrEmpty(key: String): Iterable[String] = getOr(key, Seq.empty)
 }
 

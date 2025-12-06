@@ -7,7 +7,7 @@ import scala.io.Source
 /** The test case can be used to parse arguments given a dynamically provided [[Docopt]] text. */
 object TestCaseTask extends Task {
 
-  val Cmd = "test"
+  override val Cmd = "test"
 
   val Description = "Run a test case."
 

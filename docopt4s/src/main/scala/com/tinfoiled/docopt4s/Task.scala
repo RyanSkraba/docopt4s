@@ -7,7 +7,10 @@ abstract class Task {
   val Doc: String
 
   /** The task token, used to pick the task from the main application */
-  val Cmd: String
+  val Cmd: String = getClass.getSimpleName.replace('$', ' ').trim match {
+    case tsk if tsk.endsWith("Task") => tsk.head.toLower +: tsk.tail.dropRight(4)
+    case str                         => str.head.toLower +: str.tail
+  }
 
   /** A short description for the task */
   val Description: String

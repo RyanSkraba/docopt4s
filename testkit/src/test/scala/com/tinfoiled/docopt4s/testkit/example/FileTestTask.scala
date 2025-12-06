@@ -7,7 +7,7 @@ import scala.reflect.io.Path
 /** A file test just verifies whether an argument is a path, file, directory and/or exists. */
 object FileTestTask extends Task {
 
-  val Cmd = "filetest"
+  override val Cmd = "filetest"
 
   val Description = "Run a test case."
 

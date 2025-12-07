@@ -18,3 +18,17 @@ class DocoptException(
     val docopt: String = None.orNull,
     val exitCode: Int = 1
 ) extends RuntimeException(msg, ex)
+
+// TODO:
+// /** Key required but not provided */
+// class RequiredOptionKeyException(
+//    key: String,
+//    override val docopt: String,
+// ) extends DocoptException(s"Required $key not present", null, docopt, 1)
+
+// TODO:
+// /** Value required for a key but not provided */
+// class RequiredOptionValueException(
+//    key: String,
+//    override val docopt: String,
+// ) extends DocoptException(s"Required $key not present", null, docopt, 1)

@@ -114,7 +114,7 @@ abstract class DocoptGet[T, VLD](DefaultVld: VLD) {
     */
   @throws[DocoptException]
   def get(key: String, vld: VLD = DefaultVld): T = getOption(key, vld).getOrElse {
-    throw new DocoptException(s"Expected $key not found")
+    throw new DocoptException(s"Required $key not found")
   }
 }
 

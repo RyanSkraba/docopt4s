@@ -84,8 +84,8 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     * @return
     *   the message in the DocoptException
     */
-  def failOnMissing(key: String = "missing")(thunk: => Any): Assertion =
-    failOn { thunk } shouldBe s"Expected $key not found"
+  def failOnRequiredKey(key: String = "missing")(thunk: => Any): Assertion =
+    failOn { thunk } shouldBe s"Required $key not found"
 
   describe("Testing the string methods") {
     describe("when getting an optional value") {
@@ -95,7 +95,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
     describe("when getting a required value") {
       it("should get when present") { opt.string.get("string") shouldBe "value" }
-      it("should fail when missing") { failOnMissing() { opt.string.get("missing") } }
+      it("should fail when missing") { failOnRequiredKey() { opt.string.get("missing") } }
     }
 
     describe("when getting a required value with default") {
@@ -118,7 +118,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
     describe("when getting a required value") {
       it("should get when present") { opt.strings.get("strings") shouldBe Seq("x", "y") }
-      it("should fail when missing") { failOnMissing() { opt.strings.get("missing") } }
+      it("should fail when missing") { failOnRequiredKey() { opt.strings.get("missing") } }
     }
 
     describe("when getting an optional value with empty") {
@@ -146,7 +146,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
     describe("when getting a required value") {
       it("should get when present") { opt.boolean.get("bool") shouldBe true }
-      it("should fail when missing") { failOnMissing() { opt.boolean.get("missing") } }
+      it("should fail when missing") { failOnRequiredKey() { opt.boolean.get("missing") } }
     }
 
     describe("when getting a required value with default") {
@@ -207,7 +207,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
     describe("when getting a required value") {
       it("should get when present") { opt.int.get("int") shouldBe 12345 }
-      it("should fail when missing") { failOnMissing() { opt.int.get("missing") } }
+      it("should fail when missing") { failOnRequiredKey() { opt.int.get("missing") } }
     }
 
     describe("when getting a required value with default") {
@@ -239,7 +239,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     describe("when getting a required value") {
       it("should get when present as dir") { opt.path.get("dir") shouldBe Tmp }
       it("should get when present as file") { opt.path.get("file") shouldBe ExistingFile }
-      it("should fail when missing") { failOnMissing() { opt.path.get("missing") } }
+      it("should fail when missing") { failOnRequiredKey() { opt.path.get("missing") } }
     }
 
     describe("when getting a required value with default") {
@@ -258,7 +258,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
         describe("when getting a required value") {
           it("should get when present as dir") { tc._2.path.get("dir", vldRoot) shouldBe Tmp }
           it("should get when present as file") { tc._2.path.get("file", vldRoot) shouldBe ExistingFile }
-          it("should fail when missing") { failOnMissing() { tc._2.path.get("missing", vldRoot) } }
+          it("should fail when missing") { failOnRequiredKey() { tc._2.path.get("missing", vldRoot) } }
         }
 
         describe("when getting a required value with default") {
@@ -331,7 +331,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
         failOn(opt.file.get("dir")) shouldBe s"Expected a file, found directory: $Tmp"
         failOn(opt.file.get("dir", vldTag)) shouldBe s"Source expected a file, found directory: $Tmp"
       }
-      it("should fail when missing") { failOnMissing() { opt.file.get("missing") } }
+      it("should fail when missing") { failOnRequiredKey() { opt.file.get("missing") } }
     }
 
     describe("when getting a required value with default") {
@@ -405,7 +405,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
         failOn(opt.dir.get("file")) shouldBe s"Expected a directory, found file: $ExistingFile"
         failOn(opt.dir.get("file", vldTag)) shouldBe s"Source expected a directory, found file: $ExistingFile"
       }
-      it("should fail when missing") { failOnMissing() { opt.dir.get("missing") } }
+      it("should fail when missing") { failOnRequiredKey() { opt.dir.get("missing") } }
     }
 
     describe("when getting a required value with default") {

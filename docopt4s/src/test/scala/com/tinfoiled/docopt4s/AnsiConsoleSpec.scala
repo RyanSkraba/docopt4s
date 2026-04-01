@@ -7,7 +7,7 @@ import org.scalatest.matchers.should.Matchers
 
 import java.io.ByteArrayInputStream
 import scala.io.AnsiColor._
-import scala.reflect.io.Streamable
+import scala.util.Using
 
 /** Test the [[AnsiConsole]] helper. */
 class AnsiConsoleSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
@@ -414,7 +414,7 @@ class AnsiConsoleSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matcher
     def simpleAsk(
         userResponse: String,
         out: AnsiConsole = AnsiConsole()
-    ): (String, Option[String]) = Streamable.closing(
+    ): (String, Option[String]) = Using.resource(
       new ByteArrayInputStream(s"$userResponse\n".getBytes)
     ) { in =>
       Console.withIn(in) {

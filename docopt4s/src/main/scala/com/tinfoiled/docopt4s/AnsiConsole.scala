@@ -3,7 +3,7 @@ package com.tinfoiled.docopt4s
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 import scala.io.AnsiColor
-import scala.reflect.io.Streamable
+import scala.util.Using
 
 /** A configurable, colourful mechanism for interacting with the user via the terminal. */
 trait AnsiConsole {
@@ -245,8 +245,8 @@ object AnsiConsole {
   def withConsoleMatch[T, U](
       thunk: => T
   )(pf: scala.PartialFunction[(T, String, String), U]): U = {
-    Streamable.closing(new ByteArrayOutputStream()) { out =>
-      Streamable.closing(new ByteArrayOutputStream()) { err =>
+    Using.resource(new ByteArrayOutputStream()) { out =>
+      Using.resource(new ByteArrayOutputStream()) { err =>
         Console.withOut(out) {
           Console.withErr(err) {
             val t = thunk

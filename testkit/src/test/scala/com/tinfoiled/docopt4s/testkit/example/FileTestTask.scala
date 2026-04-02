@@ -2,8 +2,6 @@ package com.tinfoiled.docopt4s.testkit.example
 
 import com.tinfoiled.docopt4s.{Docopt, PathValidator, Task}
 
-import scala.reflect.io.Path
-
 /** A file test just verifies whether an argument is a path, file, directory and/or exists. */
 object FileTestTask extends Task {
 
@@ -38,7 +36,7 @@ object FileTestTask extends Task {
 
     val vldTag = opt.string.getOption("--tag").map(vld.withTag).getOrElse(vld)
 
-    val validated: Path = if (opt.flag("--file")) {
+    val validated = if (opt.flag("--file")) {
       opt.file.get("PATH", vldTag)
     } else if (opt.flag("--dir")) {
       opt.dir.get("PATH", vldTag)

@@ -1,7 +1,8 @@
 package com.tinfoiled.docopt4s
 
+import java.nio.file.{Files, Path, Paths}
+
 import scala.jdk.CollectionConverters._
-import scala.reflect.io.{Directory, File, Path}
 import scala.util.Properties
 
 /** A [[Docopt]] provides a means to interpret command line arguments via a help text.
@@ -46,22 +47,22 @@ trait Docopt {
       )
   )
 
-  /** Get option values as a {{Path}} */
+  /** Get option values as a filesystem {{Path}} */
   val path: DocoptGet[Path, PathValidator] = new DocoptGet[Path, PathValidator](PathValidator().isPath) {
     override def getOption(key: String, vld: PathValidator): Option[Path] =
       string.getOption(key).map(_ => vld.validate(string.get(key)))
   }
 
-  /** Get option values as a {{File}} */
-  val file: DocoptGet[File, PathValidator] = new DocoptGet[File, PathValidator](PathValidator().isFile) {
-    override def getOption(key: String, vld: PathValidator): Option[File] =
-      path.getOption(key, vld.isFile).map(_.toFile)
+  /** Get option values as a filesystem path validated as a regular file */
+  val file: DocoptGet[Path, PathValidator] = new DocoptGet[Path, PathValidator](PathValidator().isFile) {
+    override def getOption(key: String, vld: PathValidator): Option[Path] =
+      path.getOption(key, vld.isFile)
   }
 
-  /** Get option values as a {{Directory}} */
-  val dir: DocoptGet[Directory, PathValidator] = new DocoptGet[Directory, PathValidator](PathValidator().isDir) {
-    override def getOption(key: String, vld: PathValidator): Option[Directory] =
-      path.getOption(key, vld.isDir).map(_.toDirectory)
+  /** Get option values as a filesystem path validated as a directory */
+  val dir: DocoptGet[Path, PathValidator] = new DocoptGet[Path, PathValidator](PathValidator().isDir) {
+    override def getOption(key: String, vld: PathValidator): Option[Path] =
+      path.getOption(key, vld.isDir)
   }
 }
 
@@ -172,39 +173,62 @@ case class PathValidator(
     *   The absolute, validated path that the option value represents on the filesystem.
     */
   def validate(value: String): Path = {
-    val path: Path = Path(
-      root
-        .map(_.toString)
-        .orElse(systemEnvVar.flatMap(sys.env.get(_)))
-        .orElse(Option(Properties.userDir))
-        .getOrElse("/")
-    )
-      .resolve(Path(value))
-      .toAbsolute
+    val path = Paths
+      .get(
+        root
+          .map(_.toString)
+          .orElse(systemEnvVar.flatMap(sys.env.get(_)))
+          .orElse(Option(Properties.userDir))
+          .getOrElse("/")
+      )
+      .resolve(value)
+      .toAbsolutePath
+      .normalize()
 
-    (ifExists, ifIsDir, tag, path.exists) match {
-      case (Some(true), _, _, false)                => throw new DocoptException(s"$pathTag doesn't exist: $path")
-      case (Some(false), _, Some(t), true)          => throw new DocoptException(s"$t already exists: $path")
-      case (Some(false), _, _, true) if path.isFile => throw new DocoptException(s"File already exists: $path")
-      case (Some(false), _, _, true)                => throw new DocoptException(s"Directory already exists: $path")
-      case (_, Some(true), None, true) if !path.isDirectory =>
-        throw new DocoptException(s"Expected a directory, found file: $path")
-      case (_, Some(true), Some(t), true) if !path.isDirectory =>
-        throw new DocoptException(s"$t expected a directory, found file: $path")
-      case (_, Some(false), None, true) if !path.isFile =>
-        throw new DocoptException(s"Expected a file, found directory: $path")
-      case (_, Some(false), Some(t), true) if !path.isFile =>
-        throw new DocoptException(s"$t expected a file, found directory: $path")
-      case (Some(false), _, _, false) =>
-        val existingParent = LazyList.iterate(path)(_.parent).dropWhile(!_.exists).headOption
-        // If it must not exist, and it does not exist, there's another constraint -- none of the parent paths must
-        // exist as a file, or the path is unusable as a file OR directory.
-        if (existingParent.exists(_.jfile.isFile))
+    if (Files.exists(path)) {
+      // If the path mustn't exist but it does
+      if (ifExists.contains(false))
+        throw new DocoptException(
+          tag match {
+            case Some(t)                        => s"$t already exists: $path"
+            case _ if Files.isRegularFile(path) => s"File already exists: $path"
+            case _                              => s"Directory already exists: $path"
+          }
+        )
+
+      // if the path should be a directory, but it isn't
+      if (ifIsDir.contains(true) && !Files.isDirectory(path))
+        throw new DocoptException(
+          tag match {
+            case Some(t) => s"$t expected a directory, found file: $path"
+            case _       => s"Expected a directory, found file: $path"
+          }
+        )
+
+      // if the path should be a file, but it isn't
+      if (ifIsDir.contains(false) && !Files.isRegularFile(path))
+        throw new DocoptException(
+          tag match {
+            case Some(t) => s"$t expected a file, found directory: $path"
+            case _       => s"Expected a file, found directory: $path"
+          }
+        )
+    } else {
+      // If the path must exist but it doesn't
+      if (ifExists.contains(true))
+        throw new DocoptException(s"$pathTag doesn't exist: $path")
+
+      // If it mustn't exist, and it doesn't exist, but it's existing parent is File, then
+      // the path is uncreatable and an error.
+      if (ifExists.contains(false)) {
+        val existingParent = LazyList.iterate(path)(_.getParent).takeWhile(_ != null).find(Files.exists(_))
+        if (existingParent.exists(Files.isRegularFile(_)))
           throw new DocoptException(s"$pathTag is uncreatable, ${existingParent.get} exists: $path")
-        else path
-      case _ => path
+      }
     }
-  }.toCanonical
+
+    path
+  }
 
   def withTag(tag: String): PathValidator = copy(tag = Some(tag))
   def withRoot(root: String): PathValidator = copy(root = Some(root))

@@ -56,7 +56,8 @@ trait WithFileTests extends TmpDir { this: MultiTaskMainSpec[? <: Task] =>
       t.getMessage shouldBe s"${tag.getOrElse("Directory")} already exists: $Tmp"
     }
 
-    val uncreatableArgs = Task.map(_.Cmd).toSeq ++ args.map(arg => if (arg == holder) ExistingFile / "nox" else arg)
+    val uncreatableArgs =
+      Task.map(_.Cmd).toSeq ++ args.map(arg => if (arg == holder) ExistingFile.resolve("nox") else arg)
     it("throws an exception when the path can't be created: " + uncreatableArgs.mkString(" ")) {
       val t = interceptGoDocoptEx(uncreatableArgs: _*)
       t.docopt shouldBe Doc

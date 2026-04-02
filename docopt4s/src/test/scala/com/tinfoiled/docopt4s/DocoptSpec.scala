@@ -5,8 +5,10 @@ import org.scalatest.{Assertion, BeforeAndAfterAll}
 import org.scalatest.funspec.AnyFunSpecLike
 import org.scalatest.matchers.should.Matchers
 
+import java.nio.charset.StandardCharsets
+import java.nio.file.{Files, Path, Paths}
 import scala.reflect.ClassTag
-import scala.reflect.io.{Directory, File, Path}
+import scala.util.{Failure, Using}
 
 /** Test the [[Docopt]] class.
   *
@@ -16,25 +18,32 @@ import scala.reflect.io.{Directory, File, Path}
 class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
   /** A local temporary directory for test file storage.  Note that we can't use TmpDir from docopt4s-testkit yet. */
-  val Tmp: Directory = Directory.makeTemp(getClass.getSimpleName)
+  val Tmp: Path = Files.createTempDirectory(getClass.getSimpleName)
 
   /** The directory that we're being run in (used for relative paths) */
-  val Pwd: Path = Directory(".").toCanonical
+  val Pwd: Path = Paths.get(".").toAbsolutePath.normalize()
 
   /** A file with a basic scenario. */
-  val ExistingFile: File = (Tmp / "file.txt").createFile()
-  ExistingFile.writeAll("file")
+  val ExistingFile: Path = Tmp.resolve("file.txt")
+  Files.createFile(ExistingFile)
+  Files.writeString(ExistingFile, "file", StandardCharsets.UTF_8)
 
-  val NonExistingPath: Path = Tmp / "nox"
+  val NonExistingPath: Path = Tmp.resolve("nox")
 
-  val DfltDir: Directory = (Tmp / "dflt").toDirectory
+  val DfltDir: Path = Tmp.resolve("dflt")
+  Files.createDirectories(DfltDir)
 
-  val DfltFile: File = DfltDir.toFile
+  val DfltFile: Path = DfltDir
 
   /** Delete temporary resources after the script. */
   override protected def afterAll(): Unit =
-    try { Tmp.deleteRecursively() }
-    catch { case ex: Exception => ex.printStackTrace() }
+    Using(Files.walk(Tmp)) { str =>
+      import scala.jdk.CollectionConverters._
+      str.iterator().asScala.toSeq.sortBy(_.getNameCount).reverse.foreach(Files.delete)
+    } match {
+      case Failure(ex) => ex.printStackTrace()
+      case _           =>
+    }
 
   /** Shortcut to generate a Docopt */
   def optWith(elems: (String, Any)*): Docopt = Docopt(Map.from(elems))
@@ -48,7 +57,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     "dir" -> Tmp.toString,
     "file" -> ExistingFile.toString,
     "nox" -> NonExistingPath.toString,
-    "badFileParent" -> (ExistingFile / "cant-exist").toString
+    "badFileParent" -> ExistingFile.resolve("cant-exist").toString
   )
 
   /** A path validator with the tag source */
@@ -71,7 +80,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     *   the message in the DocoptException
     */
   def failOn(thunk: => Any)(implicit classTag: ClassTag[DocoptException], pos: source.Position): String = {
-    val t = intercept[DocoptException] { thunk }(classTag, pos)
+    val t = intercept[DocoptException](thunk)
     Option(t.docopt) shouldBe None
     t.exitCode shouldBe 1
     t.getMessage
@@ -248,7 +257,12 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
     }
 
     // The same tests as above using a specified root, with relative and absolute option values
-    for (tc <- Map("absolute" -> opt, "relative" -> optWith("dir" -> ".", "file" -> ExistingFile.name))) {
+    for (
+      tc <- Map(
+        "absolute" -> opt,
+        "relative" -> optWith("dir" -> ".", "file" -> ExistingFile.getFileName.toString)
+      )
+    ) {
       describe(s"Testing the getPath methods with a specified root and ${tc._1} argument") {
         describe("when getting an optional value") {
           it("should get when present") { tc._2.path.getOption("dir", vldRoot) shouldBe Some(Tmp) }
@@ -296,24 +310,24 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
     describe("when converting other types") {
       it("should fail to convert a string") {
-        assume(!(Pwd / "value").exists)
-        failOn(opt.path.getOr("string", Tmp)) shouldBe s"Path doesn't exist: $Pwd/value"
-        failOn(opt.path.getOr("string", Tmp, vldTag)) shouldBe s"Source doesn't exist: $Pwd/value"
+        assume(!Files.exists(Pwd.resolve("value")))
+        failOn(opt.path.getOr("string", Tmp)) shouldBe s"Path doesn't exist: ${Pwd.resolve("value")}"
+        failOn(opt.path.getOr("string", Tmp, vldTag)) shouldBe s"Source doesn't exist: ${Pwd.resolve("value")}"
       }
       it("should fail to convert a string list") {
-        assume(!(Pwd / "x,y").exists)
-        failOn(opt.path.getOr("strings", Tmp)) shouldBe s"Path doesn't exist: $Pwd/x,y"
-        failOn(opt.path.getOr("strings", Tmp, vldTag)) shouldBe s"Source doesn't exist: $Pwd/x,y"
+        assume(!Files.exists(Pwd.resolve("x,y")))
+        failOn(opt.path.getOr("strings", Tmp)) shouldBe s"Path doesn't exist: ${Pwd.resolve("x,y")}"
+        failOn(opt.path.getOr("strings", Tmp, vldTag)) shouldBe s"Source doesn't exist: ${Pwd.resolve("x,y")}"
       }
       it("should fail to convert a boolean") {
-        assume(!(Pwd / "true").exists)
-        failOn(opt.path.getOr("bool", Tmp)) shouldBe s"Path doesn't exist: $Pwd/true"
-        failOn(opt.path.getOr("bool", Tmp, vldTag)) shouldBe s"Source doesn't exist: $Pwd/true"
+        assume(!Files.exists(Pwd.resolve("true")))
+        failOn(opt.path.getOr("bool", Tmp)) shouldBe s"Path doesn't exist: ${Pwd.resolve("true")}"
+        failOn(opt.path.getOr("bool", Tmp, vldTag)) shouldBe s"Source doesn't exist: ${Pwd.resolve("true")}"
       }
       it("should fail to convert a int") {
-        assume(!(Pwd / "12345").exists)
-        failOn(opt.path.getOr("int", Tmp)) shouldBe s"Path doesn't exist: $Pwd/12345"
-        failOn(opt.path.getOr("int", Tmp, vldTag)) shouldBe s"Source doesn't exist: $Pwd/12345"
+        assume(!Files.exists(Pwd.resolve("12345")))
+        failOn(opt.path.getOr("int", Tmp)) shouldBe s"Path doesn't exist: ${Pwd.resolve("12345")}"
+        failOn(opt.path.getOr("int", Tmp, vldTag)) shouldBe s"Source doesn't exist: ${Pwd.resolve("12345")}"
       }
     }
   }
@@ -370,24 +384,24 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
     describe("when converting other types") {
       it("should fail to convert a string") {
-        assume(!(Pwd / "value").exists)
-        failOn(opt.file.getOr("string", DfltFile)) shouldBe s"File doesn't exist: $Pwd/value"
-        failOn(opt.file.getOr("string", DfltFile, vldTag)) shouldBe s"Source doesn't exist: $Pwd/value"
+        assume(!Files.exists(Pwd.resolve("value")))
+        failOn(opt.file.getOr("string", DfltFile)) shouldBe s"File doesn't exist: ${Pwd.resolve("value")}"
+        failOn(opt.file.getOr("string", DfltFile, vldTag)) shouldBe s"Source doesn't exist: ${Pwd.resolve("value")}"
       }
       it("should fail to convert a string list") {
-        assume(!(Pwd / "x,y").exists)
-        failOn(opt.file.getOr("strings", DfltFile)) shouldBe s"File doesn't exist: $Pwd/x,y"
-        failOn(opt.file.getOr("strings", DfltFile, vldTag)) shouldBe s"Source doesn't exist: $Pwd/x,y"
+        assume(!Files.exists(Pwd.resolve("x,y")))
+        failOn(opt.file.getOr("strings", DfltFile)) shouldBe s"File doesn't exist: ${Pwd.resolve("x,y")}"
+        failOn(opt.file.getOr("strings", DfltFile, vldTag)) shouldBe s"Source doesn't exist: ${Pwd.resolve("x,y")}"
       }
       it("should fail to convert a boolean") {
-        assume(!(Pwd / "true").exists)
-        failOn(opt.file.getOr("bool", DfltFile)) shouldBe s"File doesn't exist: $Pwd/true"
-        failOn(opt.file.getOr("bool", DfltFile, vldTag)) shouldBe s"Source doesn't exist: $Pwd/true"
+        assume(!Files.exists(Pwd.resolve("true")))
+        failOn(opt.file.getOr("bool", DfltFile)) shouldBe s"File doesn't exist: ${Pwd.resolve("true")}"
+        failOn(opt.file.getOr("bool", DfltFile, vldTag)) shouldBe s"Source doesn't exist: ${Pwd.resolve("true")}"
       }
       it("should fail to convert a int") {
-        assume(!(Pwd / "12345").exists)
-        failOn(opt.file.getOr("int", DfltFile)) shouldBe s"File doesn't exist: $Pwd/12345"
-        failOn(opt.file.getOr("int", DfltFile, vldTag)) shouldBe s"Source doesn't exist: $Pwd/12345"
+        assume(!Files.exists(Pwd.resolve("12345")))
+        failOn(opt.file.getOr("int", DfltFile)) shouldBe s"File doesn't exist: ${Pwd.resolve("12345")}"
+        failOn(opt.file.getOr("int", DfltFile, vldTag)) shouldBe s"Source doesn't exist: ${Pwd.resolve("12345")}"
       }
     }
   }
@@ -446,24 +460,24 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
     describe("when converting other types") {
       it("should fail to convert a string") {
-        assume(!(Pwd / "value").exists)
-        failOn(opt.dir.getOr("string", DfltDir)) shouldBe s"Directory doesn't exist: $Pwd/value"
-        failOn(opt.dir.getOr("string", DfltDir, vldTag)) shouldBe s"Source doesn't exist: $Pwd/value"
+        assume(!Files.exists(Pwd.resolve("value")))
+        failOn(opt.dir.getOr("string", DfltDir)) shouldBe s"Directory doesn't exist: ${Pwd.resolve("value")}"
+        failOn(opt.dir.getOr("string", DfltDir, vldTag)) shouldBe s"Source doesn't exist: ${Pwd.resolve("value")}"
       }
       it("should fail to convert a string list") {
-        assume(!(Pwd / "x,y").exists)
-        failOn(opt.dir.getOr("strings", DfltDir)) shouldBe s"Directory doesn't exist: $Pwd/x,y"
-        failOn(opt.dir.getOr("strings", DfltDir, vldTag)) shouldBe s"Source doesn't exist: $Pwd/x,y"
+        assume(!Files.exists(Pwd.resolve("x,y")))
+        failOn(opt.dir.getOr("strings", DfltDir)) shouldBe s"Directory doesn't exist: ${Pwd.resolve("x,y")}"
+        failOn(opt.dir.getOr("strings", DfltDir, vldTag)) shouldBe s"Source doesn't exist: ${Pwd.resolve("x,y")}"
       }
       it("should fail to convert a boolean") {
-        assume(!(Pwd / "true").exists)
-        failOn(opt.dir.getOr("bool", DfltDir)) shouldBe s"Directory doesn't exist: $Pwd/true"
-        failOn(opt.dir.getOr("bool", DfltDir, vldTag)) shouldBe s"Source doesn't exist: $Pwd/true"
+        assume(!Files.exists(Pwd.resolve("true")))
+        failOn(opt.dir.getOr("bool", DfltDir)) shouldBe s"Directory doesn't exist: ${Pwd.resolve("true")}"
+        failOn(opt.dir.getOr("bool", DfltDir, vldTag)) shouldBe s"Source doesn't exist: ${Pwd.resolve("true")}"
       }
       it("should fail to convert a int") {
-        assume(!(Pwd / "12345").exists)
-        failOn(opt.dir.getOr("int", DfltDir)) shouldBe s"Directory doesn't exist: $Pwd/12345"
-        failOn(opt.dir.getOr("int", DfltDir, vldTag)) shouldBe s"Source doesn't exist: $Pwd/12345"
+        assume(!Files.exists(Pwd.resolve("12345")))
+        failOn(opt.dir.getOr("int", DfltDir)) shouldBe s"Directory doesn't exist: ${Pwd.resolve("12345")}"
+        failOn(opt.dir.getOr("int", DfltDir, vldTag)) shouldBe s"Source doesn't exist: ${Pwd.resolve("12345")}"
       }
     }
   }

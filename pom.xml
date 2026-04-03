@@ -87,11 +87,6 @@
         <artifactId>scala-library</artifactId>
         <version>${scala.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.scala-lang</groupId>
-        <artifactId>scala-reflect</artifactId>
-        <version>${scala.version}</version>
-      </dependency>
 
       <dependency>
         <groupId>org.scalatest</groupId>
@@ -105,7 +100,7 @@
   <dependencies>
     <dependency>
       <groupId>org.scala-lang</groupId>
-      <artifactId>scala-reflect</artifactId>
+      <artifactId>scala-library</artifactId>
     </dependency>
 
     <!-- Delegate parsing to docopt-java -->

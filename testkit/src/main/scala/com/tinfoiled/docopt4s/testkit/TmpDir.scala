@@ -2,7 +2,9 @@ package com.tinfoiled.docopt4s.testkit
 
 import org.scalatest.{BeforeAndAfterAll, Suite}
 
-import scala.reflect.io.{Directory, File, Path}
+import java.nio.charset.StandardCharsets
+import java.nio.file.{Files, Path, Paths}
+import scala.util.{Failure, Using}
 
 /** Trait for creating a temporary directory and deleting it after the suite is done. */
 trait TmpDir extends BeforeAndAfterAll { this: Suite =>
@@ -11,16 +13,17 @@ trait TmpDir extends BeforeAndAfterAll { this: Suite =>
   val Prefix: String = s"TmpDirScalatest_${getClass.getSimpleName}"
 
   /** A local temporary directory for test file storage. */
-  val Tmp: Directory = Directory.makeTemp(prefix = Prefix)
+  val Tmp: Path = Files.createTempDirectory(Prefix)
 
   /** The directory that we're being run in (used for relative paths) */
-  val Pwd: Directory = Directory(".").toCanonical.toDirectory
+  val Pwd: Path = Paths.get(".").toAbsolutePath.normalize()
 
   /** A file with a basic scenario. */
-  lazy val ExistingFile: File = {
-    val existing = nonExisting(Tmp, "existing.txt").toFile
-    existing.writeAll("file")
-    existing
+  lazy val ExistingFile: Path = {
+    val path = nonExisting(Tmp, "existing.txt")
+    Files.createFile(path)
+    Files.writeString(path, "file", StandardCharsets.UTF_8)
+    path
   }
 
   /** A simple file that is guaranteed not to exist at the start. */
@@ -30,17 +33,23 @@ trait TmpDir extends BeforeAndAfterAll { this: Suite =>
   lazy val Keep: Boolean = false
 
   /** @return a path that is guaranteed not to exist when the method is called */
-  def nonExisting(path: Directory = Tmp, tag: String = "nox"): Path = {
-    if (!(path / tag).exists) return path / tag
-    LazyList.from(1).map(tag + _).map(path / _).filterNot(_.exists).head
+  def nonExisting(path: Path = Tmp, tag: String = "nox"): Path = {
+    val candidate = path.resolve(tag)
+    if (!Files.exists(candidate)) return candidate
+    LazyList.from(1).map(i => path.resolve(tag + i)).find(p => !Files.exists(p)).get
   }
 
   /** Delete temporary resources after the script. */
   override protected def afterAll(): Unit = {
     super.afterAll()
     if (!Keep) {
-      try { Tmp.deleteRecursively() }
-      catch { case ex: Exception => ex.printStackTrace() }
+      Using(Files.walk(Tmp)) { str =>
+        import scala.jdk.CollectionConverters._
+        str.iterator().asScala.toSeq.sortBy(_.getNameCount).reverse.foreach(Files.delete)
+      } match {
+        case Failure(ex) => ex.printStackTrace()
+        case _           =>
+      }
     }
   }
 }

@@ -70,7 +70,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
   val vldMaybe: PathValidator = PathValidator().optionallyExists()
 
   /** A path validator that has a root */
-  val vldRoot: PathValidator = PathValidator().withRoot(Tmp.toString())
+  val vldRoot: PathValidator = PathValidator().withRoot(Tmp.toString)
 
   /** Helper method to capture a DocoptException with no docopt and an exitCode of 1.
     *

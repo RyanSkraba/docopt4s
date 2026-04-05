@@ -4,19 +4,19 @@ package com.tinfoiled.docopt4s
 trait MultiTaskMain {
 
   /** The application name. */
-  val Name: String
+  lazy val Name: String = getClass.getSimpleName
 
   /** The version to print when the --version flag is set. */
-  val Version: String
+  lazy val Version: String = throw new NotImplementedError()
 
   /** A list of subcommands that can be executed. */
-  val Tasks: Seq[Task]
+  lazy val Tasks: Seq[Task] = Seq.empty
 
   /** The full, main docopt that can be used for the application. */
   lazy val Doc: String = SimpleDoc
 
   /** The simple docopt without any description or additional text. */
-  val SimpleDoc: String = UsageDoc + "\n\n" + OptionsDoc + "\n\n" + CommandsDoc
+  lazy val SimpleDoc: String = UsageDoc + "\n\n" + OptionsDoc + "\n\n" + CommandsDoc
 
   /** A suggested usage section for the basic docopt. */
   lazy val UsageDoc: String =

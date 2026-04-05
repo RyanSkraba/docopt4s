@@ -277,7 +277,7 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
 
         describe("when getting a required value with default") {
           it("should get when present") { tc._2.path.getOr("dir", DfltDir, vldRoot) shouldBe Tmp }
-          it("should get when missing") { tc._2.path.getOr("missing", DfltDir, vldRoot) shouldBe (DfltDir) }
+          it("should get when missing") { tc._2.path.getOr("missing", DfltDir, vldRoot) shouldBe DfltDir }
         }
       }
     }

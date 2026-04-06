@@ -23,7 +23,7 @@ import com.tinfoiled.docopt4s.Task
   * (such as providing an existing file, when the file is expected to exist). A well-behaved tool should validate the
   * options before performing any actions.
   */
-trait WithFileTests extends TmpDir { this: MultiTaskMainSpec[? <: Task] =>
+trait WithFileTests extends TmpDir { this: MultiTaskMainSpec[_ <: Task] =>
 
   /** Helper to adapt the arguments to the test. */
   class WithFileAdapter(thunk: (Option[String], String, Seq[Any]) => Unit)

@@ -115,7 +115,7 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     *   The exception thrown when the arguments are run
     */
   def interceptGo[EX <: AnyRef](args: Any*)(implicit classTag: ClassTag[EX], pos: source.Position): EX =
-    intercept[EX] { withGo(args: _*) }(classTag, pos)
+    intercept[EX](withGo(args: _*))
 
   /** A helper method used to capture an [[DocoptException]] thrown by [[withGo]]
     *

@@ -73,7 +73,7 @@ object TestCaseTask extends Task {
     opt.string.getOption("--keys").foreach { tcKeys =>
       // TODO: Make key separator ',' configurable
       val keyDelimiter = ','
-      print(stringify(tcKeys.split(keyDelimiter)))
+      print(stringify(tcKeys.split(keyDelimiter).toSeq))
     }
 
     // if --check is specified then verify that the expected result is returned

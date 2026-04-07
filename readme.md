@@ -14,7 +14,7 @@ Docopt test cases
 Using docopt4s
 ------------------------------------------------------------------------------
 
-You can import the library into your project from [maven central](https://central.sonatype.com/artifact/com.tinfoiled/docopt4s_2.13):
+You can import the library into your project from [Maven Central](https://central.sonatype.com/artifact/com.tinfoiled/docopt4s_2.13).
 
 ```xml
 <dependency>
@@ -30,10 +30,6 @@ Building
 ```sh
 # Build, format and run all tests
 mvn spotless:apply clean verify
-
-# Using the uber jar from the command line
-alias docopt_go="java -jar $(find ~+ -name find ~+ -name docopt4s-testkit*.jar | sort | head -n1 | sort | head -n1)"
-skrync_go --help
 ```
 
 The project comes with an example CLI in the [testkit](testkit/) module, which you can run:

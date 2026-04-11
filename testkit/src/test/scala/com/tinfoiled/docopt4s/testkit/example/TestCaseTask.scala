@@ -3,6 +3,7 @@ package com.tinfoiled.docopt4s.testkit.example
 import com.tinfoiled.docopt4s.{Docopt, Task}
 
 import scala.io.Source
+import scala.util.{Failure, Success, Try}
 
 /** The test case can be used to parse arguments given a dynamically provided [[Docopt]] text. */
 object TestCaseTask extends Task {
@@ -49,39 +50,66 @@ object TestCaseTask extends Task {
     // Create the docopt from the spec and the arguments
     val tcDoc = opt.string.getOption("--docopt").getOrElse(Source.fromInputStream(System.in, "UTF-8").mkString)
     val tcArgs = opt.strings.get("ARGS")
-    val tcOpt = Docopt(tcDoc, "0.0.0-ignored", tcArgs)
-
-    // Print the values in a pseudo-JSON object with null for non-present keys, a single string value when there is
-    // only one option value, and a list when there is more than one option value.
-    def stringify(keys: Seq[String]): String = {
-      keys
-        .filter(_.nonEmpty)
-        .map(key =>
-          key -> (tcOpt.strings.getOption(key).map(_.toSeq) match {
-            case None              => "null"
-            case Some(Seq())       => "[]"
-            case Some(Seq(single)) => s"\"$single\""
-            case Some(multi)       => multi.mkString("[\"", "\",\"", "\"]")
-          })
-        )
-        .filter(_._2 != "null")
-        .map { case k -> v => "\"" + k + "\":" + v }
-        .mkString("{", ",", "}")
-    }
 
     // if --keys is specified then extract and print all the keys
     opt.string.getOption("--keys").foreach { tcKeys =>
       // TODO: Make key separator ',' configurable
       val keyDelimiter = ','
-      print(stringify(tcKeys.split(keyDelimiter).toSeq))
+      print(jsonifyKeys(Docopt(tcDoc, "0.0.0-ignored", tcArgs), tcKeys.split(keyDelimiter).toSeq))
     }
 
     // if --check is specified then verify that the expected result is returned
     opt.string.getOption("--check").foreach { expected =>
-      val expectedKeys = raw""""([^"]*)":""".r.findAllMatchIn(expected).map(_.group(1).trim).toSeq
-      val actual = stringify(expectedKeys)
-      if (actual == expected) print("OK")
-      else Console.err.print(s"NOK: $actual != $expected")
+      checkTest(tcDoc, tcArgs, expected) match {
+        case Success(_)  => print("OK")
+        case Failure(ex) => Console.err.print(s"NOK: ${ex.getMessage} != $expected")
+      }
     }
+  }
+
+  /** Performs a test on a docopt string with given arguments, and an expected result.
+    *
+    * @param docopt
+    *   The docopt specification under test
+    * @param args
+    *   The arguments to apply to the specification
+    * @param expected
+    *   The open keys and values to test as a result
+    * @return
+    *   A success if the expected values were returned, and a failure with the actual values discovered as the exception
+    *   message otherwise.
+    */
+  def checkTest(docopt: String, args: Iterable[String], expected: String): Try[String] = {
+    val expectedKeys = raw""""([^"]*)":""".r.findAllMatchIn(expected).map(_.group(1).trim).toSeq
+    val actual = jsonifyKeys(Docopt(docopt, "0.0.0-ignored", args), expectedKeys)
+    if (actual == expected) Success(expected)
+    else Failure(new Exception(actual))
+  }
+
+  /** Given option keys, fetches option values from the docopt in a pseudo-JSON object: null for non-present keys, a
+    * single string value when there is only one option value, and a string list when there is more than one option
+    * value.
+    *
+    * @param opt
+    *   The Docopt instance that has been parsed from the arguments
+    * @param keys
+    *   The option keys to fetch
+    * @return
+    *   A pseudo-JSON that shows the option values corresponding to the keys
+    */
+  def jsonifyKeys(opt: Docopt, keys: Seq[String]): String = {
+    keys
+      .filter(_.nonEmpty)
+      .map(key =>
+        key -> (opt.strings.getOption(key).map(_.toSeq) match {
+          case None              => "null"
+          case Some(Seq())       => "[]"
+          case Some(Seq(single)) => "\"" + single.replace("(\\\")", "\\$1") + "\""
+          case Some(multi)       => multi.map(_.replace("(\\\")", "\\$1")).mkString("[\"", "\",\"", "\"]")
+        })
+      )
+      .filter(_._2 != "null")
+      .map { case k -> v => "\"" + k + "\":" + v }
+      .mkString("{", ",", "}")
   }
 }

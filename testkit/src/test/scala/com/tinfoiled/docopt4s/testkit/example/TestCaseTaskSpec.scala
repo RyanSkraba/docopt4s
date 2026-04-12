@@ -30,6 +30,24 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
     wrapped
   }
 
+  describe("The tokenize helper method") {
+    for (in <- Seq("a b c", "   a b c", "a    b c", "a b    c", "a\tb    \n\nc ")) {
+      it(s"should ignore whitespace: $in") {
+        TestCaseTask.tokenize(in) shouldBe Seq("a", "b", "c")
+      }
+    }
+
+    it("should accept double quotes") {
+      TestCaseTask.tokenize(raw"""a1 "b c" d""") shouldBe Seq("a1", "b c", "d")
+      TestCaseTask.tokenize(raw"""a2 "b c d""") shouldBe Seq("a2", "\"b", "c", "d")
+      TestCaseTask.tokenize(raw"""a3 "b\"c" d""") shouldBe Seq("a3", raw"""b"c""", "d")
+      TestCaseTask.tokenize(raw"""a4 "b\\"c" d""") shouldBe Seq("a4", "b\\", "c\"", "d")
+      TestCaseTask.tokenize(raw"""a5 "b\\\"c" d""") shouldBe Seq("a5", raw"""b\"c""", "d")
+      TestCaseTask.tokenize(raw"""a6 "b
+             |\\nc" d""".stripMargin) shouldBe Seq("a6", "b\n\\nc", "d")
+    }
+  }
+
   describe("Running a test case on an empty program") {
     val SimpleDocopt = Seq(TaskCmd, "--docopt", "Usage: program")
 

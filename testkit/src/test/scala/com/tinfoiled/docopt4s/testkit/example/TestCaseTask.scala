@@ -112,4 +112,24 @@ object TestCaseTask extends Task {
       .map { case k -> v => "\"" + k + "\":" + v }
       .mkString("{", ",", "}")
   }
+
+  private[this] val RegexQuotedToken = raw""""(?:[^"\\]|\\.)*"|\S+""".r
+
+  /** Tokenizes the input string into arguments, separated by whitespace. Only double quotes are recognized if
+    * whitespace is important to the argument, and internal quotes must be escaped.
+    * @param input
+    *   A string of input to tokenize by whitespace
+    * @return
+    *   The list of arguments from the line
+    */
+  def tokenize(input: String): Iterable[String] =
+    RegexQuotedToken
+      .findAllMatchIn(input)
+      .map { _.matched }
+      .map {
+        case s if s.startsWith("\"") && s.endsWith("\"") => s.drop(1).dropRight(1)
+        case s                                           => s
+      }
+      .map { _.replaceAll(raw"\\(.)", "$1") }
+      .to(Iterable)
 }

@@ -2,8 +2,10 @@ package com.tinfoiled.docopt4s.testkit.example
 
 import com.tinfoiled.docopt4s.{Docopt, Task}
 
+import java.nio.file.Files
+import java.util.stream.Collectors
 import scala.io.Source
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success, Try, Using}
 
 /** The test case can be used to parse arguments given a dynamically provided [[Docopt]] text. */
 object TestCaseTask extends Task {
@@ -18,6 +20,7 @@ object TestCaseTask extends Task {
        |Usage:
        |  ${ExampleGo.Name} $Cmd --docopt DOC --keys KEYS [ARGS...]
        |  ${ExampleGo.Name} $Cmd --docopt DOC --check CHECK [ARGS...]
+       |  ${ExampleGo.Name} $Cmd --file FILE
        |
        |Options:
        |  -h --help      Show this screen.
@@ -25,6 +28,7 @@ object TestCaseTask extends Task {
        |  --docopt=DOC   If present, use as the default value for string arguments.
        |  --keys=KEYS    Comma separated list of keys to retrieve from the results.
        |  --check=CHECK  A JSON-like representation of the expected keys.
+       |  --file=FILE    A file of test cases to read and execute.
        |  ARGS           The arguments to pass to the docopt parser.
        |
        |Runs a test case and prints the values of the parsed options.  When the --keys
@@ -64,6 +68,12 @@ object TestCaseTask extends Task {
         case Success(_)  => print("OK")
         case Failure(ex) => Console.err.print(s"NOK: ${ex.getMessage} != $expected")
       }
+    }
+
+    // if --file is specified then read it from the system
+    opt.file.getOption("--file").foreach { file =>
+      val contents = Using.resource(Source.fromFile(file.toFile)) { _.getLines().mkString }
+      println(contents)
     }
   }
 

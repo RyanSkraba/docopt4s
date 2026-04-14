@@ -3,6 +3,8 @@ package com.tinfoiled.docopt4s.testkit.example
 import com.tinfoiled.docopt4s.DocoptException
 import com.tinfoiled.docopt4s.testkit.MultiTaskMainSpec
 
+import scala.util.{Failure, Success}
+
 /** Unit tests for [[DumpTask]] */
 class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) {
 
@@ -15,7 +17,7 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
     itShouldThrowOnMissingOptValue("--docopt", "doc", "--check")
   }
 
-  /** Run the test and unwrap the expection that happened internally. */
+  /** Run the test and unwrap the exception that happened internally. */
   def interceptWrapped(args: Seq[String]): DocoptException = {
     val t = interceptGoDocoptEx(args: _*)
     t.docopt shouldBe Doc
@@ -119,6 +121,24 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
           ): _*
         ) shouldBe "OK"
       }
+    }
+  }
+
+  describe("Running a file-based test") {
+    it("should use the checkTest method to run a test successfully") {
+      TestCaseTask.checkTest("Usage: program ARG1", Seq("a1"), """{"ARG1":"a1"}""") shouldBe Success(
+        """{"ARG1":"a1"}"""
+      )
+    }
+
+    it("should use the checkTest method to run a test with unexpected results") {
+      val ex = TestCaseTask.checkTest("Usage: program ARG1", Seq("a1"), """{"ARG1":"a2"}""")
+      ex shouldBe a[Failure[_]]
+      ex.failed.get.getMessage shouldBe """{"ARG1":"a1"}"""
+    }
+
+    ignore("should use the checkTest method to check a failure") {
+      TestCaseTask.checkTest("Usage: program ARG1", Seq("a1", "a2"), """{""ARG1":"a2"}""")
     }
   }
 }

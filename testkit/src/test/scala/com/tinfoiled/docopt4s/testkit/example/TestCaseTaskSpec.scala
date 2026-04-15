@@ -132,13 +132,15 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
     }
 
     it("should use the checkTest method to run a test with unexpected results") {
-      val ex = TestCaseTask.checkTest("Usage: program ARG1", Seq("a1"), """{"ARG1":"a2"}""")
-      ex shouldBe a[Failure[_]]
-      ex.failed.get.getMessage shouldBe """{"ARG1":"a1"}"""
+      val ex = TestCaseTask.checkTest("Usage: program ARG1", Seq("a1"), """{"ARG1":"a2"}""").failed.get
+      ex shouldBe a[AssertionError]
+      ex.getMessage shouldBe """{"ARG1":"a1"}"""
     }
 
-    ignore("should use the checkTest method to check a failure") {
-      TestCaseTask.checkTest("Usage: program ARG1", Seq("a1", "a2"), """{""ARG1":"a2"}""")
+    it("should use the checkTest method to check a failure") {
+      val ex = TestCaseTask.checkTest("Usage: program ARG1 ARG2", Seq("a1"), """{""ARG1":"a1"}""").failed.get
+      ex shouldBe a[DocoptException]
+      ex.getMessage shouldBe null
     }
   }
 }

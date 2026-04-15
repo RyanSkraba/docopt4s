@@ -1,6 +1,6 @@
 package com.tinfoiled.docopt4s.testkit.example
 
-import com.tinfoiled.docopt4s.{Docopt, Task}
+import com.tinfoiled.docopt4s.{Docopt, DocoptException, Task}
 
 import java.nio.file.Files
 import java.util.stream.Collectors
@@ -65,8 +65,9 @@ object TestCaseTask extends Task {
     // if --check is specified then verify that the expected result is returned
     opt.string.getOption("--check").foreach { expected =>
       checkTest(tcDoc, tcArgs, expected) match {
-        case Success(_)  => print("OK")
-        case Failure(ex) => Console.err.print(s"NOK: ${ex.getMessage} != $expected")
+        case Success(_)                  => print("OK")
+        case Failure(e: DocoptException) => throw e;
+        case Failure(ex)                 => Console.err.print(s"NOK: ${ex.getMessage} != $expected")
       }
     }
 
@@ -91,9 +92,11 @@ object TestCaseTask extends Task {
     */
   def checkTest(docopt: String, args: Iterable[String], expected: String): Try[String] = {
     val expectedKeys = raw""""([^"]*)":""".r.findAllMatchIn(expected).map(_.group(1).trim).toSeq
-    val actual = jsonifyKeys(Docopt(docopt, "0.0.0-ignored", args), expectedKeys)
-    if (actual == expected) Success(expected)
-    else Failure(new Exception(actual))
+    Try {
+      val actual = jsonifyKeys(Docopt(docopt, "0.0.0-ignored", args), expectedKeys)
+      if (actual != expected) throw new AssertionError(actual)
+      expected
+    }
   }
 
   /** Given option keys, fetches option values from the docopt in a pseudo-JSON object: null for non-present keys, a

@@ -126,7 +126,48 @@ object TestCaseTask extends Task {
       .mkString("{", ",", "}")
   }
 
-  private[this] val RegexQuotedToken = raw""""(?:[^"\\]|\\.)*"|\S+""".r
+  /** A test case that can be run.
+    * @param docopt
+    *   A docopt specification.
+    * @param cases
+    *   A set of arguments and the expected response.
+    */
+  case class TestCase(docopt: String, cases: (String, String)*)
+
+  object TestCase {
+    private[this] val TestCaseRegex = {
+      val q3 = "\"\"\"";
+      raw"""(?sx)
+          (?<=\n|^)r?$q3
+          (.*?)
+          $q3\s*\n
+          (.*?)(?=(\nr?$q3|$$))
+          """.r
+    }
+
+    def parse(input: String): Seq[TestCase] =
+      TestCaseRegex
+        .findAllMatchIn(input)
+        .map { m =>
+          val docopt = m.group(1)
+          val rest = m.group(2)
+          val cases = rest.linesIterator
+            .map(_.trim)
+            .filter(_.nonEmpty)
+            .toSeq
+            .grouped(2)
+            .flatMap {
+              case x if x.size != 2            => None
+              case x if x.head.startsWith("$") => Some(x.head.substring(1).trim -> x(1))
+              case x                           => Some(x.head -> x(1))
+            }
+            .toSeq
+          TestCase(docopt, cases: _*)
+        }
+        .toSeq
+  }
+
+  private[this] val RegexQuotedArgs = raw""""(?:[^"\\]|\\.)*"|\S+""".r
 
   /** Tokenizes the input string into arguments, separated by whitespace. Only double quotes are recognized if
     * whitespace is important to the argument, and internal quotes must be escaped.
@@ -135,8 +176,8 @@ object TestCaseTask extends Task {
     * @return
     *   The list of arguments from the line
     */
-  def tokenize(input: String): Iterable[String] =
-    RegexQuotedToken
+  def splitArgs(input: String): Iterable[String] =
+    RegexQuotedArgs
       .findAllMatchIn(input)
       .map { _.matched }
       .map {

@@ -2,6 +2,7 @@ package com.tinfoiled.docopt4s.testkit.example
 
 import com.tinfoiled.docopt4s.DocoptException
 import com.tinfoiled.docopt4s.testkit.MultiTaskMainSpec
+import com.tinfoiled.docopt4s.testkit.example.TestCaseTask.TestCase
 
 import scala.util.{Failure, Success}
 
@@ -32,20 +33,20 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
     wrapped
   }
 
-  describe("The tokenize helper method") {
+  describe("The splitArgs helper method") {
     for (in <- Seq("a b c", "   a b c", "a    b c", "a b    c", "a\tb    \n\nc ")) {
       it(s"should ignore whitespace: $in") {
-        TestCaseTask.tokenize(in) shouldBe Seq("a", "b", "c")
+        TestCaseTask.splitArgs(in) shouldBe Seq("a", "b", "c")
       }
     }
 
     it("should accept double quotes") {
-      TestCaseTask.tokenize(raw"""a1 "b c" d""") shouldBe Seq("a1", "b c", "d")
-      TestCaseTask.tokenize(raw"""a2 "b c d""") shouldBe Seq("a2", "\"b", "c", "d")
-      TestCaseTask.tokenize(raw"""a3 "b\"c" d""") shouldBe Seq("a3", raw"""b"c""", "d")
-      TestCaseTask.tokenize(raw"""a4 "b\\"c" d""") shouldBe Seq("a4", "b\\", "c\"", "d")
-      TestCaseTask.tokenize(raw"""a5 "b\\\"c" d""") shouldBe Seq("a5", raw"""b\"c""", "d")
-      TestCaseTask.tokenize(raw"""a6 "b
+      TestCaseTask.splitArgs(raw"""a1 "b c" d""") shouldBe Seq("a1", "b c", "d")
+      TestCaseTask.splitArgs(raw"""a2 "b c d""") shouldBe Seq("a2", "\"b", "c", "d")
+      TestCaseTask.splitArgs(raw"""a3 "b\"c" d""") shouldBe Seq("a3", raw"""b"c""", "d")
+      TestCaseTask.splitArgs(raw"""a4 "b\\"c" d""") shouldBe Seq("a4", "b\\", "c\"", "d")
+      TestCaseTask.splitArgs(raw"""a5 "b\\\"c" d""") shouldBe Seq("a5", raw"""b\"c""", "d")
+      TestCaseTask.splitArgs(raw"""a6 "b
              |\\nc" d""".stripMargin) shouldBe Seq("a6", "b\n\\nc", "d")
     }
   }
@@ -125,6 +126,8 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
   }
 
   describe("Running a file-based test") {
+    val q3 = "\"\"\""
+
     it("should use the checkTest method to run a test successfully") {
       TestCaseTask.checkTest("Usage: program ARG1", Seq("a1"), """{"ARG1":"a1"}""") shouldBe Success(
         """{"ARG1":"a1"}"""
@@ -141,6 +144,29 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
       val ex = TestCaseTask.checkTest("Usage: program ARG1 ARG2", Seq("a1"), """{""ARG1":"a1"}""").failed.get
       ex shouldBe a[DocoptException]
       ex.getMessage shouldBe null
+    }
+
+    it("should parse an input file into test cases") {
+      TestCase.parse(s"""
+          |r${q3}A$q3
+          |a1
+          |a2
+          |
+          |r$q3
+          |B
+          |$q3
+          |b1
+          |b2
+          |b3
+          |b4
+          |
+          |${q3}C
+          |$q3
+          |$$ c1
+          |c2
+          |c3
+          |""".stripMargin) shouldBe
+        Seq(TestCase("A", "a1" -> "a2"), TestCase("\nB\n", "b1" -> "b2", "b3" -> "b4"), TestCase("C\n", "c1" -> "c2"))
     }
   }
 }

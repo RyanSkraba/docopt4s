@@ -2,8 +2,6 @@ package com.tinfoiled.docopt4s.testkit.example
 
 import com.tinfoiled.docopt4s.{Docopt, DocoptException, Task}
 
-import java.nio.file.Files
-import java.util.stream.Collectors
 import scala.io.Source
 import scala.util.{Failure, Success, Try, Using}
 
@@ -129,14 +127,16 @@ object TestCaseTask extends Task {
   /** A test case that can be run.
     * @param docopt
     *   A docopt specification.
-    * @param cases
-    *   A set of arguments and the expected response.
+    * @param expected
+    *   list of expected option values as a result
+    * @param args
+    *   Arguments to pass to the docopt parser
     */
-  case class TestCase(docopt: String, cases: (String, String)*)
+  case class TestCase(docopt: String, expected: String, args: Iterable[String])
 
   object TestCase {
     private[this] val TestCaseRegex = {
-      val q3 = "\"\"\"";
+      val q3 = "\"\"\""
       raw"""(?sx)
           (?<=\n|^)r?$q3
           (.*?)
@@ -145,24 +145,26 @@ object TestCaseTask extends Task {
           """.r
     }
 
+    def apply(docopt: String, expected: String, arg0: String, args: String*): TestCase =
+      TestCase(docopt, expected, arg0 +: args)
+
     def parse(input: String): Seq[TestCase] =
       TestCaseRegex
         .findAllMatchIn(input)
-        .map { m =>
+        .flatMap { m =>
           val docopt = m.group(1)
           val rest = m.group(2)
-          val cases = rest.linesIterator
+          rest.linesIterator
             .map(_.trim)
             .filter(_.nonEmpty)
-            .toSeq
             .grouped(2)
+            .map(_.toSeq)
             .flatMap {
-              case x if x.size != 2            => None
-              case x if x.head.startsWith("$") => Some(x.head.substring(1).trim -> x(1))
-              case x                           => Some(x.head -> x(1))
+              case Seq(args, expected) if args.startsWith("$") =>
+                Some(TestCase(docopt, expected, splitArgs(args.substring(1).trim)))
+              case Seq(args, expected) => Some(TestCase(docopt, expected, splitArgs(args)))
+              case _                   => None
             }
-            .toSeq
-          TestCase(docopt, cases: _*)
         }
         .toSeq
   }

@@ -166,7 +166,12 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
           |c2
           |c3
           |""".stripMargin) shouldBe
-        Seq(TestCase("A", "a1" -> "a2"), TestCase("\nB\n", "b1" -> "b2", "b3" -> "b4"), TestCase("C\n", "c1" -> "c2"))
+        Seq(
+          TestCase("A", "a2", "a1"),
+          TestCase("\nB\n", "b2", "b1"),
+          TestCase("\nB\n", "b4", "b3"),
+          TestCase("C\n", "c2", "c1")
+        )
     }
   }
 }

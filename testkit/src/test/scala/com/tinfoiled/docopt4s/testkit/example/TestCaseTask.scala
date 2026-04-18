@@ -62,7 +62,7 @@ object TestCaseTask extends Task {
 
     // if --check is specified then verify that the expected result is returned
     opt.string.getOption("--check").foreach { expected =>
-      checkTest(tcDoc, tcArgs, expected) match {
+      TestCase(tcDoc, expected, tcArgs).execute() match {
         case Success(_)                  => print("OK")
         case Failure(e: DocoptException) => throw e;
         case Failure(ex)                 => Console.err.print(s"NOK: ${ex.getMessage} != $expected")
@@ -73,27 +73,6 @@ object TestCaseTask extends Task {
     opt.file.getOption("--file").foreach { file =>
       val contents = Using.resource(Source.fromFile(file.toFile)) { _.getLines().mkString }
       println(contents)
-    }
-  }
-
-  /** Performs a test on a docopt string with given arguments, and an expected result.
-    *
-    * @param docopt
-    *   The docopt specification under test
-    * @param args
-    *   The arguments to apply to the specification
-    * @param expected
-    *   The open keys and values to test as a result
-    * @return
-    *   A success if the expected values were returned, and a failure with the actual values discovered as the exception
-    *   message otherwise.
-    */
-  def checkTest(docopt: String, args: Iterable[String], expected: String): Try[String] = {
-    val expectedKeys = raw""""([^"]*)":""".r.findAllMatchIn(expected).map(_.group(1).trim).toSeq
-    Try {
-      val actual = jsonifyKeys(Docopt(docopt, "0.0.0-ignored", args), expectedKeys)
-      if (actual != expected) throw new AssertionError(actual)
-      expected
     }
   }
 
@@ -126,13 +105,29 @@ object TestCaseTask extends Task {
 
   /** A test case that can be run.
     * @param docopt
-    *   A docopt specification.
-    * @param expected
-    *   list of expected option values as a result
+    *   The docopt specification under test
     * @param args
-    *   Arguments to pass to the docopt parser
+    *   The arguments to apply to the specification
+    * @param expected
+    *   The open keys and values to test as a result
     */
-  case class TestCase(docopt: String, expected: String, args: Iterable[String])
+  case class TestCase(docopt: String, expected: String, args: Iterable[String]) {
+
+    /** Performs a test on a docopt string with given arguments, and an expected result.
+      *
+      * @return
+      *   A success if the expected values were returned, and a failure with the actual values discovered as the
+      *   exception message otherwise.
+      */
+    def execute(): Try[String] = {
+      val expectedKeys = raw""""([^"]*)":""".r.findAllMatchIn(expected).map(_.group(1).trim).toSeq
+      Try {
+        val actual = jsonifyKeys(Docopt(docopt, "0.0.0-ignored", args), expectedKeys)
+        if (actual != expected) throw new AssertionError(actual)
+        expected
+      }
+    }
+  }
 
   object TestCase {
     private[this] val TestCaseRegex = {

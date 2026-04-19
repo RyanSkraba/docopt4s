@@ -4,7 +4,8 @@ import com.tinfoiled.docopt4s.DocoptException
 import com.tinfoiled.docopt4s.testkit.MultiTaskMainSpec
 import com.tinfoiled.docopt4s.testkit.example.TestCaseTask.TestCase
 
-import scala.util.{Failure, Success}
+import scala.io.Source
+import scala.util.{Failure, Success, Using}
 
 /** Unit tests for [[DumpTask]] */
 class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) {
@@ -125,22 +126,22 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
     }
   }
 
-  describe("Running a file-based test") {
+  describe("Running a test case from a file") {
     val q3 = "\"\"\""
 
-    it("should use the checkTest method to run a test successfully") {
+    it("should use the execute method to run a test successfully") {
       TestCase("Usage: program ARG1", """{"ARG1":"a1"}""", "a1").execute() shouldBe Success(
         """{"ARG1":"a1"}"""
       )
     }
 
-    it("should use the checkTest method to run a test with unexpected results") {
+    it("should use the execute method to run a test with unexpected results") {
       val ex = TestCase("Usage: program ARG1", """{"ARG1":"a2"}""", "a1").execute().failed.get
       ex shouldBe a[AssertionError]
       ex.getMessage shouldBe """{"ARG1":"a1"}"""
     }
 
-    it("should use the checkTest method to check a failure") {
+    it("should use the execute method to check a failure") {
       val ex = TestCase("Usage: program ARG1 ARG2", """{""ARG1":"a1"}""", "a1").execute().failed.get
       ex shouldBe a[DocoptException]
       ex.getMessage shouldBe null
@@ -162,7 +163,7 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
           |
           |${q3}C
           |$q3
-          |$$ c1
+          |$$ prog c1
           |c2
           |c3
           |""".stripMargin) shouldBe
@@ -172,6 +173,19 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
           TestCase("\nB\n", "b4", "b3"),
           TestCase("C\n", "c2", "c1")
         )
+    }
+
+    describe("with testcases.docopt") {
+      val tests =
+        TestCase.parse(Using.resource(Source.fromInputStream(getClass.getResourceAsStream("testcases.docopt"))) {
+          _.getLines().mkString("\n")
+        })
+
+      for ((tc, i) <- tests.zipWithIndex) {
+        it(s"should test ($i)") {
+          tc.execute().get
+        }
+      }
     }
   }
 }

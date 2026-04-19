@@ -156,7 +156,7 @@ object TestCaseTask extends Task {
             .map(_.toSeq)
             .flatMap {
               case Seq(args, expected) if args.startsWith("$") =>
-                Some(TestCase(docopt, expected, splitArgs(args.substring(1).trim)))
+                Some(TestCase(docopt, expected, splitArgs(args.substring(1).trim).tail))
               case Seq(args, expected) => Some(TestCase(docopt, expected, splitArgs(args)))
               case _                   => None
             }

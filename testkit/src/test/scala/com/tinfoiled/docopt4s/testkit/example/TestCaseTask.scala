@@ -57,7 +57,7 @@ object TestCaseTask extends Task {
     opt.string.getOption("--keys").foreach { tcKeys =>
       // TODO: Make key separator ',' configurable
       val keyDelimiter = ','
-      print(jsonifyKeys(Docopt(tcDoc, "0.0.0-ignored", tcArgs), tcKeys.split(keyDelimiter).toSeq))
+      print(TestCase.jsonifyKeys(Docopt(tcDoc, "0.0.0-ignored", tcArgs), tcKeys.split(keyDelimiter).toSeq))
     }
 
     // if --check is specified then verify that the expected result is returned
@@ -74,33 +74,6 @@ object TestCaseTask extends Task {
       val contents = Using.resource(Source.fromFile(file.toFile)) { _.getLines().mkString }
       println(contents)
     }
-  }
-
-  /** Given option keys, fetches option values from the docopt in a pseudo-JSON object: null for non-present keys, a
-    * single string value when there is only one option value, and a string list when there is more than one option
-    * value.
-    *
-    * @param opt
-    *   The Docopt instance that has been parsed from the arguments
-    * @param keys
-    *   The option keys to fetch
-    * @return
-    *   A pseudo-JSON that shows the option values corresponding to the keys
-    */
-  def jsonifyKeys(opt: Docopt, keys: Seq[String]): String = {
-    keys
-      .filter(_.nonEmpty)
-      .map(key =>
-        key -> (opt.strings.getOption(key).map(_.toSeq) match {
-          case None              => "null"
-          case Some(Seq())       => "[]"
-          case Some(Seq(single)) => "\"" + single.replace("(\\\")", "\\$1") + "\""
-          case Some(multi)       => multi.map(_.replace("(\\\")", "\\$1")).mkString("[\"", "\",\"", "\"]")
-        })
-      )
-      .filter(_._2 != "null")
-      .map { case k -> v => "\"" + k + "\":" + v }
-      .mkString("{", ",", "}")
   }
 
   /** A test case that can be run.
@@ -122,7 +95,7 @@ object TestCaseTask extends Task {
     def execute(): Try[String] = {
       val expectedKeys = raw""""([^"]*)":""".r.findAllMatchIn(expected).map(_.group(1).trim).toSeq
       Try {
-        val actual = jsonifyKeys(Docopt(docopt, "0.0.0-ignored", args), expectedKeys)
+        val actual = TestCase.jsonifyKeys(Docopt(docopt, "0.0.0-ignored", args), expectedKeys)
         if (actual != expected) throw new AssertionError(actual)
         expected
       }
@@ -162,25 +135,53 @@ object TestCaseTask extends Task {
             }
         }
         .toSeq
+
+    private[this] val RegexQuotedArgs = raw""""(?:[^"\\]|\\.)*"|\S+""".r
+
+    /** Tokenizes the input string into arguments, separated by whitespace. Only double quotes are recognized if
+      * whitespace is important to the argument, and internal quotes must be escaped.
+      * @param input
+      *   A string of input to tokenize by whitespace
+      * @return
+      *   The list of arguments from the line
+      */
+    def splitArgs(input: String): Iterable[String] =
+      RegexQuotedArgs
+        .findAllMatchIn(input)
+        .map { _.matched }
+        .map {
+          case s if s.startsWith("\"") && s.endsWith("\"") => s.drop(1).dropRight(1)
+          case s                                           => s
+        }
+        .map { _.replaceAll(raw"\\(.)", "$1") }
+        .to(Iterable)
+
+    /** Given option keys, fetches option values from the docopt in a pseudo-JSON object: null for non-present keys, a
+      * single string value when there is only one option value, and a string list when there is more than one option
+      * value.
+      *
+      * @param opt
+      *   The Docopt instance that has been parsed from the arguments
+      * @param keys
+      *   The option keys to fetch
+      * @return
+      *   A pseudo-JSON that shows the option values corresponding to the keys
+      */
+    def jsonifyKeys(opt: Docopt, keys: Seq[String]): String = {
+      keys
+        .filter(_.nonEmpty)
+        .map(key =>
+          key -> (opt.strings.getOption(key).map(_.toSeq) match {
+            case None              => "null"
+            case Some(Seq())       => "[]"
+            case Some(Seq(single)) => "\"" + single.replace("(\\\")", "\\$1") + "\""
+            case Some(multi)       => multi.map(_.replace("(\\\")", "\\$1")).mkString("[\"", "\",\"", "\"]")
+          })
+        )
+        .filter(_._2 != "null")
+        .map { case k -> v => "\"" + k + "\":" + v }
+        .mkString("{", ",", "}")
+    }
+
   }
-
-  private[this] val RegexQuotedArgs = raw""""(?:[^"\\]|\\.)*"|\S+""".r
-
-  /** Tokenizes the input string into arguments, separated by whitespace. Only double quotes are recognized if
-    * whitespace is important to the argument, and internal quotes must be escaped.
-    * @param input
-    *   A string of input to tokenize by whitespace
-    * @return
-    *   The list of arguments from the line
-    */
-  def splitArgs(input: String): Iterable[String] =
-    RegexQuotedArgs
-      .findAllMatchIn(input)
-      .map { _.matched }
-      .map {
-        case s if s.startsWith("\"") && s.endsWith("\"") => s.drop(1).dropRight(1)
-        case s                                           => s
-      }
-      .map { _.replaceAll(raw"\\(.)", "$1") }
-      .to(Iterable)
 }

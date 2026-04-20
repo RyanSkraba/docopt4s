@@ -3,6 +3,7 @@ package com.tinfoiled.docopt4s.testkit.example
 import com.tinfoiled.docopt4s.DocoptException
 import com.tinfoiled.docopt4s.testkit.MultiTaskMainSpec
 import com.tinfoiled.docopt4s.testkit.example.TestCaseTask.TestCase
+import com.tinfoiled.docopt4s.testkit.example.TestCaseTask.TestCase._
 
 import scala.io.Source
 import scala.util.{Failure, Success, Using}
@@ -32,24 +33,6 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
     wrapped.exitCode shouldBe 1
     wrapped.getMessage shouldBe null // TODO: Improve errors
     wrapped
-  }
-
-  describe("The splitArgs helper method") {
-    for (in <- Seq("a b c", "   a b c", "a    b c", "a b    c", "a\tb    \n\nc ")) {
-      it(s"should ignore whitespace: $in") {
-        TestCaseTask.splitArgs(in) shouldBe Seq("a", "b", "c")
-      }
-    }
-
-    it("should accept double quotes") {
-      TestCaseTask.splitArgs(raw"""a1 "b c" d""") shouldBe Seq("a1", "b c", "d")
-      TestCaseTask.splitArgs(raw"""a2 "b c d""") shouldBe Seq("a2", "\"b", "c", "d")
-      TestCaseTask.splitArgs(raw"""a3 "b\"c" d""") shouldBe Seq("a3", raw"""b"c""", "d")
-      TestCaseTask.splitArgs(raw"""a4 "b\\"c" d""") shouldBe Seq("a4", "b\\", "c\"", "d")
-      TestCaseTask.splitArgs(raw"""a5 "b\\\"c" d""") shouldBe Seq("a5", raw"""b\"c""", "d")
-      TestCaseTask.splitArgs(raw"""a6 "b
-             |\\nc" d""".stripMargin) shouldBe Seq("a6", "b\n\\nc", "d")
-    }
   }
 
   describe("Running a test case on an empty program") {
@@ -127,6 +110,25 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
   }
 
   describe("Running a test case from a file") {
+
+    describe("The TestCase.splitArgs helper method") {
+      for (in <- Seq("a b c", "   a b c", "a    b c", "a b    c", "a\tb    \n\nc ")) {
+        it(s"should ignore whitespace: $in") {
+          splitArgs(in) shouldBe Seq("a", "b", "c")
+        }
+      }
+
+      it("should accept double quotes") {
+        splitArgs(raw"""a1 "b c" d""") shouldBe Seq("a1", "b c", "d")
+        splitArgs(raw"""a2 "b c d""") shouldBe Seq("a2", "\"b", "c", "d")
+        splitArgs(raw"""a3 "b\"c" d""") shouldBe Seq("a3", raw"""b"c""", "d")
+        splitArgs(raw"""a4 "b\\"c" d""") shouldBe Seq("a4", "b\\", "c\"", "d")
+        splitArgs(raw"""a5 "b\\\"c" d""") shouldBe Seq("a5", raw"""b\"c""", "d")
+        splitArgs(raw"""a6 "b
+                       |\\nc" d""".stripMargin) shouldBe Seq("a6", "b\n\\nc", "d")
+      }
+    }
+
     val q3 = "\"\"\""
 
     it("should use the execute method to run a test successfully") {
@@ -183,7 +185,11 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
 
       for ((tc, i) <- tests.zipWithIndex) {
         it(s"should test ($i)") {
-          tc.execute().get
+          tc.execute() match {
+            case Success(_)                                     => succeed
+            case Failure(ex) if ex.isInstanceOf[AssertionError] => ex.getMessage shouldBe tc.expected
+            case Failure(ex)                                    => fail(ex)
+          }
         }
       }
     }

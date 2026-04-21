@@ -49,12 +49,10 @@ object TestCaseTask extends Task {
 
   def go(opt: Docopt): Unit = {
 
-    // Create the docopt from the spec and the arguments
-    val tcDoc = opt.string.getOption("--docopt").getOrElse(Source.fromInputStream(System.in, "UTF-8").mkString)
-    val tcArgs = opt.strings.get("ARGS")
-
     // if --keys is specified then extract and print all the keys
     opt.string.getOption("--keys").foreach { tcKeys =>
+      val tcDoc = opt.string.getOption("--docopt").getOrElse(Source.fromInputStream(System.in, "UTF-8").mkString)
+      val tcArgs = opt.strings.get("ARGS")
       // TODO: Make key separator ',' configurable
       val keyDelimiter = ','
       print(TestCase.jsonifyKeys(Docopt(tcDoc, "0.0.0-ignored", tcArgs), tcKeys.split(keyDelimiter).toSeq))
@@ -62,6 +60,8 @@ object TestCaseTask extends Task {
 
     // if --check is specified then verify that the expected result is returned
     opt.string.getOption("--check").foreach { expected =>
+      val tcDoc = opt.string.getOption("--docopt").getOrElse(Source.fromInputStream(System.in, "UTF-8").mkString)
+      val tcArgs = opt.strings.get("ARGS")
       TestCase(tcDoc, expected, tcArgs).execute() match {
         case Success(_)                  => print("OK")
         case Failure(e: DocoptException) => throw e;
@@ -71,8 +71,10 @@ object TestCaseTask extends Task {
 
     // if --file is specified then read it from the system
     opt.file.getOption("--file").foreach { file =>
-      val contents = Using.resource(Source.fromFile(file.toFile)) { _.getLines().mkString }
-      println(contents)
+      val tests = TestCase.parse(Using.resource(Source.fromFile(file.toFile)) { _.getLines().mkString("\n") })
+      for ((tc, _) <- tests.zipWithIndex) {
+        tc.execute().get
+      }
     }
   }
 

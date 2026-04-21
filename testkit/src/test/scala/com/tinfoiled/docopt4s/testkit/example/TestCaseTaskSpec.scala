@@ -1,15 +1,16 @@
 package com.tinfoiled.docopt4s.testkit.example
 
 import com.tinfoiled.docopt4s.DocoptException
-import com.tinfoiled.docopt4s.testkit.MultiTaskMainSpec
+import com.tinfoiled.docopt4s.testkit.{MultiTaskMainSpec, TmpDir}
 import com.tinfoiled.docopt4s.testkit.example.TestCaseTask.TestCase
 import com.tinfoiled.docopt4s.testkit.example.TestCaseTask.TestCase._
 
+import java.nio.file.Files
 import scala.io.Source
 import scala.util.{Failure, Success, Using}
 
 /** Unit tests for [[DumpTask]] */
-class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) {
+class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) with TmpDir {
 
   describe(s"Standard $MainName $TaskCmd command line help, versions and exceptions") {
     itShouldHandleVersionAndHelpFlags()
@@ -177,21 +178,32 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
         )
     }
 
-    describe("with testcases.docopt") {
-      val tests =
-        TestCase.parse(Using.resource(Source.fromInputStream(getClass.getResourceAsStream("testcases.docopt"))) {
+    it("should run from the command line with --file") {
+      val file = Tmp.resolve("filearg.docopt")
+      Files.writeString(
+        file,
+        Using.resource(Source.fromInputStream(getClass.getResourceAsStream("basic.docopt"))) {
           _.getLines().mkString("\n")
-        })
+        }
+      )
+      withGoStdout(TaskCmd, s"--file", file) shouldBe empty
+    }
 
-      for ((tc, i) <- tests.zipWithIndex) {
-        it(s"should test ($i)") {
-          tc.execute() match {
-            case Success(_)                                     => succeed
-            case Failure(ex) if ex.isInstanceOf[AssertionError] => ex.getMessage shouldBe tc.expected
-            case Failure(ex)                                    => fail(ex)
+    for (file <- Seq("basic", "testcases"))
+      describe(s"with $file.docopt") {
+        val tests =
+          TestCase.parse(Using.resource(Source.fromInputStream(getClass.getResourceAsStream(s"$file.docopt"))) {
+            _.getLines().mkString("\n")
+          })
+        for ((tc, i) <- tests.zipWithIndex) {
+          it(s"should test ($i)") {
+            tc.execute() match {
+              case Success(_)                                     => succeed
+              case Failure(ex) if ex.isInstanceOf[AssertionError] => ex.getMessage shouldBe tc.expected
+              case Failure(ex)                                    => fail(ex)
+            }
           }
         }
       }
-    }
   }
 }

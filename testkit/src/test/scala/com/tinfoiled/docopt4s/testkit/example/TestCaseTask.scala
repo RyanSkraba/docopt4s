@@ -169,21 +169,20 @@ object TestCaseTask extends Task {
       * @return
       *   A pseudo-JSON that shows the option values corresponding to the keys
       */
-    def jsonifyKeys(opt: Docopt, keys: Seq[String]): String = {
-      keys
-        .filter(_.nonEmpty)
-        .map(key =>
-          key -> (opt.strings.getOption(key).map(_.toSeq) match {
-            case None              => "null"
-            case Some(Seq())       => "[]"
-            case Some(Seq(single)) => "\"" + single.replace("(\\\")", "\\$1") + "\""
-            case Some(multi)       => multi.map(_.replace("(\\\")", "\\$1")).mkString("[\"", "\",\"", "\"]")
-          })
+    def jsonifyKeys(opt: Docopt, keys: Seq[String]): String =
+      ujson.Obj
+        .from(
+          keys
+            .filter(_.nonEmpty)
+            .flatMap(key =>
+              (opt.strings.getOption(key).map(_.toSeq) match {
+                case None              => None
+                case Some(Seq())       => Some(key -> ujson.Arr())
+                case Some(Seq(single)) => Some(key -> ujson.Str(single))
+                case Some(multi)       => Some(key -> ujson.Arr.from(multi))
+              })
+            )
         )
-        .filter(_._2 != "null")
-        .map { case k -> v => "\"" + k + "\":" + v }
-        .mkString("{", ",", "}")
-    }
-
+        .render()
   }
 }

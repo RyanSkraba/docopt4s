@@ -3,3 +3,14 @@ r"""Usage: prog
 """
 $ prog
 {}
+
+r"""Usage: prog [options]
+
+Options: -a  All.
+
+"""
+$ prog
+{"-a":"false"}
+
+$ prog -a
+{"-a":"true"}

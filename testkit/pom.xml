@@ -36,6 +36,7 @@
       <groupId>com.lihaoyi</groupId>
       <artifactId>ujson_${scala.binary.version}</artifactId>
       <version>4.4.1</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

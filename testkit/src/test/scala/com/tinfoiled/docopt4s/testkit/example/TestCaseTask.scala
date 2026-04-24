@@ -62,7 +62,7 @@ object TestCaseTask extends Task {
     opt.string.getOption("--check").foreach { expected =>
       val tcDoc = opt.string.getOption("--docopt").getOrElse(Source.fromInputStream(System.in, "UTF-8").mkString)
       val tcArgs = opt.strings.get("ARGS")
-      TestCase(tcDoc, expected, tcArgs).execute() match {
+      TestCase(tcDoc, ujson.read(expected).obj, tcArgs).execute() match {
         case Success(_)                  => print("OK")
         case Failure(e: DocoptException) => throw e;
         case Failure(ex)                 => Console.err.print(s"NOK: ${ex.getMessage} != $expected")
@@ -86,7 +86,7 @@ object TestCaseTask extends Task {
     * @param expected
     *   The open keys and values to test as a result
     */
-  case class TestCase(docopt: String, expected: String, args: Iterable[String]) {
+  case class TestCase(docopt: String, expected: ujson.Obj, args: Iterable[String]) {
 
     /** Performs a test on a docopt string with given arguments, and an expected result.
       *
@@ -95,11 +95,11 @@ object TestCaseTask extends Task {
       *   exception message otherwise.
       */
     def execute(): Try[String] = {
-      val expectedKeys = raw""""([^"]*)":""".r.findAllMatchIn(expected).map(_.group(1).trim).toSeq
+      val expectedKeys = expected.value.keys.toSeq
       Try {
         val actual = TestCase.jsonifyKeys(Docopt(docopt, "0.0.0-ignored", args), expectedKeys)
-        if (actual != expected) throw new AssertionError(actual)
-        expected
+        if (ujson.read(actual) != expected) throw new AssertionError(actual)
+        expected.render()
       }
     }
   }
@@ -115,9 +115,6 @@ object TestCaseTask extends Task {
           """.r
     }
 
-    def apply(docopt: String, expected: String, arg0: String, args: String*): TestCase =
-      TestCase(docopt, expected, arg0 +: args)
-
     def parse(input: String): Seq[TestCase] =
       TestCaseRegex
         .findAllMatchIn(input)
@@ -131,8 +128,8 @@ object TestCaseTask extends Task {
             .map(_.toSeq)
             .flatMap {
               case Seq(args, expected) if args.startsWith("$") =>
-                Some(TestCase(docopt, expected, splitArgs(args.substring(1).trim).tail))
-              case Seq(args, expected) => Some(TestCase(docopt, expected, splitArgs(args)))
+                Some(TestCase(docopt, ujson.read(expected).obj, splitArgs(args.substring(1).trim).tail))
+              case Seq(args, expected) => Some(TestCase(docopt, ujson.read(expected).obj, splitArgs(args)))
               case _                   => None
             }
         }
@@ -175,12 +172,12 @@ object TestCaseTask extends Task {
           keys
             .filter(_.nonEmpty)
             .flatMap(key =>
-              (opt.strings.getOption(key).map(_.toSeq) match {
+              opt.strings.getOption(key).map(_.toSeq) match {
                 case None              => None
                 case Some(Seq())       => Some(key -> ujson.Arr())
                 case Some(Seq(single)) => Some(key -> ujson.Str(single))
                 case Some(multi)       => Some(key -> ujson.Arr.from(multi))
-              })
+              }
             )
         )
         .render()

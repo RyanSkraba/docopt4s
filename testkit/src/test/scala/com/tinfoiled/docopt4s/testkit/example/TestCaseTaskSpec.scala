@@ -54,7 +54,7 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
         }
       }
 
-      it("should fail with one argument") { interceptWrapped(SimpleDocopt :+ "--check=" :+ "unknown") }
+      it("should fail with one argument") { interceptWrapped(SimpleDocopt :+ "--check={}" :+ "x") }
     }
   }
 
@@ -133,19 +133,19 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
     val q3 = "\"\"\""
 
     it("should use the execute method to run a test successfully") {
-      TestCase("Usage: program ARG1", """{"ARG1":"a1"}""", "a1").execute() shouldBe Success(
+      TestCase("Usage: program ARG1", ujson.Obj("ARG1" -> "a1"), Seq("a1")).execute() shouldBe Success(
         """{"ARG1":"a1"}"""
       )
     }
 
     it("should use the execute method to run a test with unexpected results") {
-      val ex = TestCase("Usage: program ARG1", """{"ARG1":"a2"}""", "a1").execute().failed.get
+      val ex = TestCase("Usage: program ARG1", ujson.Obj("ARG1" -> "a2"), Seq("a1")).execute().failed.get
       ex shouldBe a[AssertionError]
       ex.getMessage shouldBe """{"ARG1":"a1"}"""
     }
 
     it("should use the execute method to check a failure") {
-      val ex = TestCase("Usage: program ARG1 ARG2", """{""ARG1":"a1"}""", "a1").execute().failed.get
+      val ex = TestCase("Usage: program ARG1 ARG2", ujson.Obj("ARG1" -> "a1"), Seq("a1")).execute().failed.get
       ex shouldBe a[DocoptException]
       ex.getMessage shouldBe null
     }
@@ -154,27 +154,27 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
       TestCase.parse(s"""
           |r${q3}A$q3
           |a1
-          |a2
+          |{"a2": true}
           |
           |r$q3
           |B
           |$q3
           |b1
-          |b2
+          |{"b2": true}
           |b3
-          |b4
+          |{"b4": true}
           |
           |${q3}C
           |$q3
           |$$ prog c1
-          |c2
+          |{"c2": true}
           |c3
           |""".stripMargin) shouldBe
         Seq(
-          TestCase("A", "a2", "a1"),
-          TestCase("\nB\n", "b2", "b1"),
-          TestCase("\nB\n", "b4", "b3"),
-          TestCase("C\n", "c2", "c1")
+          TestCase("A", ujson.Obj("a2" -> true), Seq("a1")),
+          TestCase("\nB\n", ujson.Obj("b2" -> true), Seq("b1")),
+          TestCase("\nB\n", ujson.Obj("b4" -> true), Seq("b3")),
+          TestCase("C\n", ujson.Obj("c2" -> true), Seq("c1"))
         )
     }
 

@@ -86,7 +86,7 @@ object TestCaseTask extends Task {
     * @param expected
     *   The open keys and values to test as a result
     */
-  case class TestCase(docopt: String, expected: ujson.Obj, args: Iterable[String]) {
+  case class TestCase(docopt: String, expected: ujson.Value, args: Iterable[String]) {
 
     /** Performs a test on a docopt string with given arguments, and an expected result.
       *
@@ -94,12 +94,19 @@ object TestCaseTask extends Task {
       *   A success if the expected values were returned, and a failure with the actual values discovered as the
       *   exception message otherwise.
       */
-    def execute(): Try[String] = {
-      val expectedKeys = expected.value.keys.toSeq
-      Try {
-        val actual = TestCase.jsonifyKeys(Docopt(docopt, "0.0.0-ignored", args), expectedKeys)
-        if (ujson.read(actual) != expected) throw new AssertionError(actual)
-        expected.render()
+    def execute(): Try[ujson.Value] = {
+      Try(Docopt(docopt, "0.0.0-ignored", args)) match {
+        case Success(docopt) =>
+          val expectedKeys = expected.obj.value.keys.toSeq
+          Try {
+            val actual = TestCase.jsonifyKeys(docopt, expectedKeys)
+            if (ujson.read(actual) != expected) throw new AssertionError(actual)
+            expected
+          }
+        case Failure(ex: DocoptException) if expected == ujson.Str("user error") =>
+          // TODO: improve this
+          Success("user error")
+        case Failure(ex) => Failure(ex)
       }
     }
   }

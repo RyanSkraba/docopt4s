@@ -134,7 +134,7 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
 
     it("should use the execute method to run a test successfully") {
       TestCase("Usage: program ARG1", ujson.Obj("ARG1" -> "a1"), Seq("a1")).execute() shouldBe Success(
-        """{"ARG1":"a1"}"""
+        ujson.Obj("ARG1" -> "a1")
       )
     }
 

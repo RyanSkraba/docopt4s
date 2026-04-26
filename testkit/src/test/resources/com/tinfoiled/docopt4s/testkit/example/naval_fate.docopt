@@ -1,0 +1,50 @@
+##############################################################################
+# A basic example of running a docopt with the naval fate example
+#
+# These test cases are composed of:
+#
+# 1. A docopt spec starting with """ or r""" and ending with """
+# 2. Pairs of argument sets and a JSON expected response
+#    - Arguments starting with $ are considered to have an (ignored)
+#      executable name. Only the subsequent lines are passed to docopt.
+#    - Expected responses are in a JSON object, and only the object attributes
+#      are tested in the response. Other options keys might be available.
+#    - The values in the expected response can only be true/false, a JSON
+#      string or an array of JSON string for multiple values.
+#    - Expecting a key that doesn't exist is a test case failure.
+#
+
+r"""The naval fate example for docopt.
+
+    Usage:
+      ExampleGo naval_fate ship new <name>...
+      ExampleGo naval_fate ship <name> move <x> <y> [--speed=<kn>]
+      ExampleGo naval_fate ship shoot <x> <y>
+      ExampleGo naval_fate mine (set|remove) <x> <y> [--moored|--drifting]
+      ExampleGo naval_fate -h | --help
+      ExampleGo naval_fate --version
+
+    Options:
+      -h --help     Show this screen.
+      --version     Show version.
+      --speed=<kn>  Speed in knots [default: 10].
+      --moored      Moored (anchored) mine.
+      --drifting    Drifting mine.
+"""
+$ ExampleGo naval_fate ship new Titanic
+{"ship":"true","new":"true","<name>":"Titanic"}
+
+$ ExampleGo naval_fate ship new Titanic
+{"ship":"true","new":"true","move":"false","shoot":"false","mine":"false","set":"false","remove":"false"}
+
+$ ExampleGo naval_fate ship Titanic move 1 2
+{"ship":"true","new":"false","move":"true","shoot":"false","mine":"false","set":"false","remove":"false"}
+
+$ ExampleGo naval_fate ship Titanic move 1 2
+{"ship":"true","move":"true","<x>":"1","<y>":"2","--speed":"10"}
+
+$ ExampleGo naval_fate ship Titanic move 1 2 --speed 15
+{"ship":"true","move":"true","<x>":"1","<y>":"2","--speed":"15"}
+
+$ ExampleGo naval_fate ship Titanic move 1 2 --speed=15
+{"ship":"true","move":"true","<x>":"1","<y>":"2","--speed":"15"}

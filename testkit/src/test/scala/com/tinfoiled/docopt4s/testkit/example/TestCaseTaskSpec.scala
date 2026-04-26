@@ -182,14 +182,14 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
       val file = Tmp.resolve("filearg.docopt")
       Files.writeString(
         file,
-        Using.resource(Source.fromInputStream(getClass.getResourceAsStream("basic.docopt"))) {
+        Using.resource(Source.fromInputStream(getClass.getResourceAsStream("naval_fate.docopt"))) {
           _.getLines().mkString("\n")
         }
       )
       withGoStdout(TaskCmd, s"--file", file) shouldBe empty
     }
 
-    for (file <- Seq("basic", "testcases"))
+    for (file <- Seq("naval_fate", "testcases"))
       describe(s"with $file.docopt") {
         val tests =
           TestCase.parse(Using.resource(Source.fromInputStream(getClass.getResourceAsStream(s"$file.docopt"))) {

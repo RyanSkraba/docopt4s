@@ -130,7 +130,8 @@ object TestCaseTask extends Task {
           val rest = m.group(2)
           rest.linesIterator
             .map(_.trim)
-            .filter(_.nonEmpty)
+            .filter(_.nonEmpty) // Remove blank lines
+            .filter(!_.startsWith("#")) // Remove comments
             .grouped(2)
             .map(_.toSeq)
             .flatMap {

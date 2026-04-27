@@ -13,6 +13,10 @@
 #      string or an array of JSON string for multiple values.
 #    - Expecting a key that doesn't exist is a test case failure.
 #
+# * All lines before the first docopt spec.
+# * All blank lines between docopt specs, and comment lines starting with #
+#   are remove between docopt specs when finding argument sets and expected
+#   reponse pairs.
 
 r"""The naval fate example for docopt.
 
@@ -31,11 +35,16 @@ r"""The naval fate example for docopt.
       --moored      Moored (anchored) mine.
       --drifting    Drifting mine.
 """
+# The first case in the docopt
 $ ExampleGo naval_fate ship new Titanic
 {"ship":"true","new":"true","<name>":"Titanic"}
 
+# This is the same command line as above but checks all the positional arguments
 $ ExampleGo naval_fate ship new Titanic
 {"ship":"true","new":"true","move":"false","shoot":"false","mine":"false","set":"false","remove":"false"}
+
+$ ExampleGo naval_fate ship new Titanic "S.S. Minnow"
+{"ship":"true","new":"true","<name>":["Titanic", "S.S. Minnow"]}
 
 $ ExampleGo naval_fate ship Titanic move 1 2
 {"ship":"true","new":"false","move":"true","shoot":"false","mine":"false","set":"false","remove":"false"}

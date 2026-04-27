@@ -152,6 +152,11 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
 
     it("should parse an input file into test cases") {
       TestCase.parse(s"""
+          |Everything
+          |here
+          |is
+          |
+          |ignored
           |r${q3}A$q3
           |a1
           |{"a2": true}
@@ -161,24 +166,29 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
           |$q3
           |b1
           |{"b2": true}
+          |\t   \t
           |b3
+          |
+          |
+          |
           |{"b4": true}
           |
           |${q3}C
-          |$q3
+          |# Not ignored$q3
           |$$ prog c1
           |{"c2": true}
+          |   # Ignored
           |c3
           |""".stripMargin) shouldBe
         Seq(
           TestCase("A", ujson.Obj("a2" -> true), Seq("a1")),
           TestCase("\nB\n", ujson.Obj("b2" -> true), Seq("b1")),
           TestCase("\nB\n", ujson.Obj("b4" -> true), Seq("b3")),
-          TestCase("C\n", ujson.Obj("c2" -> true), Seq("c1"))
+          TestCase("C\n# Not ignored", ujson.Obj("c2" -> true), Seq("c1"))
         )
     }
 
-    it("should run from the command line with --file") {
+    it("should run from the command line with --file naval_fate.docopt") {
       val file = Tmp.resolve("filearg.docopt")
       Files.writeString(
         file,
@@ -186,7 +196,7 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
           _.getLines().mkString("\n")
         }
       )
-      withGoStdout(TaskCmd, s"--file", file) shouldBe empty
+      withGoStdout(TaskCmd, s"--file", file) shouldBe empty // Indicates success
     }
 
     for (file <- Seq("naval_fate", "testcases"))

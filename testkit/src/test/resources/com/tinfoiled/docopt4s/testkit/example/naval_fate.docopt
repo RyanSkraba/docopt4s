@@ -57,3 +57,15 @@ $ ExampleGo naval_fate ship Titanic move 1 2 --speed 15
 
 $ ExampleGo naval_fate ship Titanic move 1 2 --speed=15
 {"ship":"true","move":"true","<x>":"1","<y>":"2","--speed":"15"}
+
+##############################################################################
+# Error cases
+$ ExampleGo naval_fate ship Titanic move 1 2 3 --speed=15
+"user-error"
+
+$ ExampleGo naval_fate ship Titanic dive
+"user-error"
+
+$ ExampleGo naval_fate new ship Titanic --speed=15
+"user-error"
+

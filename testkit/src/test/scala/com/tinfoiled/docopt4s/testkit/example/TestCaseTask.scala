@@ -94,19 +94,19 @@ object TestCaseTask extends Task {
       *   A success if the expected values were returned, and a failure with the actual values discovered as the
       *   exception message otherwise.
       */
-    def execute(): Try[ujson.Value] = {
+    def execute(): Try[Unit] = {
       Try(Docopt(docopt, "0.0.0-ignored", args)) match {
         case Success(docopt) =>
           val expectedKeys = expected.obj.value.keys.toSeq
           Try {
             val actual = TestCase.jsonifyKeys(docopt, expectedKeys)
             if (ujson.read(actual) != expected) throw new AssertionError(actual)
-            expected
           }
-        case Failure(ex: DocoptException) if expected == ujson.Str("user error") =>
+        case Failure(ex: DocoptException) if expected == ujson.Str("user-error") =>
           // TODO: improve this
-          Success("user error")
-        case Failure(ex) => Failure(ex)
+          Success(())
+        case Failure(ex) =>
+          Failure(ex)
       }
     }
   }
@@ -136,8 +136,8 @@ object TestCaseTask extends Task {
             .map(_.toSeq)
             .flatMap {
               case Seq(args, expected) if args.startsWith("$") =>
-                Some(TestCase(docopt, ujson.read(expected).obj, splitArgs(args.substring(1).trim).tail))
-              case Seq(args, expected) => Some(TestCase(docopt, ujson.read(expected).obj, splitArgs(args)))
+                Some(TestCase(docopt, ujson.read(expected), splitArgs(args.substring(1).trim).tail))
+              case Seq(args, expected) => Some(TestCase(docopt, ujson.read(expected), splitArgs(args)))
               case _                   => None
             }
         }

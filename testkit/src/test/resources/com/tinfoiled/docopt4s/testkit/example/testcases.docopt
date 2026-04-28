@@ -4,6 +4,10 @@ r"""Usage: prog
 $ prog
 {}
 
+$ prog --xxx
+"user-error"
+
+
 r"""Usage: prog [options]
 
 Options: -a  All.

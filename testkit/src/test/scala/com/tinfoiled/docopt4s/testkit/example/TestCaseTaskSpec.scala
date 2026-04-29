@@ -196,22 +196,22 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
       )
       withGoStdout(TaskCmd, s"--file", file) shouldBe empty // Indicates success
     }
+  }
 
-    for (file <- Seq("naval_fate", "testcases"))
-      describe(s"with $file.docopt") {
-        val tests =
-          TestCase.parse(Using.resource(Source.fromInputStream(getClass.getResourceAsStream(s"$file.docopt"))) {
-            _.getLines().mkString("\n")
-          })
-        for ((tc, i) <- tests.zipWithIndex) {
-          it(s"should test ($i)") {
-            tc.execute() match {
-              case Success(_)                                     => succeed
-              case Failure(ex) if ex.isInstanceOf[AssertionError] => ex.getMessage shouldBe tc.expected
-              case Failure(ex)                                    => fail(ex)
-            }
+  for (file <- Seq("naval_fate", "testcases"))
+    describe(s"Running $file.docopt") {
+      val tests =
+        TestCase.parse(Using.resource(Source.fromInputStream(getClass.getResourceAsStream(s"$file.docopt"))) {
+          _.getLines().mkString("\n")
+        })
+      for ((tc, i) <- tests.zipWithIndex) {
+        it(s"($i) with args: ${tc.args.mkString(" ")}") {
+          tc.execute() match {
+            case Success(_)                                     => succeed
+            case Failure(ex) if ex.isInstanceOf[AssertionError] => ex.getMessage shouldBe tc.expected
+            case Failure(ex)                                    => fail(ex)
           }
         }
       }
-  }
+    }
 }

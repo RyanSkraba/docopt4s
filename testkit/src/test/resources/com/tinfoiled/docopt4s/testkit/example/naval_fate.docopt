@@ -12,6 +12,9 @@
 #    - The values in the expected response can only be true/false, a JSON
 #      string or an array of JSON string for multiple values.
 #    - Expecting a key that doesn't exist is a test case failure.
+#    - If the expected response is the JSON string "user-error", then the
+#      arguments must produce a DocoptException with the docopt spec.  No
+#      reason is given or tested.
 #
 # * All lines before the first docopt spec.
 # * All blank lines between docopt specs, and comment lines starting with #
@@ -58,6 +61,15 @@ $ ExampleGo naval_fate ship Titanic move 1 2 --speed 15
 $ ExampleGo naval_fate ship Titanic move 1 2 --speed=15
 {"ship":"true","move":"true","<x>":"1","<y>":"2","--speed":"15"}
 
+$ ExampleGo naval_fate mine set 3 4
+{"mine":"true","set":"true","<x>":"3","<y>":"4","--moored":"false","--drifting":"false"}
+
+$ ExampleGo naval_fate mine set 3 4 --moored
+{"mine":"true","set":"true","<x>":"3","<y>":"4","--moored":"true","--drifting":"false"}
+
+$ ExampleGo naval_fate mine set 3 4 --drifting
+{"mine":"true","set":"true","<x>":"3","<y>":"4","--moored":"false","--drifting":"true"}
+
 ##############################################################################
 # Error cases
 $ ExampleGo naval_fate ship Titanic move 1 2 3 --speed=15
@@ -69,3 +81,5 @@ $ ExampleGo naval_fate ship Titanic dive
 $ ExampleGo naval_fate new ship Titanic --speed=15
 "user-error"
 
+$ ExampleGo naval_fate ship Titanic mine set 3 4 --moored --drifting
+"user-error"

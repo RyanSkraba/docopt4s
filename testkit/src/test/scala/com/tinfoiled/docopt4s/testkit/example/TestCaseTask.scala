@@ -100,7 +100,7 @@ object TestCaseTask extends Task {
           val expectedKeys = expected.obj.value.keys.toSeq
           Try {
             val actual = TestCase.jsonifyKeys(docopt, expectedKeys)
-            if (ujson.read(actual) != expected) throw new AssertionError(actual)
+            if (actual != expected) throw new AssertionError(actual)
           }
         case Failure(ex: DocoptException) if expected == ujson.Str("user-error") =>
           // TODO: improve this
@@ -174,7 +174,7 @@ object TestCaseTask extends Task {
       * @return
       *   A pseudo-JSON that shows the option values corresponding to the keys
       */
-    def jsonifyKeys(opt: Docopt, keys: Seq[String]): String =
+    def jsonifyKeys(opt: Docopt, keys: Seq[String]): ujson.Obj =
       ujson.Obj
         .from(
           keys
@@ -188,6 +188,5 @@ object TestCaseTask extends Task {
               }
             )
         )
-        .render()
   }
 }

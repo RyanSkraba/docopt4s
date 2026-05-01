@@ -40,10 +40,10 @@ object TestCaseTask extends Task {
        |  ${ExampleGo.Name} $Cmd --docopt "UsageX: program [--flag] CMD ARGS..." \\
        |      --keys "--flag,CMD,ARGS" a1 a2 a3 a4 a5
        |
-       |  {"--flag":"false","CMD":"a1","ARGS:["a2","a3","a4","a5"]}
+       |  {"--flag":false,"CMD":"a1","ARGS:["a2","a3","a4","a5"]}
        |
        |  ${ExampleGo.Name} $Cmd --docopt "UsageX: program [--flag] CMD ARGS..." \\
-       |      --check $$'{"--flag":"false","CMD":"a1","ARGS:["a2","a3","a4","a5"]}'
+       |      --check $$'{"--flag":false,"CMD":"a1","ARGS:["a2","a3","a4","a5"]}'
        |
        |""".stripMargin.trim
 
@@ -163,9 +163,9 @@ object TestCaseTask extends Task {
         .map { _.replaceAll(raw"\\(.)", "$1") }
         .to(Iterable)
 
-    /** Given option keys, fetches option values from the docopt in a pseudo-JSON object: null for non-present keys, a
-      * single string value when there is only one option value, and a string list when there is more than one option
-      * value.
+    /** Given option keys, fetches option values from the docopt in a JSON object: null for non-present keys, a single
+      * string value when there is only one option value, and a string list when there is more than one option value.
+      * The literal strings "true" and "false" are converted to boolean (but only lower case).
       *
       * @param opt
       *   The Docopt instance that has been parsed from the arguments
@@ -181,10 +181,12 @@ object TestCaseTask extends Task {
             .filter(_.nonEmpty)
             .flatMap(key =>
               opt.strings.getOption(key).map(_.toSeq) match {
-                case None              => None
-                case Some(Seq())       => Some(key -> ujson.Arr())
-                case Some(Seq(single)) => Some(key -> ujson.Str(single))
-                case Some(multi)       => Some(key -> ujson.Arr.from(multi))
+                case None               => None
+                case Some(Seq())        => Some(key -> ujson.Arr())
+                case Some(Seq("true"))  => Some(key -> ujson.True)
+                case Some(Seq("false")) => Some(key -> ujson.False)
+                case Some(Seq(single))  => Some(key -> ujson.Str(single))
+                case Some(multi)        => Some(key -> ujson.Arr.from(multi))
               }
             )
         )

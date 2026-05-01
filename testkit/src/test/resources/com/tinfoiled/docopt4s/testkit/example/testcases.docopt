@@ -14,7 +14,7 @@ Options: -a  All.
 
 """
 $ prog
-{"-a":"false"}
+{"-a":false}
 
 $ prog -a
-{"-a":"true"}
+{"-a":true}

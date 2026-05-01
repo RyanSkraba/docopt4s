@@ -40,35 +40,35 @@ r"""The naval fate example for docopt.
 """
 # The first case in the docopt
 $ ExampleGo naval_fate ship new Titanic
-{"ship":"true","new":"true","<name>":"Titanic"}
+{"ship":true,"new":true,"<name>":"Titanic"}
 
 # This is the same command line as above but checks all the positional arguments
 $ ExampleGo naval_fate ship new Titanic
-{"ship":"true","new":"true","move":"false","shoot":"false","mine":"false","set":"false","remove":"false"}
+{"ship":true,"new":true,"move":false,"shoot":false,"mine":false,"set":false,"remove":false}
 
 $ ExampleGo naval_fate ship new Titanic "S.S. Minnow"
-{"ship":"true","new":"true","<name>":["Titanic", "S.S. Minnow"]}
+{"ship":true,"new":true,"<name>":["Titanic", "S.S. Minnow"]}
 
 $ ExampleGo naval_fate ship Titanic move 1 2
-{"ship":"true","new":"false","move":"true","shoot":"false","mine":"false","set":"false","remove":"false"}
+{"ship":true,"new":false,"move":true,"shoot":false,"mine":false,"set":false,"remove":false}
 
 $ ExampleGo naval_fate ship Titanic move 1 2
-{"ship":"true","move":"true","<x>":"1","<y>":"2","--speed":"10"}
+{"ship":true,"move":true,"<x>":"1","<y>":"2","--speed":"10"}
 
 $ ExampleGo naval_fate ship Titanic move 1 2 --speed 15
-{"ship":"true","move":"true","<x>":"1","<y>":"2","--speed":"15"}
+{"ship":true,"move":true,"<x>":"1","<y>":"2","--speed":"15"}
 
 $ ExampleGo naval_fate ship Titanic move 1 2 --speed=15
-{"ship":"true","move":"true","<x>":"1","<y>":"2","--speed":"15"}
+{"ship":true,"move":true,"<x>":"1","<y>":"2","--speed":"15"}
 
 $ ExampleGo naval_fate mine set 3 4
-{"mine":"true","set":"true","<x>":"3","<y>":"4","--moored":"false","--drifting":"false"}
+{"mine":true,"set":true,"<x>":"3","<y>":"4","--moored":false,"--drifting":false}
 
 $ ExampleGo naval_fate mine set 3 4 --moored
-{"mine":"true","set":"true","<x>":"3","<y>":"4","--moored":"true","--drifting":"false"}
+{"mine":true,"set":true,"<x>":"3","<y>":"4","--moored":true,"--drifting":false}
 
 $ ExampleGo naval_fate mine set 3 4 --drifting
-{"mine":"true","set":"true","<x>":"3","<y>":"4","--moored":"false","--drifting":"true"}
+{"mine":true,"set":true,"<x>":"3","<y>":"4","--moored":false,"--drifting":true}
 
 ##############################################################################
 # Error cases

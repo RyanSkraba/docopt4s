@@ -68,12 +68,12 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
 
       it("should work with two arguments") {
         withGoStdout(BasicDocopt ++ Seq("--keys=--flag,CMD,ARGS", "a1", "a2"): _*) shouldBe
-          """{"--flag":"false","CMD":"a1","ARGS":"a2"}"""
+          """{"--flag":false,"CMD":"a1","ARGS":"a2"}"""
       }
 
       ignore("should work with three arguments and a flag") {
         withGoStdout(BasicDocopt ++ Seq("--keys=--flag,CMD,ARGS", "--flag", "a1", "a2", "a3"): _*) shouldBe
-          """{"--flag":"true","CMD":"a1","ARGS":["a2","a3"]}"""
+          """{"--flag":true,"CMD":"a1","ARGS":["a2","a3"]}"""
       }
     }
 
@@ -84,7 +84,7 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
 
       it("should work with two arguments") {
         withGoStdout(
-          BasicDocopt ++ Seq("""--check={"--flag":"false","CMD":"a1","ARGS":"a2"}""", "a1", "a2"): _*
+          BasicDocopt ++ Seq("""--check={"--flag":false,"CMD":"a1","ARGS":"a2"}""", "a1", "a2"): _*
         ) shouldBe "OK"
       }
 
@@ -98,7 +98,7 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
       it("should work with five arguments (like the TestCaseTask docopt)") {
         withGoStdout(
           BasicDocopt ++ Seq(
-            """--check={"--flag":"false","CMD":"a1","ARGS":["a2","a3","a4","a5"]}""",
+            """--check={"--flag":false,"CMD":"a1","ARGS":["a2","a3","a4","a5"]}""",
             "a1",
             "a2",
             "a3",

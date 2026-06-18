@@ -6,6 +6,6 @@ import com.tinfoiled.docopt4s.{MultiTaskMain, Task}
 object ExampleGo extends MultiTaskMain {
   override lazy val Name: String = "ExampleGo"
   override lazy val Version: String = "0.0.8-SNAPSHOT"
-  override lazy val Tasks: Seq[Task] = Seq(DumpTask, FileTestTask, NavalFateTask, TestCaseTask)
+  override lazy val Tasks: Seq[Task] = Seq(DumpTask, FileTestTask, NavalFateTask, TestCaseTask, EchoTask)
   override lazy val Doc: String = "An example command line interface with multiple tasks.\n\n" + SimpleDoc
 }

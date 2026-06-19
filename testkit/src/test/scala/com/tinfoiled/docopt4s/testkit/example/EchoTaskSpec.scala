@@ -21,7 +21,7 @@ class EchoTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(EchoTask)) {
         Console.withIn(in) {
           withGoStdout(TaskCmd)
         } shouldBe
-          """Reading message values from stdin (Ctrl+D to finish):
+          """Reading from stdin (Ctrl+D to finish):
             |One
             |Two
             |Three

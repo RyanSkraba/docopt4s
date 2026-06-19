@@ -31,7 +31,7 @@ object EchoTask extends Task {
       .map(i => {
         (i, Option(Console.in.readLine())) match {
           case (0, found @ Some(_)) =>
-            out.vPrintln("Reading message values from stdin (Ctrl+D to finish):")
+            out.vPrintln("Reading from stdin (Ctrl+D to finish):")
             found
           case (_, found @ Some(_)) =>
             found

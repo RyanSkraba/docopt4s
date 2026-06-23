@@ -42,6 +42,9 @@ class NavalFateTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(NavalFateTask)
     itShouldThrowOnIncompleteArgs("ship", "shoot")
     itShouldThrowOnIncompleteArgs("ship", "shoot", "0")
     itShouldThrowOnIncompatibleOpts("mine", "set", "0", "0", "--moored", "--drifting")
+
+    itShouldThrowWithADocoptMessage("Invalid ship name: shoot")("ship", "new", "shoot")
+    itShouldThrowWithADocoptMessage("Invalid ship name: new")("ship", "new", "new")
   }
 
   describe("When running the ship sub-subtask ") {

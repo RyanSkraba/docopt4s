@@ -229,4 +229,16 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
       t.getMessage shouldBe null
     }
   })
+
+  /** When a command line has a custom docopt message. */
+  val itShouldThrowWithADocoptMessage: String => BuiltInAdapter = msg =>
+    new BuiltInAdapter(args => {
+      val allArgs = Task.map(_.Cmd).toSeq ++ args
+      it("throws an exception on arguments: " + allArgs.mkString(" ")) {
+        val t = interceptGoDocoptEx(allArgs: _*)
+        t.exitCode shouldBe 1
+        // TODO: This could be a better message
+        t.getMessage shouldBe msg
+      }
+    })
 }

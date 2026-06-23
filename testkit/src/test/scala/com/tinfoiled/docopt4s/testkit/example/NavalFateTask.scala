@@ -35,6 +35,8 @@ object NavalFateTask extends Task {
     if (opt.boolean.get("ship") && opt.boolean.get("new")) {
       val names = opt.strings.get("<name>")
       if (names.isEmpty) throw new DocoptException("Ship name is required.")
+      else if (names.exists(_ == "new")) throw new DocoptException("Invalid ship name: new")
+      else if (names.exists(_ == "shoot")) throw new DocoptException("Invalid ship name: shoot")
       else for (name <- names) println(s"Creating ship: $name")
     } else if (opt.boolean.get("ship") && opt.boolean.get("move")) {
       println(s"""Moving ${opt.string.get("<name>")} ship

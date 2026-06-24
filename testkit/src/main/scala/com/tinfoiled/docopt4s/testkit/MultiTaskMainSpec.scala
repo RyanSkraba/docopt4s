@@ -1,11 +1,12 @@
 package com.tinfoiled.docopt4s.testkit
 
 import com.tinfoiled.docopt4s.AnsiConsole.withConsoleMatch
-import com.tinfoiled.docopt4s.{MultiTaskMain, Task, DocoptException}
+import com.tinfoiled.docopt4s.{DocoptException, MultiTaskMain, Task}
 import org.scalactic.source
 import org.scalatest.funspec.AnyFunSpecLike
 import org.scalatest.matchers.should.Matchers
 
+import java.nio.file.Path
 import scala.reflect.ClassTag
 
 /** Unit test specification base for an [[MultiTaskMain]] implementation.
@@ -75,6 +76,7 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
   def withGoMatching[T, U](args: Any*)(pf: scala.PartialFunction[(String, String), U]): U = {
 
     def expand(in: Any): Seq[String] = in match {
+      case path: Path      => Seq(path.toString) // Paths are iterable, which probably isn't desired.
       case xs: Iterable[_] => xs.flatMap(expand).toSeq
       case tuple: Product  => expand(tuple.productIterator.to(Iterable))
       case other           => Seq(other.toString)

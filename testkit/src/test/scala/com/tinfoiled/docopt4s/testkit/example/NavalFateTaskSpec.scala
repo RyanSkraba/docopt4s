@@ -54,6 +54,9 @@ class NavalFateTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(NavalFateTask)
       withGoStdout(TaskCmd, "ship", "new", "titanic") shouldBe "Creating ship: titanic\n"
       withGoStdout(TaskCmd, Seq("ship", "new", "titanic")) shouldBe "Creating ship: titanic\n"
       withGoStdout(TaskCmd, "ship" -> "new", "titanic") shouldBe "Creating ship: titanic\n"
+      withGoStdout(TaskCmd, ("ship", "new", "titanic")) shouldBe "Creating ship: titanic\n"
+      withGoStdout(TaskCmd, ("ship", Seq("new", "titanic"))) shouldBe "Creating ship: titanic\n"
+      withGoStdout(TaskCmd, "ship" -> Seq("new" -> Seq("titanic"))) shouldBe "Creating ship: titanic\n"
 
       withGoStdout(TaskCmd, "ship", "new", "titanic", "minnow") shouldBe
         """Creating ship: titanic

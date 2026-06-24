@@ -73,14 +73,14 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     *   The return value of the partial function.
     */
   def withGoMatching[T, U](args: Any*)(pf: scala.PartialFunction[(String, String), U]): U = {
-    // Sequences and Tuple2 are expanded.
-    val stringArgs = args.flatMap {
-      case xs: Iterable[_] => xs.map(_.toString)
-      case key -> value    => Seq(key.toString, value.toString)
+
+    def expand(in: Any): Seq[String] = in match {
+      case xs: Iterable[_] => xs.flatMap(expand).toSeq
+      case tuple: Product  => expand(tuple.productIterator.to(Iterable))
       case other           => Seq(other.toString)
     }
 
-    withConsoleMatch(Main.go(stringArgs: _*)) { case (_, stdout, stderr) =>
+    withConsoleMatch(Main.go(expand(args): _*)) { case (_, stdout, stderr) =>
       pf(stdout, stderr)
     }
   }

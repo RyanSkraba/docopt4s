@@ -1,6 +1,6 @@
 package com.tinfoiled.docopt4s.testkit.example
 
-import com.tinfoiled.docopt4s.testkit.{WithFileTests, MultiTaskMainSpec}
+import com.tinfoiled.docopt4s.testkit.{MultiTaskMainSpec, WithFileTests}
 
 /** Unit tests for [[FileTestTask]] */
 class FileTestTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(FileTestTask)) with WithFileTests {

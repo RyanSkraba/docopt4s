@@ -1,9 +1,9 @@
 package com.tinfoiled.docopt4s
 
 import org.scalactic.source
-import org.scalatest.{Assertion, BeforeAndAfterAll}
 import org.scalatest.funspec.AnyFunSpecLike
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.{Assertion, BeforeAndAfterAll}
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path, Paths}

@@ -1,7 +1,6 @@
 package com.tinfoiled.docopt4s
 
 import java.nio.file.{Files, Path, Paths}
-
 import scala.jdk.CollectionConverters._
 import scala.util.Properties
 

@@ -1,8 +1,6 @@
 package com.tinfoiled.docopt4s.testkit.example
 
-import com.tinfoiled.docopt4s.{AnsiConsole, Docopt, PathValidator, Task}
-
-import scala.io.StdIn
+import com.tinfoiled.docopt4s.{AnsiConsole, Docopt, Task}
 
 /** A echo task reads from stdin and echos each line. */
 object EchoTask extends Task {

@@ -66,14 +66,12 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     *   String arguments to pass to the [[MultiTaskMain.go()]] method
     * @param pf
     *   A partial function to apply matchers
-    * @tparam T
-    *   The return value type of the thunk code to execute
     * @tparam U
     *   The return value type of the partial function to return.
     * @return
     *   The return value of the partial function.
     */
-  def withGoMatching[T, U](args: Any*)(pf: scala.PartialFunction[(String, String), U]): U = {
+  def withGoMatching[U](args: Any*)(pf: scala.PartialFunction[(String, String), U]): U = {
 
     def expand(in: Any): Seq[String] = in match {
       case path: Path      => Seq(path.toString) // Paths are iterable, which probably isn't desired.

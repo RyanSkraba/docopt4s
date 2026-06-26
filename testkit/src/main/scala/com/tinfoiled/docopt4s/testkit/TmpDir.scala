@@ -3,7 +3,7 @@ package com.tinfoiled.docopt4s.testkit
 import org.scalatest.{BeforeAndAfterAll, Suite}
 
 import java.nio.charset.StandardCharsets
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Files, Path}
 import scala.util.{Failure, Using}
 
 /** Trait for creating a temporary directory and deleting it after the suite is done. */
@@ -14,9 +14,6 @@ trait TmpDir extends BeforeAndAfterAll { this: Suite =>
 
   /** A local temporary directory for test file storage. */
   val Tmp: Path = Files.createTempDirectory(Prefix)
-
-  /** The directory that we're being run in (used for relative paths) */
-  val Pwd: Path = Paths.get(".").toAbsolutePath.normalize()
 
   /** A file with a basic scenario. */
   lazy val ExistingFile: Path = {

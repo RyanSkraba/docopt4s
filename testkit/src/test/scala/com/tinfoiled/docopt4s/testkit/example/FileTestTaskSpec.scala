@@ -1,9 +1,10 @@
 package com.tinfoiled.docopt4s.testkit.example
 
-import com.tinfoiled.docopt4s.testkit.{MultiTaskMainSpec, WithFileTests}
+import com.tinfoiled.docopt4s.FsPath.RichPath
+import com.tinfoiled.docopt4s.testkit.{MultiTaskMainSpec, WithFileTests, WithTmpSrcDst}
 
 /** Unit tests for [[FileTestTask]] */
-class FileTestTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(FileTestTask)) with WithFileTests {
+class FileTestTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(FileTestTask)) with WithFileTests with WithTmpSrcDst {
 
   describe(s"Standard $MainName $TaskCmd command line help, versions and exceptions") {
     itShouldHandleVersionAndHelpFlags()
@@ -127,6 +128,41 @@ class FileTestTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(FileTestTask)) 
         ).getMessage shouldBe s"File already exists: $ExistingFile"
         withGoStdout(TaskCmd, "--no-exists", "--dir", NonExistingPath) shouldBe s"OK $NonExistingPath"
       }
+    }
+  }
+
+  describe(s"Running withTmpSrcDir ") {
+    val (src, dst) = createSrcDst("scenario", "dir1/file1", "dir2/", "file3")
+
+    it("should create a populated source dir and an empty destination dir") {
+      // The source has the expected files with the expected contents
+      src.toFile should exist
+      src.files shouldBe Seq(src / "file3")
+      src.dirs should have size 2
+      (src / "dir1").files() shouldBe Seq(src / "dir1" / "file1")
+      (src / "dir2").files() shouldBe empty
+
+      // The destination should be empty
+      dst.toFile should exist
+      dst.list shouldBe empty
+    }
+
+    it("should run the task and replace the src and dst") {
+      withGoStdoutSrcDst(src, dst)(TaskCmd, "--no-exists", "--dir" -> src / "xyz") shouldBe s"OK <SRC>/xyz"
+      withGoStdoutSrcDst(src, dst)(TaskCmd, "--no-exists", "--dir" -> dst / "abc") shouldBe s"OK <DST>/abc"
+    }
+
+    it("should run the task with custom replacements") {
+      withGoStdoutReplace(Tmp -> "<TMP>")(
+        TaskCmd,
+        "--no-exists",
+        "--dir" -> src / "xyz"
+      ) shouldBe s"OK <TMP>/scenario/src/xyz"
+      withGoStdoutReplace(Tmp -> "<TMP>")(
+        TaskCmd,
+        "--no-exists",
+        "--dir" -> dst / "abc"
+      ) shouldBe s"OK <TMP>/scenario/dst/abc"
     }
   }
 }

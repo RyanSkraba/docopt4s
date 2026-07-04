@@ -150,19 +150,20 @@ class FileTestTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(FileTestTask)) 
     it("should run the task and replace the src and dst") {
       withGoStdoutSrcDst(src, dst)(TaskCmd, "--no-exists", "--dir" -> src / "xyz") shouldBe s"OK <SRC>/xyz"
       withGoStdoutSrcDst(src, dst)(TaskCmd, "--no-exists", "--dir" -> dst / "abc") shouldBe s"OK <DST>/abc"
+      withGoStdoutSrcDst(src, dst)(TaskCmd, "--no-exists", "--dir" -> Tmp / "123") shouldBe s"OK <TMP>/123"
     }
 
     it("should run the task with custom replacements") {
-      withGoStdoutReplace(Tmp -> "<TMP>")(
+      withGoStdoutReplace(Tmp -> "<TEMPO>")(
         TaskCmd,
         "--no-exists",
         "--dir" -> src / "xyz"
-      ) shouldBe s"OK <TMP>/scenario/src/xyz"
-      withGoStdoutReplace(Tmp -> "<TMP>")(
+      ) shouldBe s"OK <TEMPO>/scenario/src/xyz"
+      withGoStdoutReplace(Tmp -> "<TEMPO>")(
         TaskCmd,
         "--no-exists",
         "--dir" -> dst / "abc"
-      ) shouldBe s"OK <TMP>/scenario/dst/abc"
+      ) shouldBe s"OK <TEMPO>/scenario/dst/abc"
     }
   }
 }

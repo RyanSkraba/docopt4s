@@ -32,22 +32,6 @@ trait WithTmpSrcDst extends TmpDir { this: MultiTaskMainSpec[_] =>
     (src, dst)
   }
 
-  /** A helper method for running a MultiTaskMain with an assumed successful result.
-    * @param replacements
-    *   A list of pairs of strings to replace in the output.
-    * @param args
-    *   The arguments to apply to the ammonite script
-    * @return
-    *   The output of the script with all of the string replacements applied, as well as replacing the temporary
-    *   directory with &lt;TMP&gt;.
-    */
-  def withGoStdoutReplace(replacements: (Any, String)*)(args: Any*): String = {
-    val stdout = withGoStdout(args: _*)
-    replacements
-      .foldLeft(stdout) { (acc, r) => acc.replace(r._1.toString, r._2) }
-      .replace(Tmp.toString, "<TMP>")
-  }
-
   /** A helper method for running a MultiTaskMain with an assumed successful result, specifically for scenarios
     * involving source and destination directories.
     *
@@ -60,7 +44,7 @@ trait WithTmpSrcDst extends TmpDir { this: MultiTaskMainSpec[_] =>
     * @param args
     *   The arguments to apply to the ammonite script.
     * @return
-    *   The output of the script with all of the string replacements applied, as well as replacing the source and
+    *   The output of the script with all the string replacements applied, as well as replacing the source and
     *   destination directories with &lt;SRC&gt; and &lt;DST&gt; respectively.
     */
   def withGoStdoutSrcDst(src: Path, dst: Path, replacements: (Any, String)*)(args: Any*): String =

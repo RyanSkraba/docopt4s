@@ -107,6 +107,24 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     stdout
   }
 
+  /** A helper method for running a MultiTaskMain with an assumed successful result.
+    * @param replacements
+    *   A list of pairs of strings to replace in the output.
+    * @param args
+    *   The arguments to apply to the ammonite script
+    * @return
+    *   The output of the script with all the string replacements applied, as well as replacing the temporary directory
+    *   with &lt;TMP&gt; if it exists.
+    */
+  def withGoStdoutReplace(replacements: (Any, String)*)(args: Any*): String = {
+    val stdout = withGoStdout(args: _*)
+    val replaced = replacements.foldLeft(stdout) { (acc, r) => acc.replace(r._1.toString, r._2) }
+    this match {
+      case tmp: TmpDir => replaced.replace(tmp.Tmp.toString, "<TMP>")
+      case _           => replaced
+    }
+  }
+
   /** A helper method used to capture an exception thrown by [[withGo]]
     *
     * @param args

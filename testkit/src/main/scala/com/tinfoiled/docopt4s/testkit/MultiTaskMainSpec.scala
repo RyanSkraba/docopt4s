@@ -61,6 +61,19 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     }
   }
 
+  /** Helper to do regex replacements on strings that aren't from standard out.
+    *
+    * @param in
+    *   A string to replace
+    * @param replacements
+    *   The regex to apply to the replacements with the corresponding value.
+    * @return
+    *   The string with all replacements applied.
+    */
+  def replace(in: String, replacements: (Any, String)*): String = {
+    replacements.foldLeft(in) { (acc, r) => acc.replace(r._1.toString, r._2) }
+  }
+
   /** A helper method used to capture the console of a Cli execution and apply it to a partial function.
     * @param args
     *   String arguments to pass to the [[MultiTaskMain.go()]] method
@@ -111,14 +124,14 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     * @param replacements
     *   A list of pairs of strings to replace in the output.
     * @param args
-    *   The arguments to apply to the ammonite script
+    *   The arguments to apply to the application.
     * @return
     *   The output of the script with all the string replacements applied, as well as replacing the temporary directory
     *   with &lt;TMP&gt; if it exists.
     */
   def withGoStdoutReplace(replacements: (Any, String)*)(args: Any*): String = {
     val stdout = withGoStdout(args: _*)
-    val replaced = replacements.foldLeft(stdout) { (acc, r) => acc.replace(r._1.toString, r._2) }
+    val replaced = replace(stdout, replacements: _*)
     this match {
       case tmp: TmpDir => replaced.replace(tmp.Tmp.toString, "<TMP>")
       case _           => replaced

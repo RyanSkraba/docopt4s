@@ -42,7 +42,7 @@ trait WithTmpSrcDst extends TmpDir { this: MultiTaskMainSpec[_] =>
     * @param replacements
     *   A list of pairs of strings to replace in the output.
     * @param args
-    *   The arguments to apply to the ammonite script.
+    *   The arguments to apply to the application.
     * @return
     *   The output of the script with all the string replacements applied, as well as replacing the source and
     *   destination directories with &lt;SRC&gt; and &lt;DST&gt; respectively.

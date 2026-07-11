@@ -337,6 +337,19 @@ class AnsiConsoleSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matcher
     val cfgNoV = AnsiConsole(plain = false, verbose = false)
     val cfgV = AnsiConsole(plain = false, verbose = true)
 
+    it("regardless of whether enabled, prints text through the print and println methods") {
+      for (cfg <- Seq(cfgV, cfgNoV))
+        withConsoleMatch {
+          cfg.println("Hey")
+          cfg.print("Hey")
+          cfg.print(Int.MaxValue)
+          cfg.println()
+        } { case (_, out, err) =>
+          err shouldBe empty
+          out shouldBe "Hey\nHey2147483647\n"
+        }
+    }
+
     it("when enabled, prints text through the vPrint and vPrintln methods") {
       withConsoleMatch {
         cfgV.vPrintln("Hey")

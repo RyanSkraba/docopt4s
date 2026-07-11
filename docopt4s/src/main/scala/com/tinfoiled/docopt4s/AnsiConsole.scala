@@ -8,17 +8,7 @@ import scala.util.Using
 /** A configurable, colourful mechanism for interacting with the user via the terminal. */
 trait AnsiConsole {
 
-  /** True if the script should print extra verbose information. By default, be concise. */
-  protected val _verbose: Boolean
-
-  /** True if the script should avoid ANSI colour codes. By default, be colourful. */
-  protected val _plain: Boolean
-
-  /** True if the script should assume the user would reply yes to prompts. By default, ask whether to proceed. */
-  protected val _yes: Boolean
-
-  /** Optionally provide a printer to capture output. */
-  protected val _print: Option[Any => Any]
+  protected val cfg: AnsiConsole.Cfg
 
   lazy val Black: String = ifAnsi(AnsiColor.BLACK)
   lazy val Red: String = ifAnsi(AnsiColor.RED)
@@ -59,14 +49,14 @@ trait AnsiConsole {
   lazy val Bold: String = ifAnsi(AnsiColor.BOLD)
   lazy val Reset: String = ifAnsi(AnsiColor.RESET)
 
-  private[this] def ifAnsi(ansi: String, notAnsi: String = ""): String = if (this._plain) notAnsi else ansi
+  private[this] def ifAnsi(ansi: String, notAnsi: String = ""): String = if (cfg.plain) notAnsi else ansi
 
   def style(in: Any, in2: Any = "", clr: String = White, reset: Boolean = true, bold: Boolean = false): String =
-    if (in2.toString.isEmpty && _plain)
+    if (in2.toString.isEmpty && cfg.plain)
       in.toString
     else if (in2.toString.isEmpty)
       s"${if (bold) Bold else ""}$clr$in${if (reset) Reset else ""}"
-    else if (_plain)
+    else if (cfg.plain)
       s"$in $in2"
     else
       s"$Bold$clr$in${if (bold) "" else s"$Reset$clr"} $in2${if (reset) Reset
@@ -162,13 +152,22 @@ trait AnsiConsole {
       .mkString(" ")
 
   /** Only if verbose is turned on, calls {{Console.print}} on the input. */
-  def vPrint(in: => Any): Unit = if (_verbose) _print.getOrElse(Console.print _)(in)
+  def print(in: => Any): Unit = cfg.print.getOrElse(Console.print _)(in)
 
   /** Only if verbose is turned on, calls {{Console.println}} on the input. */
-  def vPrintln(in: => Any): Unit = if (_verbose) _print.map(_(in.toString + "\n")).getOrElse(Console.println(in))
+  def println(in: => Any): Unit = cfg.print.map(_(in.toString + "\n")).getOrElse(Console.println(in))
 
   /** Only if verbose is turned on, calls {{Console.println}} on the input. */
-  def vPrintln(): Unit = if (_verbose) _print.map(_("\n")).getOrElse(Console.println())
+  def println(): Unit = cfg.print.map(_("\n")).getOrElse(Console.println())
+
+  /** Only if verbose is turned on, calls {{Console.print}} on the input. */
+  def vPrint(in: => Any): Unit = if (cfg.verbose) print(in)
+
+  /** Only if verbose is turned on, calls {{Console.println}} on the input. */
+  def vPrintln(in: => Any): Unit = if (cfg.verbose) println(in)
+
+  /** Only if verbose is turned on, calls {{Console.println}} on the input. */
+  def vPrintln(): Unit = if (cfg.verbose) println()
 
   /** Prompt the user and execute a function based on the response.
     *
@@ -196,7 +195,7 @@ trait AnsiConsole {
       qFn: => Option[T] = sys.exit(1),
       otherFn: Function[String, Option[Option[T]]] = (_: String) => None
   ): Option[T] = {
-    if (!_yes) {
+    if (!cfg.yes) {
       LazyList
         .continually {
           print(s"$prompt (Y/n/q): ")
@@ -218,16 +217,33 @@ trait AnsiConsole {
 }
 
 object AnsiConsole {
-  def apply(
+
+  /** Configuration for the console. This is indirect because an implementation using a library like mainargs might need
+    * to reserve the actual flag names.
+    *
+    * @param verbose
+    *   True if the script should print extra verbose information. By default, be concise.
+    * @param plain
+    *   True if the script should avoid ANSI colour codes. By default, be colourful.
+    * @param yes
+    *   True if the script should assume the user would reply yes to prompts. By default, ask whether to proceed.
+    * @param print
+    *   Optionally provide a printer to capture output.
+    */
+  case class Cfg(
       verbose: Boolean = false,
       plain: Boolean = false,
       yes: Boolean = false,
       print: Option[Any => Any] = None
+  )
+
+  def apply(
+      verbose: Boolean = false,
+      plain: Boolean = false,
+      yes: Boolean = false,
+      printFn: Option[Any => Any] = None
   ): AnsiConsole = new AnsiConsole() {
-    override protected val _verbose: Boolean = verbose
-    override protected val _plain: Boolean = plain
-    override protected val _yes: Boolean = yes
-    override protected val _print: Option[Any => Any] = print
+    override val cfg = Cfg(verbose, plain, yes, printFn)
   }
 
   /** A helper method used to capture the console and apply it to a partial function.

@@ -1,10 +1,10 @@
 package com.tinfoiled.docopt4s.testkit
 
+import com.tinfoiled.docopt4s.FsPath.RichPath
 import org.scalatest.{BeforeAndAfterAll, Suite}
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path}
-import scala.util.{Failure, Using}
 
 /** Trait for creating a temporary directory and deleting it after the suite is done. */
 trait TmpDir extends BeforeAndAfterAll { this: Suite =>
@@ -39,14 +39,6 @@ trait TmpDir extends BeforeAndAfterAll { this: Suite =>
   /** Delete temporary resources after the script. */
   override protected def afterAll(): Unit = {
     super.afterAll()
-    if (!Keep) {
-      Using(Files.walk(Tmp)) { str =>
-        import scala.jdk.CollectionConverters._
-        str.iterator().asScala.toSeq.sortBy(_.getNameCount).reverse.foreach(Files.delete)
-      } match {
-        case Failure(ex) => ex.printStackTrace()
-        case _           =>
-      }
-    }
+    if (!Keep) Tmp.deleteRecursively(max = Int.MaxValue)
   }
 }

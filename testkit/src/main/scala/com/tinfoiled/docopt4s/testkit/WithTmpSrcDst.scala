@@ -25,8 +25,8 @@ trait WithTmpSrcDst extends TmpDir { this: MultiTaskMainSpec[_] =>
       if (p.endsWith("/"))
         srcPath.createDirectory(failIfExists = false)
       else {
-        srcPath.getParent.createDirectory(failIfExists = false)
-        srcPath.createFile().writeAll(srcPath.name())
+        srcPath.up.createDirectory(failIfExists = false)
+        srcPath.createFile().writeAll(srcPath.name)
       }
     }
     (src, dst)

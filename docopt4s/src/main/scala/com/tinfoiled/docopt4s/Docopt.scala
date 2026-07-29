@@ -1,5 +1,7 @@
 package com.tinfoiled.docopt4s
 
+import com.tinfoiled.docopt4s.FsPath.RichPath
+
 import java.nio.file.{Files, Path, Paths}
 import scala.jdk.CollectionConverters._
 import scala.util.Properties
@@ -220,7 +222,7 @@ case class PathValidator(
       // If it mustn't exist, and it doesn't exist, but it's existing parent is File, then
       // the path is uncreatable and an error.
       if (ifExists.contains(false)) {
-        val existingParent = LazyList.iterate(path)(_.getParent).takeWhile(_ != null).find(Files.exists(_))
+        val existingParent = LazyList.iterate(path)(_.up).takeWhile(_ != null).find(Files.exists(_))
         if (existingParent.exists(Files.isRegularFile(_)))
           throw new DocoptException(s"$pathTag is uncreatable, ${existingParent.get} exists: $path")
       }

@@ -139,8 +139,8 @@ class FileTestTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(FileTestTask)) 
       src.toFile should exist
       src.files shouldBe Seq(src / "file3")
       src.dirs should have size 2
-      (src / "dir1").files() shouldBe Seq(src / "dir1" / "file1")
-      (src / "dir2").files() shouldBe empty
+      (src / "dir1").files shouldBe Seq(src / "dir1" / "file1")
+      (src / "dir2").files shouldBe empty
 
       // The destination should be empty
       dst.toFile should exist

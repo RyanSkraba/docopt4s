@@ -1,6 +1,5 @@
-package com.tinfoiled.docopt4s.testkit.example
+package com.tinfoiled.docopt4s.testkit
 
-import com.tinfoiled.docopt4s.testkit.TmpDir
 import org.scalatest.funspec.AnyFunSpecLike
 import org.scalatest.matchers.should.Matchers
 

@@ -3,14 +3,14 @@ package com.tinfoiled.docopt4s.testkit.example
 import com.tinfoiled.docopt4s.DocoptException
 import com.tinfoiled.docopt4s.testkit.example.TestCaseTask.TestCase
 import com.tinfoiled.docopt4s.testkit.example.TestCaseTask.TestCase._
-import com.tinfoiled.docopt4s.testkit.{MultiTaskMainSpec, TmpDir}
+import com.tinfoiled.docopt4s.testkit.{MultiTaskMainSpec, WithTmpDir}
 
 import java.nio.file.Files
 import scala.io.Source
 import scala.util.{Failure, Success, Using}
 
 /** Unit tests for [[DumpTask]] */
-class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) with TmpDir {
+class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) with WithTmpDir {
 
   describe(s"Standard $MainName $TaskCmd command line help, versions and exceptions") {
     itShouldHandleVersionAndHelpFlags()

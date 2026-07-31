@@ -5,7 +5,7 @@ import com.tinfoiled.docopt4s.FsPath.RichPath
 import java.nio.file.Path
 
 /** Trait for including file system helpers. */
-trait WithTmpSrcDst extends TmpDir { this: MultiTaskMainSpec[_] =>
+trait WithTmpSrcDst extends WithTmpDir { this: MultiTaskMainSpec[_] =>
 
   /** Creates a scenario in the temporary directory with some files and directories in it
     *

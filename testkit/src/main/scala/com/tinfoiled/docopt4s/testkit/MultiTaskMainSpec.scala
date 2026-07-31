@@ -133,8 +133,8 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     val stdout = withGoStdout(args: _*)
     val replaced = replace(stdout, replacements: _*)
     this match {
-      case tmp: TmpDir => replaced.replace(tmp.Tmp.toString, "<TMP>")
-      case _           => replaced
+      case tmp: WithTmpDir => replaced.replace(tmp.Tmp.toString, "<TMP>")
+      case _               => replaced
     }
   }
 

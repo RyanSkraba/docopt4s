@@ -7,8 +7,8 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import scala.util.{Failure, Using}
 
-/** Unit tests for [[TmpDir]] */
-class TmpDirSpec extends AnyFunSpecLike with Matchers with TmpDir {
+/** Unit tests for [[WithTmpDir]] */
+class WithTmpDirSpec extends AnyFunSpecLike with Matchers with WithTmpDir {
 
   override def afterAll(): Unit = {
     Files.exists(Tmp) shouldBe true
@@ -45,8 +45,8 @@ class TmpDirSpec extends AnyFunSpecLike with Matchers with TmpDir {
   }
 }
 
-/** Unit tests for [[TmpDir]] with [[TmpDir.Keep]] set to True */
-class TmpDirKeepSpec extends AnyFunSpecLike with Matchers with TmpDir {
+/** Unit tests for [[WithTmpDir]] with [[WithTmpDir.Keep]] set to True */
+class WithTmpDirKeepSpec extends AnyFunSpecLike with Matchers with WithTmpDir {
 
   override lazy val Keep: Boolean = true
 

@@ -9,7 +9,7 @@ import scala.jdk.CollectionConverters.IteratorHasAsScala
 import scala.util.{Random, Using}
 
 /** Unit tests for [[RandomFiles]] */
-class RandomFilesSpec extends AnyFunSpecLike with Matchers with TmpDir {
+class RandomFilesSpec extends AnyFunSpecLike with Matchers with WithTmpDir {
 
   describe(s"Using RandomFiles") {
 

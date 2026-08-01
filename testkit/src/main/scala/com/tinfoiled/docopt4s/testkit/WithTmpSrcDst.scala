@@ -48,5 +48,5 @@ trait WithTmpSrcDst extends WithTmpDir { this: MultiTaskMainSpec[_] =>
     *   destination directories with &lt;SRC&gt; and &lt;DST&gt; respectively.
     */
   def withGoStdoutSrcDst(src: Path, dst: Path, replacements: (Any, String)*)(args: Any*): String =
-    withGoStdoutReplace(replacements ++ Seq(src.toString -> "<SRC>", dst.toString -> "<DST>"): _*)(args: _*)
+    withGoStdoutReplace(replacements ++ Seq(s"\\Q$src\\E" -> "<SRC>", s"\\Q$dst\\E" -> "<DST>"): _*)(args: _*)
 }

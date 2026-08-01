@@ -71,7 +71,7 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     *   The string with all replacements applied.
     */
   def replace(in: String, replacements: (Any, String)*): String = {
-    replacements.foldLeft(in) { (acc, r) => acc.replace(r._1.toString, r._2) }
+    replacements.foldLeft(in) { (acc, r) => acc.replaceAll(r._1.toString, r._2) }
   }
 
   /** A helper method used to capture the console of a Cli execution and apply it to a partial function.
@@ -133,7 +133,7 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     val stdout = withGoStdout(args: _*)
     val replaced = replace(stdout, replacements: _*)
     this match {
-      case tmp: WithTmpDir => replaced.replace(tmp.Tmp.toString, "<TMP>")
+      case tmp: WithTmpDir => replaced.replaceAll(s"\\Qtmp.Tmp\\E", "<TMP>")
       case _               => replaced
     }
   }

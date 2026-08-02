@@ -133,7 +133,7 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     val stdout = withGoStdout(args: _*)
     val replaced = replace(stdout, replacements: _*)
     this match {
-      case tmp: WithTmpDir => replaced.replaceAll(s"\\Qtmp.Tmp\\E", "<TMP>")
+      case tmp: WithTmpDir => replaced.replaceAll(s"\\Q${tmp.Tmp}\\E", "<TMP>")
       case _               => replaced
     }
   }

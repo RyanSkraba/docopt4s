@@ -11,12 +11,12 @@ import com.tinfoiled.docopt4s.Task
   * // Ensure that the --inputDir option value is a directory and that it exists.
   * // This is done by creating tests that replace the argument <> with values that
   * // are known to be invalid, and checking the expected error
-  * itShouldBeAnExistingDir()("--inputDir", "<>", "--outputFile", "/tmp/output.txt")
+  * itShouldBeAnExistingDir()("--inputDir" -> "<>", "--outputFile" -> "/tmp/output.txt")
   *
   * // Ensure that the --output option value is a path that does not exist and is creatable.
   * // This is done by creating tests that replace the argument <> with values that
   * // are known to be invalid, and checking the expected error
-  * itShouldBeANonExistingFile()("--inputDir", "/tmp/", "--outputFile", "<>")
+  * itShouldBeANonExistingFile()("--inputDir" -> "/tmp/", "--outputFile" -> "<>")
   * }}}
   *
   * Note: These helpers only test the error conditions, and do not run any tests with the actual, expected option values
@@ -69,7 +69,7 @@ trait WithFileTests extends WithTmpDir { this: MultiTaskMainSpec[_ <: Task] =>
     * arguments was not an existing path. Use "<>" to specify the argument that should be replaced during the test.
     *
     * {{{
-    * itShouldBeAnExistingPath()("--input", "<>")
+    * itShouldBeAnExistingPath()("--input" ->  "<>")
     * }}}
     */
   val itShouldBeAnExistingPath: WithFileAdapter = new WithFileAdapter((tag, holder, args) => {
@@ -86,7 +86,7 @@ trait WithFileTests extends WithTmpDir { this: MultiTaskMainSpec[_ <: Task] =>
     * segments exist as a file. Use "<>" to specify the argument that should be replaced during the test.
     *
     * {{{
-    * itShouldBeANonExistingPath()("--output", "<>")
+    * itShouldBeANonExistingPath()("--output" -> "<>")
     * }}}
     */
   val itShouldBeANonExistingPath: WithFileAdapter = shouldBeNonExisting("Path")
@@ -96,7 +96,7 @@ trait WithFileTests extends WithTmpDir { this: MultiTaskMainSpec[_ <: Task] =>
     * replaced during the test.
     *
     * {{{
-    * itShouldBeAnExistingFile()("--inputFile", "<>")
+    * itShouldBeAnExistingFile()("--inputFile" -> "<>")
     * }}}
     */
   val itShouldBeAnExistingFile: WithFileAdapter = new WithFileAdapter((tag, holder, args) => {
@@ -122,7 +122,7 @@ trait WithFileTests extends WithTmpDir { this: MultiTaskMainSpec[_ <: Task] =>
     * segments exist as a file. Use "<>" to specify the argument that should be replaced during the test.
     *
     * {{{
-    * itShouldBeANonExistingFile()("--outputFile", "<>")
+    * itShouldBeANonExistingFile()("--outputFile" -> "<>")
     * }}}
     */
   val itShouldBeANonExistingFile: WithFileAdapter = shouldBeNonExisting("File")
@@ -132,7 +132,7 @@ trait WithFileTests extends WithTmpDir { this: MultiTaskMainSpec[_ <: Task] =>
     * replaced during the test.
     *
     * {{{
-    * itShouldBeAnExistingFile()("--inputDir", "<>")
+    * itShouldBeAnExistingFile()("--inputDir" -> "<>")
     * }}}
     */
   val itShouldBeAnExistingDir: WithFileAdapter = new WithFileAdapter((tag, holder, args) => {
@@ -158,7 +158,7 @@ trait WithFileTests extends WithTmpDir { this: MultiTaskMainSpec[_ <: Task] =>
     * segments exist as a file. Use "<>" to specify the argument that should be replaced during the test.
     *
     * {{{
-    * itShouldBeANonExistingFile()("--outputDir", "<>")
+    * itShouldBeANonExistingFile()("--outputDir" -> "<>")
     * }}}
     */
   val itShouldBeANonExistingDir: WithFileAdapter = shouldBeNonExisting("Directory")

@@ -35,7 +35,7 @@ class NavalFateTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(NavalFateTask)
     itShouldThrowOnIncompleteArgs("ship", "titanic")
     itShouldThrowOnIncompleteArgs("ship", "titanic", "move")
     itShouldThrowOnMissingOptValue("ship", "titanic", "move", "--speed")
-    itShouldThrowOnIncompleteArgs("ship", "titanic", "move", "--speed", "0")
+    itShouldThrowOnIncompleteArgs("ship", "titanic", "move", "--speed" -> "0")
     itShouldThrowOnIncompleteArgs("ship", "titanic", "move", "0")
     itShouldThrowOnMissingOptValue("ship", "titanic", "move", "0", "0", "--speed")
     itShouldThrowOnMissingOptValue("ship", "titanic", "move", "0", "--speed")
@@ -73,7 +73,7 @@ class NavalFateTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(NavalFateTask)
     }
 
     it("should accept 'ship <name> move' with a specific speed") {
-      withGoStdout(TaskCmd, "ship", "titanic", "move", "123", "987", "--speed", "-123") shouldBe
+      withGoStdout(TaskCmd, "ship", "titanic", "move", "123", "987", "--speed" -> "-123") shouldBe
         """Moving titanic ship
             |  to coordinates (123, 987)
             |  at speed -123

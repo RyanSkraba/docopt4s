@@ -11,7 +11,7 @@ class DumpTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(DumpTask)) {
     itShouldThrowOnIncompleteArgs()
     itShouldThrowOnIncompleteArgs("unknown")
     itShouldThrowOnMissingOptValue("string", "arg", "--default")
-    itShouldThrowOnIncompatibleOpts("string", "arg", "--options", "--default", "dflt")
+    itShouldThrowOnIncompatibleOpts("string", "arg", "--options", "--default" -> "dflt")
   }
 
   describe("When running without any flags") {

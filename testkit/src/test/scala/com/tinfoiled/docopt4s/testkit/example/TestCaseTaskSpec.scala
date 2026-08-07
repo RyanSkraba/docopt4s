@@ -16,13 +16,13 @@ class TestCaseTaskSpec extends MultiTaskMainSpec(ExampleGo, Some(TestCaseTask)) 
     itShouldHandleVersionAndHelpFlags()
     itShouldThrowOnUnknownOptKey()
     itShouldThrowOnIncompleteArgs("unknown")
-    itShouldThrowOnIncompleteArgs("--docopt", "doc")
-    itShouldThrowOnMissingOptValue("--docopt", "doc", "--keys")
-    itShouldThrowOnMissingOptValue("--docopt", "doc", "--check")
+    itShouldThrowOnIncompleteArgs("--docopt" -> "doc")
+    itShouldThrowOnMissingOptValue("--docopt" -> "doc", "--keys")
+    itShouldThrowOnMissingOptValue("--docopt" -> "doc", "--check")
   }
 
   /** Run the test and unwrap the exception that happened internally. */
-  def interceptWrapped(args: Seq[String]): DocoptException = {
+  def interceptWrapped(args: Seq[Any]): DocoptException = {
     val t = interceptGoDocoptEx(args: _*)
     t.docopt shouldBe Doc
     t.exitCode shouldBe 1

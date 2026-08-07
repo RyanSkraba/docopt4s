@@ -160,7 +160,7 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
   /** This helper allows the built-in test cases to be called using a string or string sequence. */
   class BuiltInAdapter(thunk: Seq[Any] => Unit) extends Function[Seq[Any], Unit] {
     def apply(): Unit = thunk(Seq.empty)
-    def apply(in: String, in2: Any*): Unit = thunk(in +: in2)
+    def apply(in: Any, in2: Any*): Unit = thunk(in +: in2)
     override def apply(in: Seq[Any]): Unit = thunk(in)
   }
 

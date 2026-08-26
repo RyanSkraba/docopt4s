@@ -35,7 +35,8 @@ class DocoptException(
 
 // TODO:
 // /** Two keys that are not compatible are provided */
-// class IncompatibleKeysException(
-//    key1: String, key2: String,
-//    override val docopt: String,
-// ) extends DocoptException(s"The option key $key1 should not be present with $key2", null, docopt, 1)
+class IncompatibleKeysException(
+    key1: String,
+    key2: String,
+    override val docopt: String = None.orNull
+) extends DocoptException(s"The option key $key1 should not be present with $key2", null, docopt, 1)

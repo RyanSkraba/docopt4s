@@ -8,7 +8,7 @@ import scala.util.Using
 /** A configurable, colourful mechanism for interacting with the user via the terminal. */
 trait AnsiConsole {
 
-  protected val cfg: AnsiConsole.Cfg
+  val cfg: AnsiConsole.Cfg
 
   lazy val Black: String = ifAnsi(AnsiColor.BLACK)
   lazy val Red: String = ifAnsi(AnsiColor.RED)

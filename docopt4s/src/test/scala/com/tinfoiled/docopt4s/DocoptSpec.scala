@@ -7,6 +7,7 @@ import org.scalatest.{Assertion, BeforeAndAfterAll}
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path, Paths}
+import scala.collection.immutable.SortedMap
 import scala.reflect.ClassTag
 import scala.util.{Failure, Using}
 
@@ -481,4 +482,36 @@ class DocoptSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers {
       }
     }
   }
+
+  describe("The expand helper") {
+
+    it("should handle no arguments") {
+      Docopt.expand(Seq.empty) shouldBe empty
+      Docopt.expand(None) shouldBe empty
+      Docopt.expand(()) shouldBe empty
+    }
+
+    it("should handle single arguments") {
+      Docopt.expand("one") shouldBe Seq("one")
+      Docopt.expand(Option("one")) shouldBe Seq("one")
+      Docopt.expand(1) shouldBe Seq("1")
+      Docopt.expand(true) shouldBe Seq("true")
+      Docopt.expand(Paths.get("/tmp/")) shouldBe Seq("/tmp")
+    }
+
+    it("should handle collections and embedded collections") {
+      Docopt.expand(Seq("one")) shouldBe Seq("one")
+      Docopt.expand(Seq(Option("one"))) shouldBe Seq("one")
+      Docopt.expand(Seq(1)) shouldBe Seq("1")
+      Docopt.expand(Seq(true)) shouldBe Seq("true")
+      Docopt.expand(Seq(Paths.get("/tmp/"))) shouldBe Seq("/tmp")
+      Docopt.expand(Seq("one", "two", "three")) shouldBe Seq("one", "two", "three")
+      Docopt.expand("one" -> "two" -> "three") shouldBe Seq("one", "two", "three")
+      Docopt.expand(Seq("one", Seq("two" -> "three"), None)) shouldBe Seq("one", "two", "three")
+      Docopt.expand(SortedMap("one" -> 1, "two" -> 2)) shouldBe Seq("one", "1", "two", "2")
+
+    }
+
+  }
+
 }

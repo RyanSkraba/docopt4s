@@ -291,4 +291,21 @@ object Docopt {
       })
     }
   }
+
+  /** A helper to expand any object into an array of Strings that can be supplied as command line arguments. Any
+    * collection is flattened into a single list EXCEPT [[Path]] (whicn can iterate over path segments). This allows
+    * constructing CLI arguments from numbers, paths, collections and tuples.
+    * @param in
+    *   The object to expand
+    * @return
+    *   A list of String that can be used as command line arguments.
+    */
+  def expand(in: Any): Seq[String] = in match {
+    case path: Path      => Seq(path.toString) // Paths are iterable, which probably isn't desired.
+    case xs: Iterable[_] => xs.flatMap(expand).toSeq
+    case tuple: Product  => expand(tuple.productIterator.to(Iterable))
+    case str: String     => Seq(str)
+    case unit: Unit      => Seq()
+    case other           => Seq(other.toString)
+  }
 }

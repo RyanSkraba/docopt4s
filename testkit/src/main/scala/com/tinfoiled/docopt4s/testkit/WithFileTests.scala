@@ -1,5 +1,6 @@
 package com.tinfoiled.docopt4s.testkit
 
+import com.tinfoiled.docopt4s.Docopt.expand
 import com.tinfoiled.docopt4s.Task
 
 /** Provide additional unit tests for running the multitool with path, file or directory option values, checking that
@@ -29,10 +30,10 @@ trait WithFileTests extends WithTmpDir { this: MultiTaskMainSpec[_ <: Task] =>
   class WithFileAdapter(thunk: (Option[String], String, Seq[Any]) => Unit)
       extends ((Option[String], String) => Function[Seq[String], Unit]) {
     // Note that Scala 3 can overload methods based on multiple argument lists.
-    def apply()(in: Any*): Unit = thunk(None, "<>", in)
-    def apply(tag: String)(in: Any*): Unit = thunk(Some(tag), "<>", in)
+    def apply()(in: Any*): Unit = thunk(None, "<>", expand(in))
+    def apply(tag: String)(in: Any*): Unit = thunk(Some(tag), "<>", expand(in))
     override def apply(tag: Option[String] = None, holder: String = "<>"): Function[Seq[Any], Unit] =
-      thunk(tag, holder, _)
+      args => thunk(tag, holder, expand(args))
   }
 
   /** Builds the WithFileAdapter that can run tests for paths, files and directories that should not already exist.

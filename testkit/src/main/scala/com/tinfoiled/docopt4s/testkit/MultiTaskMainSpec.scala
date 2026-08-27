@@ -1,6 +1,7 @@
 package com.tinfoiled.docopt4s.testkit
 
 import com.tinfoiled.docopt4s.AnsiConsole.withConsoleMatch
+import com.tinfoiled.docopt4s.Docopt.expand
 import com.tinfoiled.docopt4s.{DocoptException, MultiTaskMain, Task}
 import org.scalactic.source
 import org.scalatest.funspec.AnyFunSpecLike
@@ -85,13 +86,6 @@ abstract class MultiTaskMainSpec[Tsk <: Task](protected val Main: MultiTaskMain,
     *   The return value of the partial function.
     */
   def withGoMatching[U](args: Any*)(pf: scala.PartialFunction[(String, String), U]): U = {
-
-    def expand(in: Any): Seq[String] = in match {
-      case path: Path      => Seq(path.toString) // Paths are iterable, which probably isn't desired.
-      case xs: Iterable[_] => xs.flatMap(expand).toSeq
-      case tuple: Product  => expand(tuple.productIterator.to(Iterable))
-      case other           => Seq(other.toString)
-    }
 
     withConsoleMatch(Main.go(expand(args): _*)) { case (_, stdout, stderr) =>
       pf(stdout, stderr)
